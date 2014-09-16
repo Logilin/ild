@@ -22,9 +22,6 @@
 
 	static ssize_t exemple_read  (struct file * filp, char * buffer,
 	                              size_t length, loff_t * offset);
-
-	static ssize_t exemple_read  (struct file * filp, char * buffer,
-	                              size_t length, loff_t * offset);
 	static long    exemple_ioctl (struct file * filp,
 	                              unsigned int cmd, unsigned long arg);
 
