@@ -1,11 +1,11 @@
 ifneq (${KERNELRELEASE},)
 
 	obj-m  = exemple_01.o
-#	obj-m += exemple_02.o
-#	obj-m += exemple_03.o
-#	obj-m += exemple_04.o
-#	obj-m += exemple_05.o
-#	obj-m += exemple_06.o
+	obj-m += exemple_02.o
+	obj-m += exemple_03.o
+	obj-m += exemple_04.o
+	obj-m += exemple_05.o
+	obj-m += exemple_06.o
 #	obj-m += exemple_07.o
 #	obj-m += exemple_09.o
 #	obj-m += exemple_18.o
@@ -52,12 +52,12 @@ else
 	CROSS_ARCH       ?= arm
 	CROSS_COMPILE    ?= /usr/local/cross/rpi/bin/arm-linux-
 
-	USER_PROGS :=          \
-#		test_exemple_05    \
-#		cat_nonblock       \
-#		test_select        \
-#		test_mmap          \
-#		exemple_ioctl      \
+	USER_PROGS :=                \
+	          exemple_ioctl      \
+	          ioctl_exemple_06   \
+#                 cat_nonblock       \
+#                 test_select        \
+#                 test_mmap          \
 
 
 
