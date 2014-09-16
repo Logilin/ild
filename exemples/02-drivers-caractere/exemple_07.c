@@ -19,10 +19,12 @@
 #include <linux/sched.h>
 
 
+	static int current_pid = 0;
+
+
 	static ssize_t exemple_read  (struct file * filp, char * buffer,
 	                              size_t length, loff_t * offset);
 
-	static int current_pid = 0;
 
 	static struct file_operations fops_exemple = {
 		.owner   =  THIS_MODULE,
