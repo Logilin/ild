@@ -19,7 +19,7 @@ ifneq (${RPI},)
 	obj-m += exemple_12_A.o
 	obj-m += exemple_13_A.o
 	obj-m += exemple_14_A.o
-#	obj-m += exemple_15_A.o
+	obj-m += exemple_15_A.o
 #	obj-m += exemple_16_A.o
 #	obj-m += exemple_17_A.o
 else
@@ -28,7 +28,7 @@ else
 	obj-m += exemple_12_B.o
 	obj-m += exemple_13_B.o
 	obj-m += exemple_14_B.o
-#	obj-m += exemple_15_B.o
+	obj-m += exemple_15_B.o
 #	obj-m += exemple_16_B.o
 #	obj-m += exemple_17_B.o
 endif
@@ -37,7 +37,7 @@ endif
 	obj-m += exemple_12_C.o
 	obj-m += exemple_13_C.o
 	obj-m += exemple_14_C.o
-#	obj-m += exemple_15_C.o
+	obj-m += exemple_15_C.o
 #	obj-m += exemple_16_C.o
 #	obj-m += exemple_17_C.o
 
