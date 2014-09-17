@@ -66,6 +66,7 @@ static int __init exemple_init (void)
 	return 0;
 }
 
+
 static void __exit exemple_exit (void)
 {
 	misc_deregister(& exemple_misc_driver);
