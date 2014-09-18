@@ -21,7 +21,7 @@ ifneq (${RPI},)
 	obj-m += exemple_15_A.o
 	obj-m += exemple_16_A.o
 	obj-m += exemple_17_A.o
-#	obj-m += exemple_18_A.o
+	obj-m += exemple_18_A.o
 #	obj-m += exemple_19_A.o
 else
 	obj-m += exemple_09_B.o
@@ -32,7 +32,7 @@ else
 	obj-m += exemple_15_B.o
 	obj-m += exemple_16_B.o
 	obj-m += exemple_17_B.o
-#	obj-m += exemple_18_B.o
+	obj-m += exemple_18_B.o
 #	obj-m += exemple_19_B.o
 endif
 
@@ -43,12 +43,12 @@ endif
 	obj-m += exemple_15_C.o
 	obj-m += exemple_16_C.o
 	obj-m += exemple_17_C.o
-#	obj-m += exemple_18_C.o
+	obj-m += exemple_18_C.o
 #	obj-m += exemple_19_C.o
 
 else
 
-	RPI := 1
+#	RPI := 1
 
 	KERNEL_DIR ?= /lib/modules/$(shell uname -r)/build
 	MODULE_DIR := $(shell pwd)
