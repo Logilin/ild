@@ -18,10 +18,8 @@
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION (2,6,27)
 	#define uid_task(t) (t->uid)
-#elif LINUX_VERSION_CODE < KERNEL_VERSION(3,5,0)
-	#define uid_task(t) (task_uid(t))
 #else
-	#define uid_task(t) (task_uid(t).val)
+	#define uid_task(t) __kuid_val(task_uid(t))
 #endif
 
 static char * nom_entree = "exemple_13";
