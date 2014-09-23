@@ -17,6 +17,8 @@
 #include <linux/module.h>
 #include <linux/sched.h>
 
+#include <asm/uaccess.h>
+
 
 	static ssize_t exemple_read  (struct file * filp, char * buffer,
 	                              size_t length, loff_t * offset);
