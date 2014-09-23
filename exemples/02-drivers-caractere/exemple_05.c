@@ -54,7 +54,7 @@ static ssize_t exemple_read(struct file * filp, char * buffer,
 	char chaine[128];
 	int lg;
 
-	printk(KERN_INFO "%s - exemple_read(.., %u, %lld)...",
+	printk(KERN_INFO "%s - exemple_read(.., %zu, %lld)...",
 	                 THIS_MODULE->name, length, *offset);
 
 	snprintf(chaine, 128, "PID=%u, PPID=%u\n",
