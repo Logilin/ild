@@ -18,6 +18,7 @@
 #include <linux/module.h>
 #include <linux/sched.h>
 
+#include <asm/uaccess.h>
 
 	static int current_pid = 0;
 
