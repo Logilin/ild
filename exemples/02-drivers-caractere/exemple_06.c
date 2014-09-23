@@ -100,10 +100,12 @@ static long exemple_ioctl (struct file * filp,
 			
 	switch(_IOC_NR(cmd)) {
 		case EX_GET_AFFICHE_PPID :
-			copy_to_user((void *) arg, & exemple_affiche_ppid, sizeof(exemple_affiche_ppid));
+			if (copy_to_user((void *) arg, & exemple_affiche_ppid, sizeof(exemple_affiche_ppid)) != 0)
+				return -EFAULT;
 			break;
 		case EX_SET_AFFICHE_PPID :
-			copy_from_user(& exemple_affiche_ppid, (void *) arg, sizeof(exemple_affiche_ppid));
+			if (copy_from_user(& exemple_affiche_ppid, (void *) arg, sizeof(exemple_affiche_ppid)) != 0)
+				return -EFAULT;
 			break;
 		default :
 			return -ENOTTY; 
