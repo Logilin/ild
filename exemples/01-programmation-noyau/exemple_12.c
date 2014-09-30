@@ -18,6 +18,8 @@
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION (2,6,27)
 	#define uid_task(t) (t->uid)
+#elif LINUX_VERSION_CODE < KERNEL_VERSION (2,6,35)
+	#define uid_task(t) (t->cred->uid)
 #else
 	#define uid_task(t) __kuid_val(task_uid(t))
 #endif

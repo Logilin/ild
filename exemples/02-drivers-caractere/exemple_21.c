@@ -21,7 +21,7 @@
 #include <linux/slab.h>
 #include <linux/timer.h>
 
-
+#include <asm/io.h>
 
 
 
