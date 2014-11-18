@@ -16,14 +16,6 @@
 #include <linux/sched.h>
 #include <linux/version.h>
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION (2,6,27)
-	#define uid_task(t) (t->uid)
-#elif LINUX_VERSION_CODE < KERNEL_VERSION (2,6,35)
-	#define uid_task(t) (t->cred->uid)
-#else
-	#define uid_task(t) __kuid_val(task_uid(t))
-#endif
-
 static char * nom_entree = "exemple_13";
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION (3,10,0)
@@ -53,10 +45,10 @@ static void __exit exemple_13_exit (void)
 static int lecture (char * buffer, char **debut, off_t offset,
                     int max, int * eof, void * private)
 {
-	snprintf(buffer, max, "PID=%u, PPID=%u, UID=%u, Nom=%s\n",
+	snprintf(buffer, max, "PID=%u, PPID=%u, Nom=%s\n",
 	         current->pid, 
 	         current->real_parent->pid,
-	         uid_task(current), current->comm);
+	         current->comm);
 	return strlen(buffer);
 }
 
@@ -94,18 +86,20 @@ static ssize_t lecture (struct file * filp, char __user * u_buffer, size_t max, 
 	char buffer[128];
 	int  nb;
 
-	snprintf(buffer, max, "PID=%u, PPID=%u, UID=%u, Nom=%s\n",
+	snprintf(buffer, max, "PID=%u, PPID=%u, Nom=%s\n",
 	         current->pid, 
 	         current->real_parent->pid,
-	         uid_task(current), current->comm);
+	         current->comm);
 
-	nb = strlen(buffer);
-	if ((* offset) >= nb)
+	nb = strlen(buffer) - (*offset);
+	if (nb <= 0)
 		return 0;
-	if (copy_to_user(u_buffer, & (buffer[*offset]), nb - (*offset)) != 0)
+	if (nb > max)
+		nb = max;
+	if (copy_to_user(u_buffer, & (buffer[*offset]), nb) != 0)
 		return -EFAULT;
 	(*offset) += nb;
-	return strlen_user(u_buffer);;
+	return nb;
 }
 
 module_init(exemple_13_init);

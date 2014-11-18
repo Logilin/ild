@@ -111,18 +111,21 @@ static ssize_t lecture (struct file * filp, char __user * u_buffer, size_t max, 
 	char buffer[128];
 	int  nb;
 
-	snprintf(buffer, max, "PID=%u, PPID=%u, valeur=%d\n",
-	         current->pid,
+	snprintf(buffer, max, "PID=%u, PPID=%u, Nom=%s, valeur=%d\n",
+	         current->pid, 
 	         current->real_parent->pid,
+	         current->comm,
 	         valeur_exemple);
 
-	nb = strlen(buffer);
-	if ((* offset) >= nb)
+	nb = strlen(buffer) - (*offset);
+	if (nb <= 0)
 		return 0;
-	if (copy_to_user(u_buffer, & (buffer[*offset]), nb - (*offset)) != 0)
+	if (nb > max)
+		nb = max;
+	if (copy_to_user(u_buffer, & (buffer[*offset]), nb) != 0)
 		return -EFAULT;
 	(*offset) += nb;
-	return strlen_user(u_buffer);;
+	return nb;
 }
 
 

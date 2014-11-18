@@ -16,14 +16,6 @@
 #include <linux/sched.h>
 #include <linux/version.h>
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION (2,6,27)
-	#define uid_task(t) (t->uid)
-#elif LINUX_VERSION_CODE < KERNEL_VERSION (2,6,35)
-	#define uid_task(t) (t->cred->uid)
-#else
-	#define uid_task(t) __kuid_val(task_uid(t))
-#endif
-
 static char * nom_entree = "exemple_12";
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION (3,10,0)
@@ -53,10 +45,10 @@ static void __exit exemple_12_exit (void)
 static int lecture (char * buffer, char **debut, off_t offset,
                     int max, int * eof, void * private)
 {
-	snprintf(buffer, max, "PID=%u, PPID=%u, UID=%u, Nom=%s\n",
+	snprintf(buffer, max, "PID=%u, PPID=%u, Nom=%s\n",
 	         current->pid, 
 	         current->real_parent->pid,
-	         uid_task(current), current->comm);
+	         current->comm);
 	return strlen(buffer);
 }
 
@@ -94,12 +86,14 @@ static ssize_t lecture (struct file * filp, char __user * u_buffer, size_t max, 
 	char buffer[128];
 	int  nb;
 
-	snprintf(buffer, max, "PID=%u, PPID=%u, UID=%u, Nom=%s\n",
+	snprintf(buffer, max, "PID=%u, PPID=%u, Nom=%s\n",
 	         current->pid, 
 	         current->real_parent->pid,
-	         uid_task(current), current->comm);
+	         current->comm);
 
 	nb = strlen(buffer);
+	if (nb > max)
+		return -ENOMEM;
 	if (copy_to_user(u_buffer, buffer, nb) != 0)
 		return -EFAULT;
 	return nb;
