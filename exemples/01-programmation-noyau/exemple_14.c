@@ -111,7 +111,7 @@ static ssize_t lecture (struct file * filp, char __user * u_buffer, size_t max, 
 	char buffer[128];
 	int  nb;
 
-	snprintf(buffer, max, "PID=%u, PPID=%u, Nom=%s, valeur=%d\n",
+	snprintf(buffer, 128, "PID=%u, PPID=%u, Nom=%s, valeur=%d\n",
 	         current->pid, 
 	         current->real_parent->pid,
 	         current->comm,
