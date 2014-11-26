@@ -10,11 +10,12 @@
 
 \************************************************************************/
 
-#include <linux/cred.h>
 #include <linux/module.h>
 #include <linux/proc_fs.h>
 #include <linux/sched.h>
 #include <linux/version.h>
+
+#include <asm/uaccess.h>
 
 static char * nom_entree = "exemple_13";
 
