@@ -21,73 +21,14 @@ static char * nom_entree = "exemple_14";
 
 static int valeur_exemple = 0;
 
+static ssize_t lecture  (struct file *, char __user *, size_t, loff_t *);
+static ssize_t ecriture (struct file *, const char __user *, size_t, loff_t *);
 
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION (3,10,0)
-
-static int lecture (char *, char **, off_t, int, int *, void *);
-static int ecriture (struct file *, const char __user *, unsigned long, void *);
-
-static int __init exemple_14_init (void)
-{
-	struct proc_dir_entry * entree;
-	
-	entree = create_proc_entry(nom_entree, S_IFREG | 0644, NULL);
-	if (entree == NULL)
-		return -EBUSY;
-	entree->read_proc = lecture;
-	entree->write_proc = ecriture;
-	return 0; 
-}
-
-
-static void __exit exemple_14_exit (void)
-{
-	remove_proc_entry(nom_entree, NULL);
-}
-
-
-static int lecture (char * buffer, char **debut, off_t offset,
-                    int max, int * eof, void * private)
-{
-	snprintf(buffer, max, "PID=%u, PPID=%u, valeur=%d\n",
-	         current->pid,
-	         current->real_parent->pid,
-	         valeur_exemple);
-	return strlen(buffer);
-}
-
-
-static int ecriture (struct file * filp, const char __user * u_buffer,
-                     unsigned long nombre, void * data)
-{
-	char buffer[128];
-	if (nombre >= 128)
-		return -ENOMEM;
-	if (copy_from_user(buffer, u_buffer, nombre) != 0)
-		return -EFAULT;
-	if (sscanf(buffer, "%d", & valeur_exemple) != 1)
-		return -EINVAL;
-	return nombre;
-}
-
-
-module_init(exemple_14_init);
-module_exit(exemple_14_exit);
-
-MODULE_LICENSE("GPL");
-
-
-#else
-
-	static ssize_t lecture  (struct file *, char __user *, size_t, loff_t *);
-	static ssize_t ecriture (struct file *, const char __user *, size_t, loff_t *);
-
-	static const struct file_operations exemple_14_proc_fops = {
-		.owner	= THIS_MODULE,
-		.read   = lecture,
-		.write  = ecriture,
-	};
+static const struct file_operations exemple_14_proc_fops = {
+	.owner	= THIS_MODULE,
+	.read   = lecture,
+	.write  = ecriture,
+};
 
 
 static int __init exemple_14_init (void)
@@ -145,5 +86,4 @@ module_init(exemple_14_init);
 module_exit(exemple_14_exit);
 MODULE_LICENSE("GPL");
 
-#endif
 
