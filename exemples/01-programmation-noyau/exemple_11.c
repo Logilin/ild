@@ -16,22 +16,16 @@
 
 static char * nom_entree = "exemple_11";
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION (3,10,0)
 	static const struct file_operations exemple_11_proc_fops = {
 		.owner	= THIS_MODULE,
 	};
-#endif
 
 static int __init exemple_11_init (void)
 {
 	struct proc_dir_entry * entree;
 	
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION (3,10,0)
-	entree = create_proc_entry(nom_entree, S_IFREG | 0644, NULL);
-#else
 	entree = proc_create(nom_entree, S_IFREG | 0644, NULL, & exemple_11_proc_fops);
-#endif
+
 	if (entree == NULL)
 		return -EBUSY;
 	return 0; 
