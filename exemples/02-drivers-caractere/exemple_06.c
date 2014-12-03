@@ -90,14 +90,6 @@ static long exemple_ioctl (struct file * filp,
 	if (_IOC_TYPE(cmd) != TYPE_IOCTL_EXEMPLE)
 		return -ENOTTY;
 		
-	if (_IOC_DIR(cmd) & _IOC_READ)
-		if (access_ok(VERIFY_WRITE, (void __user *)arg, _IOC_SIZE(cmd)) == 0)
-			return -EFAULT;
-			
-	if (_IOC_DIR(cmd) & _IOC_WRITE)
-		if (access_ok(VERIFY_READ, (void __user *)arg, _IOC_SIZE(cmd)) == 0)
-			return -EFAULT;
-			
 	switch(_IOC_NR(cmd)) {
 		case EX_GET_AFFICHE_PPID :
 			if (copy_to_user((void *) arg, & exemple_affiche_ppid, sizeof(exemple_affiche_ppid)) != 0)
