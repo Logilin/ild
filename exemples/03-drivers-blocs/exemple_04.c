@@ -6,7 +6,7 @@
 
   Exemples de la formation "Programmation Noyau sous Linux"
 
-  (c) 2005-2014 Christophe Blaess
+  (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -81,10 +81,10 @@ static void exemple_request(struct request_queue * rqueue)
 
 		if (rq_data_dir(rq)) { /* write */
 			memmove(& exemple_data[secteur_debut << exemple_puissance_sect],
-			        rq->buffer,
+			        bio_data(rq->bio),
 			        nb_secteurs << exemple_puissance_sect);
 		} else /* read */ {
-			memmove(rq->buffer,
+			memmove(bio_data(rq->bio),
 			        & exemple_data[secteur_debut << exemple_puissance_sect],
 			        nb_secteurs << exemple_puissance_sect);
 		}
