@@ -16,6 +16,7 @@
 #include <linux/hdreg.h>
 #include <linux/blkdev.h>
 #include <linux/module.h>
+#include <linux/version.h>
 #include <linux/vmalloc.h>
 #include <linux/spinlock.h>
 
@@ -153,6 +154,9 @@ static int __init exemple_init (void)
 	exemple_gendisk->queue       = exemple_request_queue;
 	snprintf(exemple_gendisk->disk_name, 32, THIS_MODULE->name);
 	set_capacity(exemple_gendisk, (exemple_nb_sect << exemple_puissance_sect) / 512);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,2,0)
+	exemple_gendisk->flags       = GENHD_FL_REMOVABLE;	// Automatic flush.
+#endif
 	
 	add_disk(exemple_gendisk);
 		
