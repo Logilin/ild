@@ -12,7 +12,7 @@ ifneq (${KERNELRELEASE},)
 	obj-m += exemple_20.o
 	obj-m += exemple_21.o
 
-ifneq (${RPI},)
+ifneq (${RPI_GPIO},)
 	obj-m += exemple_09_A.o
 	obj-m += exemple_11_A.o
 	obj-m += exemple_12_A.o
@@ -23,7 +23,9 @@ ifneq (${RPI},)
 	obj-m += exemple_17_A.o
 	obj-m += exemple_18_A.o
 	obj-m += exemple_19_A.o
-else
+endif
+
+ifneq (${PC_PARALLEL},)
 	obj-m += exemple_09_B.o
 	obj-m += exemple_11_B.o
 	obj-m += exemple_12_B.o
@@ -36,6 +38,7 @@ else
 	obj-m += exemple_19_B.o
 endif
 
+ifneq (${KBD_IRQ},)
 	obj-m += exemple_11_C.o
 	obj-m += exemple_12_C.o
 	obj-m += exemple_13_C.o
@@ -45,10 +48,23 @@ endif
 	obj-m += exemple_17_C.o
 	obj-m += exemple_18_C.o
 	obj-m += exemple_19_C.o
+endif
+
+ifneq (${FPGASOC_GPIO},)
+	obj-m += exemple_09_D.o
+endif
+
 
 else
 
-	RPI := 1
+	# Uncomment next line to compile Raspberry Pi specific examples.
+	export RPI_GPIO     := 1
+	# Uncomment next line to compile keyboard interrupt based examples.
+	#export KBD_IRQ      := 1
+	# Uncomment next line to compile PC parallel port specific examples (obsolete).
+	#export PC_PARALLEL  := 1
+	# Uncomment next line to compile Cyclone V FPGA SoC specific examples.
+	#export FPGASOC_GPIO := 1
 
 	KERNEL_DIR ?= /lib/modules/$(shell uname -r)/build
 	MODULE_DIR := $(shell pwd)
@@ -64,18 +80,15 @@ else
 	          test_select        \
 	          test_mmap          \
 
-
-
-	
 	CFLAGS := -Wall -g
 
 all: user modules
 
 modules:
-	${MAKE} -C ${KERNEL_DIR} SUBDIRS=${MODULE_DIR}  RPI=${RPI} modules
+	${MAKE} -C ${KERNEL_DIR} SUBDIRS=${MODULE_DIR}  modules
 
 cross:
-	${MAKE} -C ${CROSS_KERNEL_DIR} SUBDIRS=${MODULE_DIR} ARCH=${CROSS_ARCH} CROSS_COMPILE=${CROSS_COMPILE} RPI=${RPI} modules
+	${MAKE} -C ${CROSS_KERNEL_DIR} SUBDIRS=${MODULE_DIR} ARCH=${CROSS_ARCH} CROSS_COMPILE=${CROSS_COMPILE} modules
 
 user: ${USER_PROGS}
 
