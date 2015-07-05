@@ -5,7 +5,7 @@
 
   Exemples de la formation "Programmation Noyau sous Linux"
 
-  (c) 2005-2014 Christophe Blaess
+  (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -21,10 +21,7 @@
 
 #include <asm/uaccess.h>
 
-
-
-	// Entree sur broche 16 (GPIO 23)
-	#define RPI_GPIO_IN  23
+#include "gpio_exemples.h"
 
 	#define EXEMPLE_LG_BUFFER 1024
 	static unsigned long exemple_buffer[EXEMPLE_LG_BUFFER];
@@ -60,25 +57,25 @@ static int __init exemple_init (void)
 {
 	int err;
 
-	if ((err = gpio_request(RPI_GPIO_IN,THIS_MODULE->name)) != 0)
+	if ((err = gpio_request(GPIO_IN,THIS_MODULE->name)) != 0)
 		return err;
 		
-	if ((err = gpio_direction_input(RPI_GPIO_IN)) != 0) {
-		gpio_free(RPI_GPIO_IN);
+	if ((err = gpio_direction_input(GPIO_IN)) != 0) {
+		gpio_free(GPIO_IN);
 		return err;
 	}
 
 	spin_lock_init(& exemple_spinlock_buffer);
 
-	if ((err = request_irq(gpio_to_irq(RPI_GPIO_IN), exemple_handler,
+	if ((err = request_irq(gpio_to_irq(GPIO_IN), exemple_handler,
 	                       IRQF_SHARED | IRQF_TRIGGER_RISING,
 	                       THIS_MODULE->name, THIS_MODULE->name)) != 0) {
-		gpio_free(RPI_GPIO_IN);
+		gpio_free(GPIO_IN);
 		return err;
 	}
 	if ((err = misc_register(& exemple_misc_driver)) != 0) {
-		free_irq(gpio_to_irq(RPI_GPIO_IN), THIS_MODULE->name);
-		gpio_free(RPI_GPIO_IN);
+		free_irq(gpio_to_irq(GPIO_IN), THIS_MODULE->name);
+		gpio_free(GPIO_IN);
 		return err;
 	}
 	return 0;
@@ -88,8 +85,8 @@ static int __init exemple_init (void)
 static void __exit exemple_exit (void)
 {
 	misc_deregister(& exemple_misc_driver);
-	free_irq(gpio_to_irq(RPI_GPIO_IN), THIS_MODULE->name);
-	gpio_free(RPI_GPIO_IN);
+	free_irq(gpio_to_irq(GPIO_IN), THIS_MODULE->name);
+	gpio_free(GPIO_IN);
 }
 
 

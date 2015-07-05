@@ -1,11 +1,11 @@
 /************************************************************************\
-  exemple_09_A - Chapitre "Ecriture de driver - peripherique caractere"
+  exemple_09 - Chapitre "Ecriture de driver - peripherique caractere"
 
-  Driver permettant les entrees-sorties sur broches GPIO d'un Raspberry Pi
+  Driver permettant les entrees-sorties sur broches GPIO
 
   Exemples de la formation "Programmation Noyau sous Linux"
 
-  (c) 2005-2014 Christophe Blaess
+  (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -17,8 +17,8 @@
 #include <linux/miscdevice.h>
 #include <linux/module.h>
 #include <asm/uaccess.h>
-#include "gpio_exemples.h"
 
+#include "gpio_exemples.h"
 
 	static ssize_t exemple_read  (struct file * filp, char * buffer,
 	                              size_t length, loff_t * offset);
