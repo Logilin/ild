@@ -8,70 +8,32 @@ ifneq (${KERNELRELEASE},)
 	obj-m += exemple_06.o
 	obj-m += exemple_07.o
 	obj-m += exemple_08.o
+	obj-m += exemple_09.o
 	obj-m += exemple_10.o
+	obj-m += exemple_11.o
+	obj-m += exemple_12.o
+	obj-m += exemple_13.o
+	obj-m += exemple_14.o
+	obj-m += exemple_15.o
+	obj-m += exemple_16.o
+	obj-m += exemple_17.o
+	obj-m += exemple_18.o
+	obj-m += exemple_19.o
 	obj-m += exemple_20.o
 	obj-m += exemple_21.o
-
-ifneq (${RPI_GPIO},)
-	obj-m += exemple_09_A.o
-	obj-m += exemple_11_A.o
-	obj-m += exemple_12_A.o
-	obj-m += exemple_13_A.o
-	obj-m += exemple_14_A.o
-	obj-m += exemple_15_A.o
-	obj-m += exemple_16_A.o
-	obj-m += exemple_17_A.o
-	obj-m += exemple_18_A.o
-	obj-m += exemple_19_A.o
-endif
-
-ifneq (${PC_PARALLEL},)
-	obj-m += exemple_09_B.o
-	obj-m += exemple_11_B.o
-	obj-m += exemple_12_B.o
-	obj-m += exemple_13_B.o
-	obj-m += exemple_14_B.o
-	obj-m += exemple_15_B.o
-	obj-m += exemple_16_B.o
-	obj-m += exemple_17_B.o
-	obj-m += exemple_18_B.o
-	obj-m += exemple_19_B.o
-endif
-
-ifneq (${KBD_IRQ},)
-	obj-m += exemple_11_C.o
-	obj-m += exemple_12_C.o
-	obj-m += exemple_13_C.o
-	obj-m += exemple_14_C.o
-	obj-m += exemple_15_C.o
-	obj-m += exemple_16_C.o
-	obj-m += exemple_17_C.o
-	obj-m += exemple_18_C.o
-	obj-m += exemple_19_C.o
-endif
-
-ifneq (${FPGASOC_GPIO},)
-	obj-m += exemple_09_D.o
-endif
 
 
 else
 
-	# Uncomment next line to compile Raspberry Pi specific examples.
-	export RPI_GPIO     := 1
-	# Uncomment next line to compile keyboard interrupt based examples.
-	#export KBD_IRQ      := 1
-	# Uncomment next line to compile PC parallel port specific examples (obsolete).
-	#export PC_PARALLEL  := 1
-	# Uncomment next line to compile Cyclone V FPGA SoC specific examples.
-	#export FPGASOC_GPIO := 1
+
+	# Uncomment and complete the following lines if you cross-compile the examples.
+	# export ARCH          := arm
+	# export CROSS_COMPILE := arm-linux-
+	# export KERNEL_DIR    := ~/cross/kernel/linux-rpi-3.6.11
+
 
 	KERNEL_DIR ?= /lib/modules/$(shell uname -r)/build
 	MODULE_DIR := $(shell pwd)
-
-	CROSS_KERNEL_DIR ?= /usr/local/src/linux-rpi-3.6.11
-	CROSS_ARCH       ?= arm
-	CROSS_COMPILE    ?= /usr/local/cross/rpi/bin/arm-linux-
 
 	USER_PROGS :=                \
 	          exemple_ioctl      \
@@ -80,19 +42,20 @@ else
 	          test_select        \
 	          test_mmap          \
 
-	CFLAGS := -Wall -g
-
+.PHONY: all
 all: user modules
 
+.PHONY: modules
 modules:
 	${MAKE} -C ${KERNEL_DIR} SUBDIRS=${MODULE_DIR}  modules
 
-cross:
-	${MAKE} -C ${CROSS_KERNEL_DIR} SUBDIRS=${MODULE_DIR} ARCH=${CROSS_ARCH} CROSS_COMPILE=${CROSS_COMPILE} modules
-
+.PHONY: user
 user: ${USER_PROGS}
 
+%:%.c
+	$(CROSS_COMPILE)$(CC) $(CFLAGS) -c -o $@ $<
 
+.PHONY: clean,
 clean:
 	rm -f *.o *.ko *.mod.c .*.o .*.ko .*.mod.c .*.cmd *~ *.ko.unsigned
 	rm -f Module.symvers Module.markers modules.order
@@ -100,3 +63,4 @@ clean:
 	rm -f ${USER_PROGS}
 
 endif
+
