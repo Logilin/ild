@@ -33,8 +33,6 @@ static int __init exemple_init (void)
 	       THIS_MODULE->name, buffer);
 	printk("%s: virt-to-phys() -> %llx\n",
 	       THIS_MODULE->name, (long long unsigned int) virt_to_phys(buffer));
-	printk("%s: virt-to-bus() -> %llx\n",
-	       THIS_MODULE->name, (long long unsigned int) virt_to_bus(buffer));
 
 	pfn = virt_to_phys(buffer) >> PAGE_SHIFT;
 	printk("%s: pfn -> %x\n",
