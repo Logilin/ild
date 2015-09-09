@@ -53,7 +53,7 @@ modules:
 user: ${USER_PROGS}
 
 %:%.c
-	$(CROSS_COMPILE)$(CC) $(CFLAGS) -c -o $@ $<
+	$(CROSS_COMPILE)$(CC) $(CFLAGS)  -o $@ $<
 
 .PHONY: clean,
 clean:
