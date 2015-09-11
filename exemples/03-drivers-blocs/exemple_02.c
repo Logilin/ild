@@ -107,7 +107,7 @@ static void exemple_request(struct request_queue * rqueue)
 		
 fin_requete:
 		/* Valider le traitement de la requete */
-		if (__blk_end_request_cur(rq, erreur) == 0)
+		if (blk_end_request_cur(rq, erreur) == 0)
 			/* Il n'y a plus de donnees dans la requete */
 			rq = blk_fetch_request(rqueue);
 	}
