@@ -79,7 +79,7 @@ static void exemple_request(struct request_queue * rqueue)
 		}
 		
 fin_requete:
-		if (blk_end_request_cur(rq, erreur) == 0)
+		if (__blk_end_request_cur(rq, erreur) == 0)
 			rq = blk_fetch_request(rqueue);
 	}
 }
