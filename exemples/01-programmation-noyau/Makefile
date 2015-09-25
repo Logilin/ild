@@ -14,7 +14,6 @@ ifneq (${KERNELRELEASE},)
 	obj-m += exemple_11.o
 	obj-m += exemple_12.o
 	obj-m += exemple_13.o
-	obj-m += exemple_14.o
 else
 
 	KERNEL_DIR ?= /lib/modules/$(shell uname -r)/build

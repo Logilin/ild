@@ -1,7 +1,7 @@
 /************************************************************************\
   exemple_10 - Chapitre "Programmer pour le noyau Linux"
 
-  Affichage au chargement et dechargement des PID et PPID de l'appelant
+  Creation et suppression d'une entree dans /proc
 
   Exemples de la formation "Programmation Noyau sous Linux"
 
@@ -11,27 +11,33 @@
 \************************************************************************/
 
 #include <linux/module.h>
-#include <linux/sched.h>
+#include <linux/proc_fs.h>
 #include <linux/version.h>
 
-static int __init exemple_10_init (void)
+static char * nom_entree = "exemple_11";
+
+	static const struct file_operations exemple_11_proc_fops = {
+		.owner	= THIS_MODULE,
+	};
+
+static int __init exemple_11_init (void)
 {
-	printk(KERN_INFO "%s - Chargement par %u, son pere est %u\n",
-	          THIS_MODULE->name,
-	          current->pid,
-	          current->real_parent->pid);
-	return 0;
-}
- 
-static void __exit exemple_10_exit (void)
-{
-	printk(KERN_INFO "%s - Dechargement par %u, son pere est %u\n",
-	          THIS_MODULE->name,
-	          current->pid,
-	          current->real_parent->pid);
+	struct proc_dir_entry * entree;
+	
+	entree = proc_create(nom_entree, S_IFREG | 0644, NULL, & exemple_11_proc_fops);
+
+	if (entree == NULL)
+		return -EBUSY;
+	return 0; 
 }
 
-module_init(exemple_10_init);
-module_exit(exemple_10_exit);
+static void __exit exemple_11_exit (void)
+{
+	remove_proc_entry(nom_entree, NULL);
+}
+
+module_init(exemple_11_init);
+module_exit(exemple_11_exit);
+
 MODULE_LICENSE("GPL");
 

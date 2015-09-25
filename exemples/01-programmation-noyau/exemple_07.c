@@ -1,7 +1,7 @@
 /************************************************************************\
   exemple_07 - Chapitre "Programmer pour le noyau Linux"
 
-  Ecriture au chargement et dechargement des heures precises.
+  Ecriture de l'heure precise toutes les secondes.
 
   Exemples de la formation "Programmation Noyau sous Linux"
 
@@ -10,53 +10,40 @@
 
 \************************************************************************/
 
-#include <linux/jiffies.h>
 #include <linux/module.h>
+#include <linux/sched.h>
 
-static int __init exemple_07_init (void)
+static void fonction_periodique (unsigned long);
+
+static struct timer_list timer;
+
+static int __init exemple_08_init (void)
 {
-	struct timeval  tv_jif, tv_tod;
-	struct timespec ts_ckt, ts_tod;
+	init_timer (& timer);
+	timer.function = fonction_periodique;
+	timer.data = 0; /* inutilise */
+	timer.expires = jiffies + HZ;
+	add_timer(& timer);
 
-	jiffies_to_timeval(jiffies, & tv_jif);
-	do_gettimeofday(& tv_tod);
-	ts_ckt = current_kernel_time();
-	getnstimeofday(& ts_tod);
-	printk(KERN_INFO  "%s - Chargement :\n", THIS_MODULE->name);
-	printk(KERN_INFO "tv_jif.tv_sec = %ld, tv_jif.tv_usec = %ld\n",
-	                  tv_jif.tv_sec, tv_jif.tv_usec);
-	printk(KERN_INFO "tv_tod.tv_sec = %ld, tv_tod.tv_usec = %ld\n",
-	                  tv_tod.tv_sec, tv_tod.tv_usec);
-	printk(KERN_INFO "ts_ckt.tv_sec = %ld, ts_ckt.tv_nsec = %ld\n",
-	                  ts_ckt.tv_sec, ts_ckt.tv_nsec);
-	printk(KERN_INFO "ts_tod.tv_sec = %ld, ts_tod.tv_nsec = %ld\n",
-	                  ts_tod.tv_sec, ts_tod.tv_nsec);
 	return 0;
 }
  
-static void __exit exemple_07_exit (void)
+static void __exit exemple_08_exit (void)
 {
-	struct timeval tv_jif, tv_tod;
-	struct timespec ts_ckt, ts_tod;
-
-	jiffies_to_timeval(jiffies, & tv_jif);
-	do_gettimeofday(& tv_tod);
-	ts_ckt = current_kernel_time();
-	getnstimeofday(& ts_tod);
-
-	printk(KERN_INFO  "%s - Dechargement :\n", THIS_MODULE->name);
-	printk(KERN_INFO "tv_jif.tv_sec = %ld, tv_jif.tv_usec = %ld\n",
-	                  tv_jif.tv_sec, tv_jif.tv_usec);
-	printk(KERN_INFO "tv_tod.tv_sec = %ld, tv_tod.tv_usec = %ld\n",
-	                  tv_tod.tv_sec, tv_tod.tv_usec);
-	printk(KERN_INFO "ts_ckt.tv_sec = %ld, ts_ckt.tv_nsec = %ld\n",
-	                  ts_ckt.tv_sec, ts_ckt.tv_nsec);
-	printk(KERN_INFO "ts_tod.tv_sec = %ld, ts_tod.tv_nsec = %ld\n",
-	                  ts_tod.tv_sec, ts_tod.tv_nsec);
+	del_timer(& timer);
 }
 
-module_init(exemple_07_init);
-module_exit(exemple_07_exit);
+static void fonction_periodique(unsigned long inutile)
+{
+	struct timeval time_of_day;
 
+	do_gettimeofday(& time_of_day);
+	printk(KERN_INFO "%s - time_of_day: %ld.%06ld\n",
+	       THIS_MODULE->name, time_of_day.tv_sec, time_of_day.tv_usec);
+
+	mod_timer(& timer, jiffies+HZ);
+}
+
+module_init(exemple_08_init);
+module_exit(exemple_08_exit);
 MODULE_LICENSE("GPL");
-

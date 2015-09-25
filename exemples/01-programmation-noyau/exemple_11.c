@@ -1,7 +1,7 @@
 /************************************************************************\
   exemple_11 - Chapitre "Programmer pour le noyau Linux"
 
-  Creation et suppression d'une entree dans /proc
+  Callback de lecture depuis /proc
 
   Exemples de la formation "Programmation Noyau sous Linux"
 
@@ -12,32 +12,55 @@
 
 #include <linux/module.h>
 #include <linux/proc_fs.h>
+#include <linux/sched.h>
 #include <linux/version.h>
+#include <asm/uaccess.h>
 
-static char * nom_entree = "exemple_11";
+static char * nom_entree = "exemple_12";
 
-	static const struct file_operations exemple_11_proc_fops = {
-		.owner	= THIS_MODULE,
-	};
+static ssize_t lecture (struct file *, char __user *, size_t, loff_t *);
 
-static int __init exemple_11_init (void)
+static const struct file_operations exemple_12_proc_fops = {
+	.owner	= THIS_MODULE,
+	.read   = lecture,
+};
+
+static int __init exemple_12_init (void)
 {
 	struct proc_dir_entry * entree;
-	
-	entree = proc_create(nom_entree, S_IFREG | 0644, NULL, & exemple_11_proc_fops);
-
+	entree = proc_create(nom_entree, S_IFREG | 0644, NULL, & exemple_12_proc_fops);
 	if (entree == NULL)
 		return -EBUSY;
 	return 0; 
 }
 
-static void __exit exemple_11_exit (void)
+
+static void __exit exemple_12_exit (void)
 {
 	remove_proc_entry(nom_entree, NULL);
 }
 
-module_init(exemple_11_init);
-module_exit(exemple_11_exit);
+static ssize_t lecture (struct file * filp, char __user * u_buffer, size_t max, loff_t * offset)
+{
+	char buffer[128];
+	int  nb;
 
+	snprintf(buffer, 128, "PID=%u, PPID=%u, Nom=%s\n",
+	         current->pid, 
+	         current->real_parent->pid,
+	         current->comm);
+
+	nb = strlen(buffer);
+	if (nb > max)
+		return -ENOMEM;
+	if (copy_to_user(u_buffer, buffer, nb) != 0)
+		return -EFAULT;
+	return nb;
+}
+
+module_init(exemple_12_init);
+module_exit(exemple_12_exit);
 MODULE_LICENSE("GPL");
+
+
 
