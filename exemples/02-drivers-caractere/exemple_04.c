@@ -5,16 +5,16 @@
 
   Exemples de la formation "Programmation Noyau sous Linux"
 
-  (c) 2005-2014 Christophe Blaess
+  (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
 
-#include <linux/cdev.h>
-#include <linux/device.h>
-#include <linux/fs.h>
-#include <linux/miscdevice.h>
-#include <linux/module.h>
+	#include <linux/cdev.h>
+	#include <linux/device.h>
+	#include <linux/fs.h>
+	#include <linux/miscdevice.h>
+	#include <linux/module.h>
 
 
 	static int exemple_open    (struct inode * ind, struct file * filp);
@@ -35,10 +35,12 @@
 	};
 
 
+
 static int __init exemple_init (void)
 {
 	return misc_register(& exemple_misc_driver);
 }
+
 
 
 static void __exit exemple_exit (void)
@@ -47,21 +49,22 @@ static void __exit exemple_exit (void)
 }
 
 
+
 static int exemple_open(struct inode * ind, struct file * filp)
 {
-	printk(KERN_INFO "%s - exemple_open()\n", THIS_MODULE->name);
+	printk(KERN_INFO "%s - %s()\n", THIS_MODULE->name, __FUNCTION__);
 	return 0;
 }
+
 
 
 static int exemple_release(struct inode * ind, struct file * filp)
 {
-	printk(KERN_INFO "%s - exemple_release()\n", THIS_MODULE->name);
+	printk(KERN_INFO "%s - %s()\n", THIS_MODULE->name, __FUNCTION__);
 	return 0;
 }
 
 
-module_init(exemple_init);
-module_exit(exemple_exit);
-MODULE_LICENSE("GPL");
-
+	module_init(exemple_init);
+	module_exit(exemple_exit);
+	MODULE_LICENSE("GPL");

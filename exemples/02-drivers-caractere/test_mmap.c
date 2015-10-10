@@ -5,7 +5,7 @@
 
   Exemples de la formation "Programmation Noyau sous Linux"
 
-  (c) 2005-2014 Christophe Blaess
+  (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -27,17 +27,20 @@ int main(int argc, char * argv[])
 		fprintf(stderr, "usage: %s <device>\n", argv[0]);
 		exit(1);
 	}
+
 	ptr = mmap(NULL, 4096, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	if (ptr == MAP_FAILED) {
 		perror("mmap");
 		exit(1);
 	}
-	while(1) {
+
+	while (1) {
 		fprintf(stderr, "%s", ptr);
 		usleep(100000); /* 1/10e s. */
 	}
 
 	munmap(ptr, 4096);
 	close(fd);
+
 	return 0;
 }

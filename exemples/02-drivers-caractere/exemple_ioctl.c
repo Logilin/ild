@@ -6,7 +6,7 @@
 // le lecteur de CD
 //
 // Exemples de la formation "Programmation Noyau sous Linux"
-// (c) 2005-2010 Christophe Blaess - http://www.blaess.fr/christophe/
+// (c) 2005-2015 Christophe Blaess - http://www.blaess.fr/christophe/
 //
 // *********************************************************************
 
@@ -26,9 +26,11 @@ int main(int argc, char * argv[])
 		perror("/dev/cdrom");
 		exit(1);
 	}
+
 	if (ioctl(fd, CDROMEJECT, 0) < 0) {
 		perror("ioctl(CDROMEJECT)");
 		exit(1);
 	}
+
 	return 0;
 }

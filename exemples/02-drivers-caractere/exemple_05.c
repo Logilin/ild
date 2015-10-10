@@ -5,23 +5,24 @@
 
   Exemples de la formation "Programmation Noyau sous Linux"
 
-  (c) 2005-2014 Christophe Blaess
+  (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
 
-#include <linux/cdev.h>
-#include <linux/device.h>
-#include <linux/fs.h>
-#include <linux/miscdevice.h>
-#include <linux/module.h>
-#include <linux/sched.h>
+	#include <linux/cdev.h>
+	#include <linux/device.h>
+	#include <linux/fs.h>
+	#include <linux/miscdevice.h>
+	#include <linux/module.h>
+	#include <linux/sched.h>
 
-#include <asm/uaccess.h>
+	#include <asm/uaccess.h>
 
 
 	static ssize_t exemple_read  (struct file * filp, char * buffer,
 	                              size_t length, loff_t * offset);
+
 
 	static struct file_operations fops_exemple = {
 		.owner   =  THIS_MODULE,
@@ -36,10 +37,12 @@
 	};
 
 
+
 static int __init exemple_init (void)
 {
 	return misc_register(& exemple_misc_driver);
 }
+
 
 
 static void __exit exemple_exit (void)
@@ -48,38 +51,33 @@ static void __exit exemple_exit (void)
 }
 
 
+
 static ssize_t exemple_read(struct file * filp, char * buffer,
                             size_t length, loff_t * offset)
 {
 	char chaine[128];
 	int lg;
 
-	printk(KERN_INFO "%s - exemple_read(.., %zu, %lld)...",
-	                 THIS_MODULE->name, length, *offset);
-
 	snprintf(chaine, 128, "PID=%u, PPID=%u\n",
 	                current->pid,
 	                current->real_parent->pid);
 
-	lg = strlen(chaine);
-	lg -= *offset;
-	if (lg <= 0) {
-		printk("-> 0\n");
+	lg = strlen(chaine) - (*offset);
+
+	if (lg <= 0)
 		return 0;
-	}
+
 	if (length < lg)
 		lg = length;
 
-	if (copy_to_user(buffer, & chaine[* offset], lg) != 0) {
-		printk("-> Error\n");
+	if (copy_to_user(buffer, & chaine[* offset], lg) != 0)
 		return -EFAULT;
-	}
+
 	*offset += lg;
-	printk("-> %d\n", lg);
+
 	return lg;
 }
 
-module_init(exemple_init);
-module_exit(exemple_exit);
-MODULE_LICENSE("GPL");
-
+	module_init(exemple_init);
+	module_exit(exemple_exit);
+	MODULE_LICENSE("GPL");

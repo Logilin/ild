@@ -10,18 +10,20 @@
 
 \************************************************************************/
 
-#include <linux/cdev.h>
-#include <linux/device.h>
-#include <linux/fs.h>
-#include <linux/gpio.h>
-#include <linux/miscdevice.h>
-#include <linux/module.h>
-#include <asm/uaccess.h>
+	#include <linux/cdev.h>
+	#include <linux/device.h>
+	#include <linux/fs.h>
+	#include <linux/gpio.h>
+	#include <linux/miscdevice.h>
+	#include <linux/module.h>
+	#include <asm/uaccess.h>
 
-#include "gpio_exemples.h"
+	#include "gpio_exemples.h"
+
 
 	static ssize_t exemple_read  (struct file * filp, char * buffer,
 	                              size_t length, loff_t * offset);
+
 	static ssize_t exemple_write (struct file * filp, const char * buffer,
 	                              size_t length, loff_t * offset);
 
@@ -40,31 +42,35 @@
 	};
 
 
+
 static int __init exemple_init (void)
 {
 	int err;
 
 	if ((err = gpio_request(GPIO_IN,THIS_MODULE->name)) != 0)
 		return err;
-		
+
 	if ((err = gpio_request(GPIO_OUT,THIS_MODULE->name)) != 0) {
 		gpio_free(GPIO_IN);
 		return err;
 	}
-	
+
 	if (((err = gpio_direction_input(GPIO_IN)) != 0)
 	 || ((err = gpio_direction_output(GPIO_OUT,1)) != 0)) {
 		gpio_free(GPIO_OUT);
 		gpio_free(GPIO_IN);
 		return err;
 	}
+
 	if ((err = misc_register(& exemple_misc_driver)) != 0) {
 		gpio_free(GPIO_OUT);
 		gpio_free(GPIO_IN);
 		return err;
-	}		
+	}
+
 	return 0;
 }
+
 
 
 static void __exit exemple_exit (void)
@@ -75,17 +81,21 @@ static void __exit exemple_exit (void)
 }
 
 
+
 static ssize_t exemple_read(struct file * filp, char * buffer,
                             size_t length, loff_t * offset)
 {
 	char k_buffer [8];
+
 	if (length < 2)
 		return 0;
-	sprintf(k_buffer, "%d\n", gpio_get_value(GPIO_IN) & 0x01);
+	sprintf(k_buffer, "%d\n", gpio_get_value(GPIO_IN));
 	if (copy_to_user(buffer, k_buffer, 2) != 0)
 		return -EFAULT;
+
 	return 2;
 }
+
 
 
 static ssize_t exemple_write(struct file * filp, const char * buffer,
@@ -100,12 +110,13 @@ static ssize_t exemple_write(struct file * filp, const char * buffer,
 		return -EFAULT;
 	if (sscanf(k_buffer, "%d", & val) != 1)
 		return -EINVAL;
+
 	gpio_set_value(GPIO_OUT, val & 0x01);
+
 	return length;
 }
 
 
-module_init(exemple_init);
-module_exit(exemple_exit);
-MODULE_LICENSE("GPL");
-
+	module_init(exemple_init);
+	module_exit(exemple_exit);
+	MODULE_LICENSE("GPL");

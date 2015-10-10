@@ -1,7 +1,7 @@
 /************************************************************************\
   exemple_13 - Chapitre "Ecriture de driver - peripherique caractere"
 
-  Utilisation d'une tasklet sur une interruption GPIO
+  Declenchement d'une workqueue sur interruption GPIO
 
   Exemples de la formation "Programmation Noyau sous Linux"
 
@@ -10,17 +10,19 @@
 
 \************************************************************************/
 
-#include <linux/gpio.h>
-#include <linux/interrupt.h>
-#include <linux/module.h>
 
-#include "gpio_exemples.h"
+	#include <linux/gpio.h>
+	#include <linux/interrupt.h>
+	#include <linux/module.h>
+	#include <linux/workqueue.h>
+
+	#include "gpio_exemples.h"
 
 	static irqreturn_t exemple_handler(int irq, void * ident);
 
+	static void exemple_workqueue_function(struct work_struct * inutilise);
+	static DECLARE_WORK(exemple_workqueue, exemple_workqueue_function);
 
-	static void fonction_tasklet(unsigned long unused);
-	static DECLARE_TASKLET(exemple_tasklet, fonction_tasklet, 0);
 
 
 static int __init exemple_init (void)
@@ -29,12 +31,12 @@ static int __init exemple_init (void)
 
 	if ((err = gpio_request(GPIO_IN,THIS_MODULE->name)) != 0)
 		return err;
-		
+
 	if ((err = gpio_request(GPIO_OUT,THIS_MODULE->name)) != 0) {
 		gpio_free(GPIO_IN);
 		return err;
 	}
-	
+
 	if (((err = gpio_direction_input(GPIO_IN)) != 0)
 	 || ((err = gpio_direction_output(GPIO_OUT,1)) != 0)) {
 		gpio_free(GPIO_OUT);
@@ -53,23 +55,26 @@ static int __init exemple_init (void)
 }
 
 
+
 static void __exit exemple_exit (void)
 {
 	free_irq(gpio_to_irq(GPIO_IN), THIS_MODULE->name);
-	tasklet_kill(& exemple_tasklet);
+	flush_scheduled_work();
 	gpio_free(GPIO_OUT);
 	gpio_free(GPIO_IN);
 }
 
 
+
 static irqreturn_t exemple_handler(int irq, void * ident)
 {
-	tasklet_schedule(& exemple_tasklet);
+	schedule_work(& exemple_workqueue);
 	return IRQ_HANDLED;
 }
 
 
-static void fonction_tasklet(unsigned long inutilise)
+
+static void exemple_workqueue_function(struct work_struct * inutilise)
 {
 	static int value = 1;
 
@@ -78,7 +83,6 @@ static void fonction_tasklet(unsigned long inutilise)
 }
 
 
-module_init(exemple_init);
-module_exit(exemple_exit);
-MODULE_LICENSE("GPL");
-
+	module_init(exemple_init);
+	module_exit(exemple_exit);
+	MODULE_LICENSE("GPL");
