@@ -2,7 +2,7 @@
   Chapitre "Peripheriques en mode bloc"
   exemple_04
 
-  Secteurs de taille configurable au chargement
+  Media amovible (sur noyaux recents).
 
   Exemples de la formation "Programmation Noyau sous Linux"
 
@@ -11,39 +11,32 @@
 
 \************************************************************************/
 
-#include <linux/fs.h>
-#include <linux/genhd.h>
-#include <linux/hdreg.h>
-#include <linux/blkdev.h>
-#include <linux/module.h>
-#include <linux/version.h>
-#include <linux/vmalloc.h>
-#include <linux/spinlock.h>
+	#include <linux/fs.h>
+	#include <linux/genhd.h>
+	#include <linux/hdreg.h>
+	#include <linux/blkdev.h>
+	#include <linux/module.h>
+	#include <linux/version.h>
+	#include <linux/vmalloc.h>
+	#include <linux/spinlock.h>
 
 	static int exemple_major = 0;
 	module_param_named(major, exemple_major, int, 0444);
 
-	#define NB_MINORS 16
+	/* Le numero mineur 0 correspond au disque dans son entier.
+	 * Les numeros 1, 2, etc. correspondent aux partitions creees sur le disque.
+	 * Le nombre maximal de mineurs influe sur le nombre maximal de partitions.
+	 */
+	#define EXEMPLE_MINORS 7
 
-	/* La taille des secteurs devient un parametre configurable,
-	   par puissance de deux.
-	   La valeur par defaut est 2^9 = 512 octets */
-
-	#define PUISSANCE_SECTEUR_DEFAUT 9
-	static int exemple_puissance_sect = PUISSANCE_SECTEUR_DEFAUT;
-	module_param_named(puissance_sect, exemple_puissance_sect, int, 0444);
-
-	#define LG_SECTEUR 512
-	static int exemple_nb_sect = 4096;
-	module_param_named(nb_sect, exemple_nb_sect, int, 0444);
+	#define EXEMPLE_SECTOR_SIZE 512
+	static int exemple_sectors = 4096;
+	module_param_named(sectors, exemple_sectors, int, 0444);
 
 	static char * exemple_data = NULL;
-
-	static struct request_queue * exemple_request_queue;
-	
-	static struct gendisk * exemple_gendisk;
-
-	static spinlock_t exemple_spinlock;
+	static struct request_queue  * exemple_request_queue;
+	static struct gendisk        * exemple_gendisk;
+	static spinlock_t              exemple_spinlock;
 
 	static int exemple_getgeo (struct block_device *, struct hd_geometry *);
 
@@ -53,74 +46,73 @@
 	};
 
 
+
 static void exemple_request(struct request_queue * rqueue)
 {
-	unsigned long secteur_debut;
-	unsigned long nb_secteurs;
+	unsigned long start;
+	unsigned long length;
 	struct request * rq;
-	int erreur;
+	int err;
 
+	/* Lire les requetes de la file. */
 	rq = blk_fetch_request(rqueue);
 	while (rq != NULL) {
-		erreur = 0;
+
+		err = 0;
 		if (rq->cmd_type != REQ_TYPE_FS) {
-			erreur = -EIO;
-			goto fin_requete;
+			err = -EIO;
+			goto request_end;
 		}
 
-		/*
-		 * Les numeros de secteurs pour le transfert correspondent 
-		 * a des secteurs de 512 octets... -> convertir.
-		 */
-		secteur_debut = (blk_rq_pos(rq) * 512) >> exemple_puissance_sect;
-		nb_secteurs   = (blk_rq_cur_sectors(rq) * 512) >> exemple_puissance_sect;
-
-		if (secteur_debut + nb_secteurs > exemple_nb_sect) {
-			erreur = -EIO;
-			goto fin_requete;
-		}
+		start  = blk_rq_pos(rq);
+		length = blk_rq_cur_sectors(rq);
 
 		if (rq_data_dir(rq)) { /* write */
-			memmove(& exemple_data[secteur_debut << exemple_puissance_sect],
+			memmove(& exemple_data[start * EXEMPLE_SECTOR_SIZE],
 			        bio_data(rq->bio),
-			        nb_secteurs << exemple_puissance_sect);
+			        length * EXEMPLE_SECTOR_SIZE);
 		} else /* read */ {
 			memmove(bio_data(rq->bio),
-			        & exemple_data[secteur_debut << exemple_puissance_sect],
-			        nb_secteurs << exemple_puissance_sect);
+			        & exemple_data[start * EXEMPLE_SECTOR_SIZE],
+			        length * EXEMPLE_SECTOR_SIZE);
 		}
-		
-fin_requete:
-		if (__blk_end_request_cur(rq, erreur) == 0)
+request_end:
+		if (__blk_end_request_cur(rq, err) == 0)
 			rq = blk_fetch_request(rqueue);
 	}
 }
 
 
-/*
- * Encore une conversion puisque l'on veut des secteurs de 512 octets
+
+/* Les utilitaires de partitionnement, comme fdisk, appellent
+ * getgeo() pour connaitre la geometrie du disque.
+ *
+ * On simule un disque avec 4 tetes, 8 secteurs par cylindres,
+ * et un nombre de cylindres dependant de sa capacite totale.
  */
+
 static int exemple_getgeo(struct block_device *bdev, struct hd_geometry *geo)
 {
 	geo->heads = 4;
 	geo->sectors = 8;
-	geo->cylinders = (exemple_nb_sect << exemple_puissance_sect) / 512/ geo->heads / geo->sectors;
+	geo->cylinders = exemple_sectors / geo->heads / geo->sectors;
 	geo->start = 0;
 	return 0;
 }
+
 
 
 static int __init exemple_init (void)
 {
 	int ret;
 
-	if (exemple_nb_sect <= 0)
+	if (exemple_sectors <= 0)
 		return -EINVAL;
 
-	exemple_data = vmalloc(exemple_nb_sect * LG_SECTEUR);
+	exemple_data = vmalloc(exemple_sectors * EXEMPLE_SECTOR_SIZE);
 	if (exemple_data == NULL)
 		return -ENOMEM;
-	memset(exemple_data, 0, exemple_nb_sect * LG_SECTEUR);
+	memset(exemple_data, 0, exemple_sectors * EXEMPLE_SECTOR_SIZE);
 
 	ret = register_blkdev(exemple_major, THIS_MODULE->name);
 	if (ret < 0) {
@@ -141,7 +133,7 @@ static int __init exemple_init (void)
 		return -ENOMEM;
 	}
 
-	exemple_gendisk = alloc_disk(NB_MINORS);
+	exemple_gendisk = alloc_disk(EXEMPLE_MINORS);
 	if (exemple_gendisk == NULL) {
 		blk_cleanup_queue(exemple_request_queue);
 		unregister_blkdev(exemple_major, THIS_MODULE->name);
@@ -150,32 +142,30 @@ static int __init exemple_init (void)
 	}
 	exemple_gendisk->major       = exemple_major;
 	exemple_gendisk->first_minor = 0;
-	exemple_gendisk->fops        = & exemple_devops;
+	exemple_gendisk->fops        = &exemple_devops;
 	exemple_gendisk->queue       = exemple_request_queue;
 	snprintf(exemple_gendisk->disk_name, 32, THIS_MODULE->name);
-	set_capacity(exemple_gendisk, (exemple_nb_sect << exemple_puissance_sect) / 512);
+	set_capacity(exemple_gendisk, exemple_sectors);
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,2,0)
 	exemple_gendisk->flags       = GENHD_FL_REMOVABLE;	// Automatic flush.
 #endif
-	
+
 	add_disk(exemple_gendisk);
-		
-	return 0; 
+
+	return 0;
 }
+
 
 
 static void __exit exemple_exit (void)
 {
 	del_gendisk(exemple_gendisk);
-
 	blk_cleanup_queue(exemple_request_queue);
-
 	unregister_blkdev(exemple_major, THIS_MODULE->name);
 	vfree(exemple_data);
 }
 
 
-module_init(exemple_init);
-module_exit(exemple_exit);
-MODULE_LICENSE("GPL");
-
+	module_init(exemple_init);
+	module_exit(exemple_exit);
+	MODULE_LICENSE("GPL");

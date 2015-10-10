@@ -5,18 +5,18 @@
   Appels-systeme d'acces au disque
 
   Exemples de la formation "Programmation Noyau sous Linux"
- 
+
   (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
 
-#include <linux/fs.h>
-#include <linux/genhd.h>
-#include <linux/blkdev.h>
-#include <linux/module.h>
-#include <linux/vmalloc.h>
-#include <linux/spinlock.h>
+	#include <linux/fs.h>
+	#include <linux/genhd.h>
+	#include <linux/blkdev.h>
+	#include <linux/module.h>
+	#include <linux/vmalloc.h>
+	#include <linux/spinlock.h>
 
 	static int exemple_major = 0;
 	module_param_named(major, exemple_major, int, 0444);
@@ -25,23 +25,16 @@
 	 * Les numeros 1, 2, etc. correspondent aux partitions creees sur le disque.
 	 * Le nombre maximal de mineurs influe sur le nombre maximal de partitions.
 	 */
-	#define NB_MINORS 16
+	#define EXEMPLE_MINORS 7
 
-	#define LG_SECTEUR 512
-	static int exemple_nb_sect = 4096;
-	module_param_named(nb_sect, exemple_nb_sect, int, 0444);
+	#define EXEMPLE_SECTOR_SIZE 512
+	static int exemple_sectors = 4096;
+	module_param_named(sectors, exemple_sectors, int, 0444);
 
 	static char * exemple_data = NULL;
-
-	/* La structure request_queue stocke les requetes en attente */
-	static struct request_queue * exemple_request_queue;
-	
-	/* La structure gendisk represente un disque generique.*/
-	static struct gendisk * exemple_gendisk;
-
-	/* Le spinlock est utilise en interne par le sous-systeme block
-	 * pour limiter les acces concurrents.*/	
-	static spinlock_t exemple_spinlock;
+	static struct request_queue  * exemple_request_queue;
+	static struct gendisk        * exemple_gendisk;
+	static spinlock_t              exemple_spinlock;
 
 	static int  exemple_open    (struct block_device *, fmode_t);
 	static void exemple_release (struct gendisk *, fmode_t);
@@ -53,78 +46,70 @@
 	};
 
 
+
 static int exemple_open(struct block_device * blkdev, fmode_t mode)
 {
-	/* Cette fonction est appelee a chaque ouverture du peripherique.
-	 * Elle n'a pas d'utilite ici. */
-	printk(KERN_INFO "%s: exemple_02_open()\n", THIS_MODULE->name);
+	printk(KERN_INFO "%s - %s()\n", THIS_MODULE->name, __FUNCTION__);
 	return 0;
 }
 
 
+
 static void exemple_release(struct gendisk * disk, fmode_t mode)
 {
-	printk(KERN_INFO "%s: exemple_02_release()\n", THIS_MODULE->name);
+	printk(KERN_INFO "%s - %s()\n", THIS_MODULE->name, __FUNCTION__);
 }
+
 
 
 static void exemple_request(struct request_queue * rqueue)
 {
-	unsigned long secteur_debut;
-	unsigned long nb_secteurs;
+	unsigned long start;
+	unsigned long length;
 	struct request * rq;
-	int erreur;
+	int err;
 
 	/* Lire les requetes de la file. */
 	rq = blk_fetch_request(rqueue);
 	while (rq != NULL) {
-		erreur = 0;
-		/* Ignorer les requetes autres que celles du
-		 * systeme de fichier. */
+
+		err = 0;
 		if (rq->cmd_type != REQ_TYPE_FS) {
-			erreur = -EIO;
-			goto fin_requete;
+			err = -EIO;
+			goto request_end;
 		}
 
-		/* Rechercher la position des donnees a transferer. */
-		secteur_debut = blk_rq_pos(rq);
-		nb_secteurs   = blk_rq_cur_sectors(rq);
-
-		if (secteur_debut + nb_secteurs > exemple_nb_sect) {
-			erreur = -EIO;
-			goto fin_requete;
-		}
+		start  = blk_rq_pos(rq);
+		length = blk_rq_cur_sectors(rq);
 
 		if (rq_data_dir(rq)) { /* write */
-			memmove(& exemple_data[secteur_debut*LG_SECTEUR],
+			memmove(& exemple_data[start * EXEMPLE_SECTOR_SIZE],
 			        bio_data(rq->bio),
-			        nb_secteurs*LG_SECTEUR);
+			        length * EXEMPLE_SECTOR_SIZE);
 		} else /* read */ {
 			memmove(bio_data(rq->bio),
-			        & exemple_data[secteur_debut*LG_SECTEUR],
-			        nb_secteurs*LG_SECTEUR);
+			        & exemple_data[start * EXEMPLE_SECTOR_SIZE],
+			        length * EXEMPLE_SECTOR_SIZE);
 		}
-		
-fin_requete:
-		/* Valider le traitement de la requete */
-		if (__blk_end_request_cur(rq, erreur) == 0)
-			/* Il n'y a plus de donnees dans la requete */
+request_end:
+		if (__blk_end_request_cur(rq, err) == 0)
 			rq = blk_fetch_request(rqueue);
 	}
 }
+
 
 
 static int __init exemple_init (void)
 {
 	int ret;
 
-	if (exemple_nb_sect <= 0)
+	if (exemple_sectors <= 0)
 		return -EINVAL;
 
-	exemple_data = vmalloc(exemple_nb_sect * LG_SECTEUR);
+	exemple_data = vmalloc(exemple_sectors * EXEMPLE_SECTOR_SIZE);
 	if (exemple_data == NULL)
 		return -ENOMEM;
-	memset(exemple_data, 0, exemple_nb_sect * LG_SECTEUR);
+	memset(exemple_data, 0, exemple_sectors * EXEMPLE_SECTOR_SIZE);
 
 	ret = register_blkdev(exemple_major, THIS_MODULE->name);
 	if (ret < 0) {
@@ -135,7 +120,6 @@ static int __init exemple_init (void)
 	if (exemple_major == 0)
 		exemple_major = ret;
 
-	/* Initialiser le spinlock et la file des requetes. */
 	spin_lock_init(& exemple_spinlock);
 
 	exemple_request_queue = blk_init_queue(exemple_request,
@@ -146,8 +130,7 @@ static int __init exemple_init (void)
 		return -ENOMEM;
 	}
 
-	/* Initialiser le driver gendisk */
-	exemple_gendisk = alloc_disk(NB_MINORS);
+	exemple_gendisk = alloc_disk(EXEMPLE_MINORS);
 	if (exemple_gendisk == NULL) {
 		blk_cleanup_queue(exemple_request_queue);
 		unregister_blkdev(exemple_major, THIS_MODULE->name);
@@ -156,32 +139,27 @@ static int __init exemple_init (void)
 	}
 	exemple_gendisk->major       = exemple_major;
 	exemple_gendisk->first_minor = 0;
-	exemple_gendisk->fops        = & exemple_devops;
+	exemple_gendisk->fops        = &exemple_devops;
 	exemple_gendisk->queue       = exemple_request_queue;
 	snprintf(exemple_gendisk->disk_name, 32, THIS_MODULE->name);
-	set_capacity(exemple_gendisk, exemple_nb_sect);
-	
-	/* Enregistrer le driver gendisk */
+	set_capacity(exemple_gendisk, exemple_sectors);
+
 	add_disk(exemple_gendisk);
-		
-	return 0; 
+
+	return 0;
 }
+
 
 
 static void __exit exemple_exit (void)
 {
-	/* Supprimer le driver gendisk. */
 	del_gendisk(exemple_gendisk);
-
-	/* Vider la file des requetes.*/
 	blk_cleanup_queue(exemple_request_queue);
-
 	unregister_blkdev(exemple_major, THIS_MODULE->name);
 	vfree(exemple_data);
 }
 
 
-module_init(exemple_init);
-module_exit(exemple_exit);
-MODULE_LICENSE("GPL");
-
+	module_init(exemple_init);
+	module_exit(exemple_exit);
+	MODULE_LICENSE("GPL");
