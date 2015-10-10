@@ -5,15 +5,17 @@
 
   Exemples de la formation "Programmation Noyau sous Linux"
 
-  (c) 2005-2014 Christophe Blaess
+  (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
 
-#include <linux/jiffies.h>
-#include <linux/module.h>
+	#include <linux/jiffies.h>
+	#include <linux/module.h>
 
-static int __init exemple_07_init (void)
+
+
+static int __init exemple_init (void)
 {
 	struct timeval  tv_jif, tv_tod;
 	struct timespec ts_ckt, ts_tod;
@@ -22,7 +24,8 @@ static int __init exemple_07_init (void)
 	do_gettimeofday(& tv_tod);
 	ts_ckt = current_kernel_time();
 	getnstimeofday(& ts_tod);
-	printk(KERN_INFO  "%s - Chargement :\n", THIS_MODULE->name);
+
+	printk(KERN_INFO  "%s - %s():\n", THIS_MODULE->name, __FUNCTION__);
 	printk(KERN_INFO "tv_jif.tv_sec = %ld, tv_jif.tv_usec = %ld\n",
 	                  tv_jif.tv_sec, tv_jif.tv_usec);
 	printk(KERN_INFO "tv_tod.tv_sec = %ld, tv_tod.tv_usec = %ld\n",
@@ -33,8 +36,10 @@ static int __init exemple_07_init (void)
 	                  ts_tod.tv_sec, ts_tod.tv_nsec);
 	return 0;
 }
- 
-static void __exit exemple_07_exit (void)
+
+
+
+static void __exit exemple_exit (void)
 {
 	struct timeval tv_jif, tv_tod;
 	struct timespec ts_ckt, ts_tod;
@@ -44,7 +49,7 @@ static void __exit exemple_07_exit (void)
 	ts_ckt = current_kernel_time();
 	getnstimeofday(& ts_tod);
 
-	printk(KERN_INFO  "%s - Dechargement :\n", THIS_MODULE->name);
+	printk(KERN_INFO  "%s - %s():\n", THIS_MODULE->name, __FUNCTION__);
 	printk(KERN_INFO "tv_jif.tv_sec = %ld, tv_jif.tv_usec = %ld\n",
 	                  tv_jif.tv_sec, tv_jif.tv_usec);
 	printk(KERN_INFO "tv_tod.tv_sec = %ld, tv_tod.tv_usec = %ld\n",
@@ -55,8 +60,8 @@ static void __exit exemple_07_exit (void)
 	                  ts_tod.tv_sec, ts_tod.tv_nsec);
 }
 
-module_init(exemple_07_init);
-module_exit(exemple_07_exit);
 
-MODULE_LICENSE("GPL");
+	module_init(exemple_init);
+	module_exit(exemple_exit);
 
+	MODULE_LICENSE("GPL");

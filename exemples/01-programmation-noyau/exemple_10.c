@@ -5,39 +5,43 @@
 
   Exemples de la formation "Programmation Noyau sous Linux"
 
-  (c) 2005-2014 Christophe Blaess
+  (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
 
-#include <linux/module.h>
-#include <linux/proc_fs.h>
-#include <linux/version.h>
+	#include <linux/module.h>
+	#include <linux/proc_fs.h>
+	#include <linux/version.h>
 
-static char * nom_entree = "exemple_11";
 
-	static const struct file_operations exemple_11_proc_fops = {
+
+	static const struct file_operations exemple_fops = {
 		.owner	= THIS_MODULE,
 	};
 
-static int __init exemple_11_init (void)
-{
-	struct proc_dir_entry * entree;
-	
-	entree = proc_create(nom_entree, S_IFREG | 0644, NULL, & exemple_11_proc_fops);
 
-	if (entree == NULL)
+
+static int __init exemple_init (void)
+{
+	struct proc_dir_entry * entry;
+
+	entry = proc_create(THIS_MODULE->name, S_IFREG | 0644, NULL, & exemple_fops);
+	if (entry == NULL)
 		return -EBUSY;
-	return 0; 
+
+	return 0;
 }
 
-static void __exit exemple_11_exit (void)
+
+
+static void __exit exemple_exit (void)
 {
-	remove_proc_entry(nom_entree, NULL);
+	remove_proc_entry(THIS_MODULE->name, NULL);
 }
 
-module_init(exemple_11_init);
-module_exit(exemple_11_exit);
 
-MODULE_LICENSE("GPL");
+	module_init(exemple_init);
+	module_exit(exemple_exit);
 
+	MODULE_LICENSE("GPL");

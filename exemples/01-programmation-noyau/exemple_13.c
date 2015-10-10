@@ -5,58 +5,58 @@
 
   Exemples de la formation "Programmation Noyau sous Linux"
 
-  (c) 2005-2014 Christophe Blaess
+  (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
 
-#include <linux/module.h>
-#include <linux/proc_fs.h>
-#include <linux/sched.h>
-#include <linux/version.h>
+	#include <linux/module.h>
+	#include <linux/proc_fs.h>
+	#include <linux/sched.h>
+	#include <linux/version.h>
 
-#include <asm/uaccess.h>
-
-static char * nom_entree = "exemple_14";
-
-static int valeur_exemple = 0;
-
-static ssize_t lecture  (struct file *, char __user *, size_t, loff_t *);
-static ssize_t ecriture (struct file *, const char __user *, size_t, loff_t *);
-
-static const struct file_operations exemple_14_proc_fops = {
-	.owner	= THIS_MODULE,
-	.read   = lecture,
-	.write  = ecriture,
-};
+	#include <asm/uaccess.h>
 
 
-static int __init exemple_14_init (void)
+	static ssize_t exemple_read  (struct file *, char __user *, size_t, loff_t *);
+	static ssize_t exemple_write (struct file *, const char __user *, size_t, loff_t *);
+
+	static int exemple_value = 0;
+
+	static const struct file_operations exemple_proc_fops = {
+		.owner	= THIS_MODULE,
+		.read   = exemple_read,
+		.write  = exemple_write,
+	};
+
+
+static int __init exemple_init (void)
 {
-	struct proc_dir_entry * entree;
-	entree = proc_create(nom_entree, S_IFREG | 0644, NULL, & exemple_14_proc_fops);
-	if (entree == NULL)
+	if (proc_create(THIS_MODULE->name, S_IFREG | 0644, NULL, & exemple_proc_fops) == NULL)
 		return -EBUSY;
-	return 0; 
+
+	return 0;
 }
 
 
-static void __exit exemple_14_exit (void)
+
+static void __exit exemple_exit (void)
 {
-	remove_proc_entry(nom_entree, NULL);
+	remove_proc_entry(THIS_MODULE->name, NULL);
 }
 
 
-static ssize_t lecture (struct file * filp, char __user * u_buffer, size_t max, loff_t * offset)
+
+static ssize_t exemple_read(struct file * filp, char __user * u_buffer, size_t max, loff_t * offset)
 {
 	char buffer[128];
 	int  nb;
 
-	snprintf(buffer, 128, "PID=%u, PPID=%u, Nom=%s, valeur=%d\n",
+	snprintf(buffer, 128, "PID=%u, PPID=%u, Name=%s, Value=%d\n",
 	         current->pid, 
 	         current->real_parent->pid,
 	         current->comm,
-	         valeur_exemple);
+	         exemple_value);
 
 	nb = strlen(buffer) - (*offset);
 	if (nb <= 0)
@@ -66,24 +66,28 @@ static ssize_t lecture (struct file * filp, char __user * u_buffer, size_t max, 
 	if (copy_to_user(u_buffer, & (buffer[*offset]), nb) != 0)
 		return -EFAULT;
 	(*offset) += nb;
+
 	return nb;
 }
 
 
-static ssize_t ecriture (struct file * filp, const char __user * u_buffer, size_t nb, loff_t * unused)
+
+static ssize_t exemple_write(struct file * filp, const char __user * u_buffer, size_t nb, loff_t * unused)
 {
 	char buffer[128];
+
 	if (nb >= 128)
 		return -ENOMEM;
 	if (copy_from_user(buffer, u_buffer, nb) != 0)
 		return -EFAULT;
-	if (sscanf(buffer, "%d", & valeur_exemple) != 1)
+	if (sscanf(buffer, "%d", &exemple_value) != 1)
 		return -EINVAL;
+
 	return nb;
 }
 
-module_init(exemple_14_init);
-module_exit(exemple_14_exit);
+
+
+module_init(exemple_init);
+module_exit(exemple_exit);
 MODULE_LICENSE("GPL");
-
-

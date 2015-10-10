@@ -2,35 +2,36 @@
 
   Squelette minimal de module du noyau
 
-  (c) 2005-2014 Christophe Blaess
+  (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
 
-#include <linux/init.h>
-#include <linux/module.h>
-#include <linux/kernel.h>
-#include <linux/version.h>
+	#include <linux/init.h>
+	#include <linux/module.h>
+	#include <linux/kernel.h>
+	#include <linux/version.h>
 
-MODULE_AUTHOR("Christophe Blaess");
-MODULE_DESCRIPTION("Ceci est un squelette de module");
-MODULE_LICENSE("GPL");
 
-int __init initialisation_module(void)
+
+int __init exemple_init(void)
 {
-	/* initialisation */
+	/* Module initialization. */
 
 	return 0;
 }
 
 
-void __exit suppression_module(void)
+
+void __exit exemple_exit(void)
 {
-	/* liberation */
+	/* Module cleanup. */
 
 }
 
+	module_init(exemple_init);
+	module_exit(exemple_exit);
 
-module_init(initialisation_module);
-module_exit(suppression_module);
-
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
+	MODULE_DESCRIPTION("This is an empty module skeleton");
+	MODULE_LICENSE("GPL");
