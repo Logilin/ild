@@ -47,24 +47,24 @@ static int __init exemple_init (void)
 {
 	int err;
 
-	if ((err = gpio_request(GPIO_IN,THIS_MODULE->name)) != 0)
+	if ((err = gpio_request(EXEMPLE_GPIO_IN,THIS_MODULE->name)) != 0)
 		return err;
 
-	if ((err = gpio_request(GPIO_OUT,THIS_MODULE->name)) != 0) {
-		gpio_free(GPIO_IN);
+	if ((err = gpio_request(EXEMPLE_GPIO_OUT,THIS_MODULE->name)) != 0) {
+		gpio_free(EXEMPLE_GPIO_IN);
 		return err;
 	}
 
-	if (((err = gpio_direction_input(GPIO_IN)) != 0)
-	 || ((err = gpio_direction_output(GPIO_OUT,1)) != 0)) {
-		gpio_free(GPIO_OUT);
-		gpio_free(GPIO_IN);
+	if (((err = gpio_direction_input(EXEMPLE_GPIO_IN)) != 0)
+	 || ((err = gpio_direction_output(EXEMPLE_GPIO_OUT,1)) != 0)) {
+		gpio_free(EXEMPLE_GPIO_OUT);
+		gpio_free(EXEMPLE_GPIO_IN);
 		return err;
 	}
 
 	if ((err = misc_register(& exemple_misc_driver)) != 0) {
-		gpio_free(GPIO_OUT);
-		gpio_free(GPIO_IN);
+		gpio_free(EXEMPLE_GPIO_OUT);
+		gpio_free(EXEMPLE_GPIO_IN);
 		return err;
 	}
 
@@ -76,8 +76,8 @@ static int __init exemple_init (void)
 static void __exit exemple_exit (void)
 {
 	misc_deregister(& exemple_misc_driver);
-	gpio_free(GPIO_OUT);
-	gpio_free(GPIO_IN);
+	gpio_free(EXEMPLE_GPIO_OUT);
+	gpio_free(EXEMPLE_GPIO_IN);
 }
 
 
@@ -89,7 +89,7 @@ static ssize_t exemple_read(struct file * filp, char * buffer,
 
 	if (length < 2)
 		return 0;
-	sprintf(k_buffer, "%d\n", gpio_get_value(GPIO_IN));
+	sprintf(k_buffer, "%d\n", gpio_get_value(EXEMPLE_GPIO_IN));
 	if (copy_to_user(buffer, k_buffer, 2) != 0)
 		return -EFAULT;
 
@@ -111,7 +111,7 @@ static ssize_t exemple_write(struct file * filp, const char * buffer,
 	if (sscanf(k_buffer, "%d", & val) != 1)
 		return -EINVAL;
 
-	gpio_set_value(GPIO_OUT, val & 0x01);
+	gpio_set_value(EXEMPLE_GPIO_OUT, val & 0x01);
 
 	return length;
 }

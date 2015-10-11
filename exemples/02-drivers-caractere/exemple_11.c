@@ -24,26 +24,26 @@ static int __init exemple_init (void)
 {
 	int err;
 
-	if ((err = gpio_request(GPIO_IN,THIS_MODULE->name)) != 0)
+	if ((err = gpio_request(EXEMPLE_GPIO_IN,THIS_MODULE->name)) != 0)
 		return err;
 
-	if ((err = gpio_request(GPIO_OUT,THIS_MODULE->name)) != 0) {
-		gpio_free(GPIO_IN);
-		return err;
-	}
-
-	if (((err = gpio_direction_input(GPIO_IN)) != 0)
-	 || ((err = gpio_direction_output(GPIO_OUT,1)) != 0)) {
-		gpio_free(GPIO_OUT);
-		gpio_free(GPIO_IN);
+	if ((err = gpio_request(EXEMPLE_GPIO_OUT,THIS_MODULE->name)) != 0) {
+		gpio_free(EXEMPLE_GPIO_IN);
 		return err;
 	}
 
-	if ((err = request_irq(gpio_to_irq(GPIO_IN), exemple_handler,
+	if (((err = gpio_direction_input(EXEMPLE_GPIO_IN)) != 0)
+	 || ((err = gpio_direction_output(EXEMPLE_GPIO_OUT,1)) != 0)) {
+		gpio_free(EXEMPLE_GPIO_OUT);
+		gpio_free(EXEMPLE_GPIO_IN);
+		return err;
+	}
+
+	if ((err = request_irq(gpio_to_irq(EXEMPLE_GPIO_IN), exemple_handler,
 	                       IRQF_SHARED | IRQF_TRIGGER_RISING,
 	                       THIS_MODULE->name, THIS_MODULE->name)) != 0) {
-		gpio_free(GPIO_OUT);
-		gpio_free(GPIO_IN);
+		gpio_free(EXEMPLE_GPIO_OUT);
+		gpio_free(EXEMPLE_GPIO_IN);
 		return err;
 	}
 	return 0; 
@@ -53,16 +53,16 @@ static int __init exemple_init (void)
 
 static void __exit exemple_exit (void)
 {
-	free_irq(gpio_to_irq(GPIO_IN), THIS_MODULE->name);
-	gpio_free(GPIO_OUT);
-	gpio_free(GPIO_IN);
+	free_irq(gpio_to_irq(EXEMPLE_GPIO_IN), THIS_MODULE->name);
+	gpio_free(EXEMPLE_GPIO_OUT);
+	gpio_free(EXEMPLE_GPIO_IN);
 }
 
 
 static irqreturn_t exemple_handler(int irq, void * ident)
 {
 	static int value = 1;
-	gpio_set_value(GPIO_OUT, value);
+	gpio_set_value(EXEMPLE_GPIO_OUT, value);
 
 	value = 1 - value;
 	return IRQ_HANDLED;
