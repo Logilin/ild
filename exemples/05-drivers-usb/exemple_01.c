@@ -13,14 +13,14 @@
 
 \************************************************************************/
 
-#include <linux/version.h>
-#include <linux/module.h>
-#include <linux/usb.h>
+	#include <linux/version.h>
+	#include <linux/module.h>
+	#include <linux/usb.h>
 
 
-/* Identification du peripherique gere par notre driver */
-#define ID_VENDEUR_EXEMPLE   0x0000  /* Velleman  */
-#define ID_PRODUIT_EXEMPLE   0x0000  /* Kit K8055 */
+	/* Identification du peripherique gere par notre driver */
+	#define ID_VENDEUR_EXEMPLE   0x0000  /* Velleman  */
+	#define ID_PRODUIT_EXEMPLE   0x0000  /* Kit K8055 */
 
 
 	static struct usb_device_id   id_table_exemple [] = {
@@ -43,6 +43,7 @@
 	};
 
 
+
 static int probe_exemple(struct usb_interface * intf,
                   const struct usb_device_id  * dev_id)
 {
@@ -58,15 +59,17 @@ static int probe_exemple(struct usb_interface * intf,
 }
 
 
+
 static void disconnect_exemple(struct usb_interface * intf)
 {
-	/* 
+	/*
 	 * Cette fonction est invoquee par le sous-systeme usb-core
 	 * lorsque le peripherique est debranche.
 	 */
 	printk(KERN_INFO "%s: disconnect_exemple()\n",
 	       THIS_MODULE->name);
 }
+
 
 
 static int __init exemple_init(void)
@@ -93,6 +96,7 @@ static int __init exemple_init(void)
 }
 
 
+
 static void __exit exemple_exit(void)
 {
 	/*
@@ -102,7 +106,6 @@ static void __exit exemple_exit(void)
 }
 
 
-module_init (exemple_init);
-module_exit (exemple_exit);
-MODULE_LICENSE("GPL");
-
+	module_init (exemple_init);
+	module_exit (exemple_exit);
+	MODULE_LICENSE("GPL");
