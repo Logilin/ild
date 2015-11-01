@@ -275,8 +275,11 @@ static int __init exemple_init(void)
 
 	printk(KERN_INFO "%s - %s()\n", THIS_MODULE->name, __FUNCTION__);
 
-	net_dev_ex_0 = alloc_netdev(sizeof(struct exemple_net_dev_priv),
-	                           "ex%d", exemple_setup);
+	#if LINUX_VERSION_CODE < KERNEL_VERSION(3,17,0)
+	net_dev_ex_0 = alloc_netdev(sizeof(struct exemple_net_dev_priv), "ex%d", exemple_setup);
+	#else
+	net_dev_ex_0 = alloc_netdev(sizeof(struct exemple_net_dev_priv), "ex%d", NET_NAME_UNKNOWN, exemple_setup);
+	#endif
 	if (net_dev_ex_0 == NULL)
 		return -ENOMEM;
 
@@ -285,8 +288,11 @@ static int __init exemple_init(void)
 		return -ENODEV;
 	}
 
-	net_dev_ex_1 = alloc_netdev(sizeof(struct exemple_net_dev_priv),
-	              "ex%d", exemple_setup);
+	#if LINUX_VERSION_CODE < KERNEL_VERSION(3,17,0)
+	net_dev_ex_1 = alloc_netdev(sizeof(struct exemple_net_dev_priv), "ex%d", exemple_setup);
+	#else
+	net_dev_ex_1 = alloc_netdev(sizeof(struct exemple_net_dev_priv), "ex%d", NET_NAME_UNKNOWN, exemple_setup);
+	#endif
 	if (net_dev_ex_1 == NULL) {
 		exemple_exit();
 		return -ENOMEM;
