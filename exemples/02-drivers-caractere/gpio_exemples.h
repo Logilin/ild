@@ -7,9 +7,9 @@
 
 
 // Uncomment one of the next lines depending on you plateform.
-#define EXEMPLE_GPIO_MODE  EXEMPLE_RASPBERRY_PI
-//#define GPIO_MODE        EXEMPLE_BEAGLEBONE_BLACK
-//#define GPIO_MODE        EXEMPLE_TERASIC_DE1_SOC
+//#define EXEMPLE_GPIO_MODE  EXEMPLE_RASPBERRY_PI
+  #define EXEMPLE_GPIO_MODE        EXEMPLE_BEAGLEBONE_BLACK
+//#define EXEMPLE_GPIO_MODE        EXEMPLE_TERASIC_DE1_SOC
 
 
 #ifndef EXEMPLE_GPIO_MODE

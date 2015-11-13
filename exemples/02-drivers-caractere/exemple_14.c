@@ -34,7 +34,7 @@ static int __init exemple_init (void)
 	}
 
 	if (((err = gpio_direction_input(EXEMPLE_GPIO_IN)) != 0)
-	 || ((err = gpio_direction_output(EXEMPLE_GPIO_OUT,1)) != 0)) {
+	 || ((err = gpio_direction_output(EXEMPLE_GPIO_OUT, 0)) != 0)) {
 		gpio_free(EXEMPLE_GPIO_OUT);
 		gpio_free(EXEMPLE_GPIO_IN);
 		return err;
