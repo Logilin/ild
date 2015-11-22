@@ -20,7 +20,6 @@ ifneq (${KERNELRELEASE},)
 	obj-m += exemple_18.o
 	obj-m += exemple_19.o
 	obj-m += exemple_20.o
-	obj-m += exemple_21.o
 
 
 else
