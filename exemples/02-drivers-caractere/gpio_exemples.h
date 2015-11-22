@@ -22,8 +22,8 @@
 		// Output on pin 18 (GPIO 24)
 		#define EXEMPLE_GPIO_OUT 24
 	#elif EXEMPLE_GPIO_MODE == EXEMPLE_BEAGLEBONE_BLACK
-		// Input on pin P8-08 (GPIO 67)
-		#define EXEMPLE_GPIO_IN  67
+		// Input on pin P8-07 (GPIO 66)
+		#define EXEMPLE_GPIO_IN  66
 		// Output on LED 4 (GPIO 56)
 		#define EXEMPLE_GPIO_OUT 56
 	#elif EXEMPLE_GPIO_MODE == EXEMPLE_TERASIC_DE1_SOC
