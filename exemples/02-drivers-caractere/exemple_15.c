@@ -1,9 +1,7 @@
 /************************************************************************\
-  exemple_15 - Chapitre "Ecriture de driver - peripherique caractere"
-
-  Synchronisation par spinlock entre appel-systeme et interruption GPIO
-
-  Exemples de la formation "Programmation Noyau sous Linux"
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Ecriture de driver en mode caractere"
 
   (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
@@ -23,7 +21,6 @@
 	#include "gpio_exemples.h"
 
 
-
 	static irqreturn_t exemple_handler(int irq, void * ident);
 
 	static ssize_t exemple_read  (struct file * filp, char * buffer,
@@ -35,7 +32,6 @@
 		.read    =  exemple_read,
 	};
 
-
 	static struct miscdevice exemple_misc_driver = {
 		    .minor          = MISC_DYNAMIC_MINOR,
 		    .name           = THIS_MODULE->name,
@@ -43,12 +39,10 @@
 	};
 
 
-
 	#define EXEMPLE_BUFFER_SIZE 1024
 	static unsigned long exemple_buffer[EXEMPLE_BUFFER_SIZE];
 	static int           exemple_buffer_end = 0;
 	static spinlock_t    exemple_buffer_spl;
-
 
 
 static int __init exemple_init (void)
@@ -82,14 +76,12 @@ static int __init exemple_init (void)
 }
 
 
-
 static void __exit exemple_exit (void)
 {
 	misc_deregister(& exemple_misc_driver);
 	free_irq(gpio_to_irq(EXEMPLE_GPIO_IN), THIS_MODULE->name);
 	gpio_free(EXEMPLE_GPIO_IN);
 }
-
 
 
 static ssize_t exemple_read(struct file * filp, char * buffer,
@@ -123,7 +115,6 @@ static ssize_t exemple_read(struct file * filp, char * buffer,
 }
 
 
-
 static irqreturn_t exemple_handler(int irq, void * ident)
 {
 	spin_lock(& exemple_buffer_spl);
@@ -141,4 +132,8 @@ static irqreturn_t exemple_handler(int irq, void * ident)
 
 	module_init(exemple_init);
 	module_exit(exemple_exit);
+
+	MODULE_DESCRIPTION("Spinlock protection of a shared variable");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
+

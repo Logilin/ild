@@ -1,16 +1,10 @@
 /************************************************************************\
-  Chapitre "Peripheriques et protocoles reseau"
-  exemple_03
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Ecriture de driver reseau"
 
-  Collecte des statistiques reseau
-
-  Exemples de la formation "Programmation Noyau sous Linux"
-
-  (c) 2005-2014 Christophe Blaess
+  (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
-
-  Librement inspire d'un exemple du livre "Linux Device Driver"
-  d'Alessandro Rubini et Jonathan Corbet.
 
 \************************************************************************/
 
@@ -62,7 +56,6 @@ static int exemple_open (struct net_device * net_dev)
 }
 
 
-
 static int exemple_stop (struct net_device * net_dev)
 {
 	printk(KERN_INFO "%s - %s(%p):\n",
@@ -72,7 +65,6 @@ static int exemple_stop (struct net_device * net_dev)
 
 	return 0;
 }
-
 
 
 static int exemple_start_xmit(struct sk_buff * sk_b, struct net_device * src)
@@ -144,7 +136,6 @@ static int exemple_start_xmit(struct sk_buff * sk_b, struct net_device * src)
 }
 
 
-
 static irqreturn_t exemple_irq_rx_handler(int irq, void * irq_id, struct pt_regs * regs)
 {
 	unsigned char * data;
@@ -176,7 +167,6 @@ static irqreturn_t exemple_irq_rx_handler(int irq, void * irq_id, struct pt_regs
 }
 
 
-
 static irqreturn_t exemple_irq_tx_handler(int irq, void * irq_id, struct pt_regs * regs)
 {
 	struct net_device * net_dev;
@@ -193,7 +183,6 @@ static irqreturn_t exemple_irq_tx_handler(int irq, void * irq_id, struct pt_regs
 	dev_kfree_skb(priv->sk_b);
 	return IRQ_HANDLED;
 }
-
 
 
 static int exemple_hard_header(struct sk_buff * sk_b, struct net_device * net_dev,
@@ -220,7 +209,6 @@ static int exemple_hard_header(struct sk_buff * sk_b, struct net_device * net_de
 
 	return net_dev->hard_header_len;
 }
-
 
 
 static struct net_device_stats * exemple_get_stats(struct net_device * net_dev)
@@ -266,7 +254,6 @@ static void exemple_setup (struct net_device * net_dev)
 }
 
 
-
 static void exemple_exit(void);
 
 
@@ -307,7 +294,6 @@ static int __init exemple_init(void)
 }
 
 
-
 static void exemple_exit(void)
 {
 	printk(KERN_INFO "%s - %s()\n", THIS_MODULE->name, __FUNCTION__);
@@ -327,4 +313,8 @@ static void exemple_exit(void)
 
 	module_init(exemple_init)
 	module_exit(exemple_exit)
+
+	MODULE_DESCRIPTION("Netdevice statistic collections.");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
+

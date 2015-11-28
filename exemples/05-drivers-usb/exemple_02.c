@@ -1,14 +1,9 @@
 /************************************************************************\
-  Chapitre "Peripheriques USB"
-  exemple_02
-  
-  Driver pour carte d'entrees-sorties Velleman K8055
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Ecriture de driver USB"
 
-  Enumeration des endpoints proposes par le peripherique.
-
-  Exemples de la formation "Programmation Noyau sous Linux"
-
-  (c) 2005-2014 Christophe Blaess
+  (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -16,7 +11,6 @@
 #include <linux/version.h>
 #include <linux/module.h>
 #include <linux/usb.h>
-
 
 
 #define ID_VENDEUR_EXEMPLE   0x10CF  /* Velleman  */
@@ -28,7 +22,6 @@
 		{ }
 	};
 	MODULE_DEVICE_TABLE(usb, id_table_exemple);
-
 
 	static int  probe_exemple      (struct usb_interface * intf,
 	                                const struct usb_device_id * dev_id);
@@ -46,9 +39,6 @@
 static int probe_exemple(struct usb_interface * intf,
                   const struct usb_device_id  * dev_id)
 {
-	// Cette routine affiche les "endpoints" permettant
-	// de communiquer avec le peripherique.
-
 	int i;
 	struct usb_host_interface * host_intf;
 	struct usb_endpoint_descriptor * endpoint_desc;
@@ -129,7 +119,10 @@ static void __exit exemple_exit(void)
 }
 
 
-module_init (exemple_init);
-module_exit (exemple_exit);
-MODULE_LICENSE("GPL");
+	module_init (exemple_init);
+	module_exit (exemple_exit);
+
+	MODULE_DESCRIPTION("Endpoint analysis.");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
+	MODULE_LICENSE("GPL");
 

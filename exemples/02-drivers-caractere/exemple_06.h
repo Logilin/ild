@@ -1,11 +1,9 @@
 /************************************************************************\
-  exemple_06 - Chapitre "Ecriture de driver - peripherique caractere"
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Ecriture de driver en mode caractere"
 
-  Fonction d'ioctl permettant d'afficher ou non le PPID
-
-  Exemples de la formation "Programmation Noyau sous Linux"
-
-  (c) 2005-2014 Christophe Blaess
+  (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -24,3 +22,4 @@
 	#define EXIOCSPPIDF _IOW(EXEMPLE_IOCTL_MAGIC, EXEMPLE_SET_PPID_FLAG, int)
 
 #endif
+

@@ -1,9 +1,7 @@
 /************************************************************************\
-  exemple_05 - Chapitre "Ecriture de driver - peripherique caractere"
-
-  Fonction de lecture.
-
-  Exemples de la formation "Programmation Noyau sous Linux"
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Ecriture de driver en mode caractere"
 
   (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
@@ -37,19 +35,16 @@
 	};
 
 
-
 static int __init exemple_init (void)
 {
 	return misc_register(& exemple_misc_driver);
 }
 
 
-
 static void __exit exemple_exit (void)
 {
 	misc_deregister(& exemple_misc_driver);
 }
-
 
 
 static ssize_t exemple_read(struct file * filp, char * buffer,
@@ -78,6 +73,11 @@ static ssize_t exemple_read(struct file * filp, char * buffer,
 	return lg;
 }
 
+
 	module_init(exemple_init);
 	module_exit(exemple_exit);
+
+	MODULE_DESCRIPTION("read() system call implementation.");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
+

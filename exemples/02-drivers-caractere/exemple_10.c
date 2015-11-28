@@ -1,9 +1,7 @@
 /************************************************************************\
-  exemple_10 - Chapitre "Ecriture de driver - peripherique caractere"
-
-  Execution d'un thread noyau
-
-  Exemples de la formation "Programmation Noyau sous Linux"
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Ecriture de driver en mode caractere"
 
   (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
@@ -16,11 +14,11 @@
 	#include <linux/kthread.h>
 	#include <linux/module.h>
 
-
 	static DECLARE_COMPLETION(exemple_started);
 	static DECLARE_COMPLETION(exemple_stopped);
 
 	static int exemple_stop = 0;
+
 
 int exemple_thread(void * arg)
 {
@@ -33,7 +31,6 @@ int exemple_thread(void * arg)
 	}
 	complete_and_exit(& exemple_stopped, 0);
 }
-
 
 
 static int __init exemple_init (void)
@@ -50,7 +47,6 @@ static int __init exemple_init (void)
 }
 
 
-
 static void __exit exemple_exit (void)
 {
 	exemple_stop = 1;
@@ -62,4 +58,8 @@ static void __exit exemple_exit (void)
 
 	module_init(exemple_init);
 	module_exit(exemple_exit);
+
+	MODULE_DESCRIPTION("Kernel thread implementation.");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
+

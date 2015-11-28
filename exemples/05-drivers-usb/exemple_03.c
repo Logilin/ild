@@ -1,14 +1,9 @@
 /************************************************************************\
-  Chapitre "Peripheriques USB"
-  exemple_03
-  
-  Driver pour carte d'entrees-sorties Velleman K8055
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Ecriture de driver USB"
 
-  Acces en ecriture depuis l'espace utilisateur.
-
-  Exemples de la formation "Programmation Noyau sous Linux"
-
-  (c) 2005-2014 Christophe Blaess
+  (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -19,8 +14,9 @@
 #include <linux/usb.h>
 #include <asm/uaccess.h>
 
-#define EXEMPLE_ID_VENDEUR   0x10CF  /* Velleman  */
-#define EXEMPLE_ID_PRODUIT   0x5500  /* Kit K8055 */
+
+	#define EXEMPLE_ID_VENDEUR   0x10CF  /* Velleman  */
+	#define EXEMPLE_ID_PRODUIT   0x5500  /* Kit K8055 */
 
 
 	static struct usb_device_id   exemple_id_table [] = {
@@ -42,7 +38,6 @@
 		.disconnect = exemple_disconnect,
 	};
 
-
 	static int     exemple_open    (struct inode *, struct file *);
 	static int     exemple_release (struct inode *, struct file *);
 	static ssize_t exemple_write   (struct file *, const char __user *,
@@ -63,7 +58,6 @@
 	};
 
 
-	/* Donnees utilisees par le driver */	
 	static struct usb_device              * exemple_usb_device   = NULL;
 	static struct usb_endpoint_descriptor * exemple_out_endpoint = NULL;
 	static struct urb                     * exemple_out_urb      = NULL;
@@ -121,11 +115,6 @@ static int exemple_probe(struct usb_interface * intf,
 		return -ENOMEM;
 	}
 
-	/*
-	 * Allouer un buffer pour le transfert des donnees en sortie.
-	 * Attention ce buffer doit etre alloue avec kmalloc() ou la
-	 * fonction usb_buffer_alloc() mais pas en variable statique.
-	 */
 	exemple_out_buffer = kmalloc(EXEMPLE_OUT_BUFFER_SIZE, GFP_KERNEL);
 	if (exemple_out_buffer == NULL) {
 		usb_free_urb(exemple_out_urb);
@@ -135,12 +124,6 @@ static int exemple_probe(struct usb_interface * intf,
 		return -ENOMEM;
 	}
 	
-	/*
-	 * L'enregistrement du peripherique permet d'y acceder par un
-	 * fichier special caractere de numero majeur USB (generalement 180)
-	 * et de numero mineur alloue par le noyau a partir de celui indique
-	 * dans la structure class_driver.
-	 */
 	err = usb_register_dev(intf, & exemple_usb_class_driver);
 	if (err != 0) {
 		kfree(exemple_out_buffer);
@@ -151,17 +134,12 @@ static int exemple_probe(struct usb_interface * intf,
 		exemple_usb_device   = NULL;
 		return err;
 	}
-
-	/* A present nous connaissons le numero mineur attribue, on l'affiche. */
-	printk(KERN_INFO "%s: Numero mineur : %d\n",
-	       THIS_MODULE->name, intf->minor);
 	return 0;
 }
 
 
 static void exemple_disconnect(struct usb_interface * intf)
 {
-	/* Realiser les operations inverses de probe(). */
 	usb_deregister_dev(intf, & exemple_usb_class_driver);
 	kfree(exemple_out_buffer);
 	usb_free_urb(exemple_out_urb);
@@ -192,8 +170,6 @@ static ssize_t exemple_write (struct file * file,
 	char * buffer;
 	int err;
 	
-	/* Allouer un buffer de travail contenant une copie des donnees
-	 * envoyees par l'utilisateur. */
 	buffer = kmalloc(length, GFP_KERNEL);
 	if (buffer == NULL)
 		return -ENOMEM;
@@ -209,8 +185,6 @@ static ssize_t exemple_write (struct file * file,
 	if (err)
 		return -EINVAL;
 	
-	/* On ecrit les donnees a envoyer dans le buffer alloue
-	   pour la sortie INTERRUPT OUT. */
 	exemple_out_buffer[0] = o0 & 0xFF; 
 	exemple_out_buffer[1] = o1 & 0xFF;
 	exemple_out_buffer[2] = o2 & 0xFF;
@@ -220,7 +194,6 @@ static ssize_t exemple_write (struct file * file,
 	exemple_out_buffer[6] = o6 & 0xFF;
 	exemple_out_buffer[7] = o7 & 0xFF;
 
-	/* Remplir l'URB de INTERRUPT OUT pour une ecriture. */
 	usb_fill_int_urb(exemple_out_urb,
 	                 exemple_usb_device,
 	                 usb_sndintpipe(exemple_usb_device,
@@ -231,7 +204,6 @@ static ssize_t exemple_write (struct file * file,
 					 NULL, /* donnees privees non utilisees */
 					 exemple_out_endpoint->bInterval);
 
-	/* Soumettre la requete URB au sous-systeme usb-core. */
 	err = usb_submit_urb(exemple_out_urb, GFP_KERNEL);
 	if (err == 0)
 		return length;
@@ -241,11 +213,6 @@ static ssize_t exemple_write (struct file * file,
 
 static void exemple_write_callback(struct urb * urb)
 {
-	/*
-	 * Cette routine est appelee une fois que la requete
-	 * associee a l'URB est terminee. Dans cette premiere
-	 * version on ne fait rien.
-	 */
 }
 
 
@@ -269,7 +236,10 @@ static void __exit exemple_exit(void)
 }
 
 
-module_init (exemple_init);
-module_exit (exemple_exit);
-MODULE_LICENSE("GPL");
+	module_init (exemple_init);
+	module_exit (exemple_exit);
+
+	MODULE_DESCRIPTION("write() system call implementation.");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
+	MODULE_LICENSE("GPL");
 

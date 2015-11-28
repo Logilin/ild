@@ -19,7 +19,6 @@ ifneq (${KERNELRELEASE},)
 	obj-m += exemple_17.o
 	obj-m += exemple_18.o
 	obj-m += exemple_19.o
-	obj-m += exemple_20.o
 
 
 else
@@ -30,7 +29,6 @@ else
 	# export CROSS_COMPILE := arm-linux-
 	# export KERNEL_DIR    := ~/cross/kernel/linux-rpi-3.6.11
 
-
 	KERNEL_DIR ?= /lib/modules/$(shell uname -r)/build
 	MODULE_DIR := $(shell pwd)
 
@@ -38,7 +36,6 @@ else
 	          exemple_ioctl      \
 	          ioctl_exemple_06   \
 	          cat_nonblock       \
-	          test_select        \
 	          test_mmap          \
 
 .PHONY: all

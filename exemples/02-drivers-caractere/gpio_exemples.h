@@ -1,3 +1,13 @@
+/************************************************************************\
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Ecriture de driver en mode caractere"
+
+  (c) 2005-2015 Christophe Blaess
+  http://www.blaess.fr/christophe/
+
+\************************************************************************/
+
 #ifndef _GPIO_EXEMPLES_H_
 #define _GPIO_EXEMPLES_H_
 
@@ -6,10 +16,10 @@
 #define EXEMPLE_TERASIC_DE1_SOC    3
 
 
-// Uncomment one of the next lines depending on you plateform.
-//#define EXEMPLE_GPIO_MODE  EXEMPLE_RASPBERRY_PI
-  #define EXEMPLE_GPIO_MODE        EXEMPLE_BEAGLEBONE_BLACK
-//#define EXEMPLE_GPIO_MODE        EXEMPLE_TERASIC_DE1_SOC
+// Uncomment one of the following lines depending on you plateform:
+  // #define EXEMPLE_GPIO_MODE  EXEMPLE_RASPBERRY_PI
+     #define EXEMPLE_GPIO_MODE        EXEMPLE_BEAGLEBONE_BLACK
+  // #define EXEMPLE_GPIO_MODE        EXEMPLE_TERASIC_DE1_SOC
 
 
 #ifndef EXEMPLE_GPIO_MODE
@@ -37,3 +47,4 @@
 #endif
 
 #endif
+

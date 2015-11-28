@@ -1,9 +1,7 @@
 /************************************************************************\
-  exemple_06 - Chapitre "Programmer pour le noyau Linux"
-
-  Ecriture au chargement et dechargement des heures precises.
-
-  Exemples de la formation "Programmation Noyau sous Linux"
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Programmer pour le noyau Linux"
 
   (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
@@ -12,7 +10,6 @@
 
 	#include <linux/jiffies.h>
 	#include <linux/module.h>
-
 
 
 static int __init exemple_init (void)
@@ -36,7 +33,6 @@ static int __init exemple_init (void)
 	                  ts_tod.tv_sec, ts_tod.tv_nsec);
 	return 0;
 }
-
 
 
 static void __exit exemple_exit (void)
@@ -64,4 +60,7 @@ static void __exit exemple_exit (void)
 	module_init(exemple_init);
 	module_exit(exemple_exit);
 
+	MODULE_DESCRIPTION("Different representations of current time.");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
+

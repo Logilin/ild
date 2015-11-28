@@ -1,9 +1,7 @@
 /************************************************************************\
-  exemple_08 - Chapitre "Programmer pour le noyau Linux"
-
-  Utilisation des timers de precision.
-
-  Exemples de la formation "Programmation Noyau sous Linux"
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Programmer pour le noyau Linux"
 
   (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
@@ -24,7 +22,6 @@
 	static ktime_t exemple_period_kt;
 
 
-
 static int __init exemple_init (void)
 {
 	exemple_period_kt = ktime_set(0, 1000 * period_us);
@@ -38,12 +35,10 @@ static int __init exemple_init (void)
 }
 
 
-
 static void __exit exemple_exit (void)
 {
 	hrtimer_cancel(& exemple_htimer);
 }
-
 
 
 static enum hrtimer_restart exemple_htimer_function(struct hrtimer * unused)
@@ -82,4 +77,8 @@ static enum hrtimer_restart exemple_htimer_function(struct hrtimer * unused)
 
 	module_init(exemple_init);
 	module_exit(exemple_exit);
+
+	MODULE_DESCRIPTION("Jitter of a precise timer.");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
+

@@ -1,9 +1,7 @@
 /************************************************************************\
-  exemple_04 - Chapitre "Ecriture de driver - peripherique caractere"
-
-  Inscription dans une classe de périphériques existante.
-
-  Exemples de la formation "Programmation Noyau sous Linux"
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Ecriture de driver en mode caractere"
 
   (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
@@ -27,13 +25,11 @@
 		.release =  exemple_release,
 	};
 
-
 	static struct miscdevice exemple_misc_driver = {
 		    .minor          = MISC_DYNAMIC_MINOR,
 		    .name           = THIS_MODULE->name,
 		    .fops           = & fops_exemple,
 	};
-
 
 
 static int __init exemple_init (void)
@@ -42,12 +38,10 @@ static int __init exemple_init (void)
 }
 
 
-
 static void __exit exemple_exit (void)
 {
 	misc_deregister(& exemple_misc_driver);
 }
-
 
 
 static int exemple_open(struct inode * ind, struct file * filp)
@@ -55,7 +49,6 @@ static int exemple_open(struct inode * ind, struct file * filp)
 	printk(KERN_INFO "%s - %s()\n", THIS_MODULE->name, __FUNCTION__);
 	return 0;
 }
-
 
 
 static int exemple_release(struct inode * ind, struct file * filp)
@@ -67,4 +60,8 @@ static int exemple_release(struct inode * ind, struct file * filp)
 
 	module_init(exemple_init);
 	module_exit(exemple_exit);
+
+	MODULE_DESCRIPTION("Registration into an existing class.");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
+

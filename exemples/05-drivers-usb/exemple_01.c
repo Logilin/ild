@@ -1,17 +1,13 @@
 /************************************************************************\
-  Chapitre "Peripheriques USB"
-  exemple_01
-  
-  Driver pour carte d'entrees-sorties Velleman K8055
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Ecriture de driver USB"
 
-  Enregistrement des fonctions de detection et extraction du peripherique
-
-  Exemples de la formation "Programmation Noyau sous Linux"
-
-  (c) 2005-2014 Christophe Blaess
+  (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
+
 
 	#include <linux/version.h>
 	#include <linux/module.h>
@@ -21,7 +17,6 @@
 	/* Identification du peripherique gere par notre driver */
 	#define ID_VENDEUR_EXEMPLE   0x0000  /* Velleman  */
 	#define ID_PRODUIT_EXEMPLE   0x0000  /* Kit K8055 */
-
 
 	static struct usb_device_id   id_table_exemple [] = {
 		{ USB_DEVICE(ID_VENDEUR_EXEMPLE, ID_PRODUIT_EXEMPLE) },
@@ -43,43 +38,25 @@
 	};
 
 
-
 static int probe_exemple(struct usb_interface * intf,
                   const struct usb_device_id  * dev_id)
 {
-	/*
-	 * Cette routine est appelee automatiquement par le sous-systeme
-	 * usb-core du noyau lorsque le peripherique est branche.
-	 * Elle doit renvoyer zero si elle est capable de piloter ce
-	 * peripherique.
-	 */
 	printk(KERN_INFO "%s: probe_exemple()\n",
 	       THIS_MODULE->name);
 	return 0;
 }
 
 
-
 static void disconnect_exemple(struct usb_interface * intf)
 {
-	/*
-	 * Cette fonction est invoquee par le sous-systeme usb-core
-	 * lorsque le peripherique est debranche.
-	 */
 	printk(KERN_INFO "%s: disconnect_exemple()\n",
 	       THIS_MODULE->name);
 }
 
 
-
 static int __init exemple_init(void)
 
 {
-	/*
-	 * A l'initialisation du module, on enregistre le driver usb.
-	 * Attention, les fonctions probe() et disconnect() peuvent
-	 * etre invoquee avant meme que usb_register() se termine.
-	 */
 	int err;
 
 	err = usb_register(& usb_driver_exemple);
@@ -96,16 +73,16 @@ static int __init exemple_init(void)
 }
 
 
-
 static void __exit exemple_exit(void)
 {
-	/*
-	 * Retrait du driver, et invocation de la routine disconnect().
-	 */
 	usb_deregister(& usb_driver_exemple);
 }
 
 
 	module_init (exemple_init);
 	module_exit (exemple_exit);
+
+	MODULE_DESCRIPTION("probe() and disconnect() callbacks invocation.");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
+

@@ -1,9 +1,7 @@
 /************************************************************************\
-  exemple_04 - Chapitre "Programmer pour le noyau Linux"
-
-  Utilisation d'un symbole exporté par un autre module.
-
-  Exemples de la formation "Programmation Noyau sous Linux"
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Programmer pour le noyau Linux"
 
   (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
@@ -14,13 +12,11 @@
 	#include "exemple_03.h"
 
 
-
 static int __init exemple_init (void)
 {
 	exemple_03_hello(10);
 	return 0;
 }
-
 
 
 static void __exit exemple_exit (void)
@@ -32,4 +28,7 @@ static void __exit exemple_exit (void)
 	module_init(exemple_init);
 	module_exit(exemple_exit);
 
+	MODULE_DESCRIPTION("External symbol importation.");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
+

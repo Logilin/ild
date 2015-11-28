@@ -1,9 +1,7 @@
 /************************************************************************\
-  exemple_12 - Chapitre "Ecriture de driver - peripherique caractere"
-
-  Utilisation d'une tasklet sur une interruption GPIO
-
-  Exemples de la formation "Programmation Noyau sous Linux"
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Ecriture de driver en mode caractere"
 
   (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
@@ -54,7 +52,6 @@ static int __init exemple_init (void)
 }
 
 
-
 static void __exit exemple_exit (void)
 {
 	free_irq(gpio_to_irq(EXEMPLE_GPIO_IN), THIS_MODULE->name);
@@ -64,13 +61,11 @@ static void __exit exemple_exit (void)
 }
 
 
-
 static irqreturn_t exemple_handler(int irq, void * ident)
 {
 	tasklet_schedule(& exemple_tasklet);
 	return IRQ_HANDLED;
 }
-
 
 
 static void exemple_tasklet_function(unsigned long inutilise)
@@ -84,4 +79,8 @@ static void exemple_tasklet_function(unsigned long inutilise)
 
 	module_init(exemple_init);
 	module_exit(exemple_exit);
+
+	MODULE_DESCRIPTION("Tasklet bottom half implementation");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
+

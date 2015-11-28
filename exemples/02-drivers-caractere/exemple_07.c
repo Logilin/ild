@@ -1,9 +1,7 @@
 /************************************************************************\
-  exemple_07 - Chapitre "Ecriture de driver - peripherique caractere"
-
-  Acces incontrole a une variable globale depuis un appel-systeme.
-
-  Exemples de la formation "Programmation Noyau sous Linux"
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Ecriture de driver en mode caractere"
 
   (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
@@ -21,16 +19,13 @@
 	#include <asm/uaccess.h>
 
 
-
 	static ssize_t exemple_read  (struct file * filp, char * buffer,
 	                              size_t length, loff_t * offset);
-
 
 	static struct file_operations fops_exemple = {
 		.owner   =  THIS_MODULE,
 		.read    =  exemple_read,
 	};
-
 
 	static struct miscdevice exemple_misc_driver = {
 		    .minor          = MISC_DYNAMIC_MINOR,
@@ -38,9 +33,7 @@
 		    .fops           = & fops_exemple,
 	};
 
-
 	static volatile int current_pid;
-
 
 
 static int __init exemple_init (void)
@@ -49,12 +42,10 @@ static int __init exemple_init (void)
 }
 
 
-
 static void __exit exemple_exit (void)
 {
 	misc_deregister(& exemple_misc_driver);
 }
-
 
 
 static ssize_t exemple_read(struct file * filp, char * buffer,
@@ -65,13 +56,10 @@ static ssize_t exemple_read(struct file * filp, char * buffer,
 
 	current_pid = current->pid;
 
-	/* Boucle de 10 ticks pour provoquer artificiellement
-	  la collision entre des appels-systeme simultanes.*/
+	// 10 ticks loop to force collision between simultaneous system calls.
 	delay = jiffies + 10;
 	while (time_before(jiffies, delay))
-		schedule();
-	/* on peut remplacer schedule() par cpu_relax() sur
-	   un systeme preemptible */
+		schedule(); // On a preemptible system, cpu_relax() works as well.
 
 	if (current_pid == current->pid)
 		strcpy(k_buffer, ".");
@@ -85,6 +73,11 @@ static ssize_t exemple_read(struct file * filp, char * buffer,
 	return 1;
 }
 
+
 	module_init(exemple_init);
 	module_exit(exemple_exit);
+
+	MODULE_DESCRIPTION("Unprotected access on a shared variable.");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
+

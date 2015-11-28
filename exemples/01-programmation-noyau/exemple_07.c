@@ -1,9 +1,7 @@
 /************************************************************************\
-  exemple_07 - Chapitre "Programmer pour le noyau Linux"
-
-  Ecriture de l'heure precise toutes les secondes.
-
-  Exemples de la formation "Programmation Noyau sous Linux"
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Programmer pour le noyau Linux"
 
   (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
@@ -15,9 +13,7 @@
 
 
 	static void exemple_timer_function(unsigned long);
-
 	static struct timer_list exemple_timer;
-
 
 
 static int __init exemple_init (void)
@@ -32,12 +28,10 @@ static int __init exemple_init (void)
 }
 
 
-
 static void __exit exemple_exit (void)
 {
 	del_timer(& exemple_timer);
 }
-
 
 
 static void exemple_timer_function(unsigned long arg)
@@ -56,4 +50,8 @@ static void exemple_timer_function(unsigned long arg)
 
 	module_init(exemple_init);
 	module_exit(exemple_exit);
+
+	MODULE_DESCRIPTION("Periodic message (current time).");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
+

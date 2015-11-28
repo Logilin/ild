@@ -1,9 +1,7 @@
 /************************************************************************\
-  exemple_06 - Chapitre "Ecriture de driver - peripherique caractere"
-
-  Fonction d'ioctl
-
-  Exemples de la formation "Programmation Noyau sous Linux"
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Ecriture de driver en mode caractere"
 
   (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
@@ -28,20 +26,17 @@
 	static long    exemple_ioctl (struct file * filp,
 	                              unsigned int cmd, unsigned long arg);
 
-
 	static struct file_operations fops_exemple = {
 		.owner   =  THIS_MODULE,
 		.read    =  exemple_read,
 		.unlocked_ioctl   =  exemple_ioctl,
 	};
 
-
 	static struct miscdevice exemple_misc_driver = {
 		    .minor          = MISC_DYNAMIC_MINOR,
 		    .name           = THIS_MODULE->name,
 		    .fops           = & fops_exemple,
 	};
-
 
 	static int exemple_ppid_flag = 1;
 
@@ -52,12 +47,10 @@ static int __init exemple_init (void)
 }
 
 
-
 static void __exit exemple_exit (void)
 {
 	misc_deregister(& exemple_misc_driver);
 }
-
 
 
 static ssize_t exemple_read(struct file * filp, char * buffer,
@@ -89,7 +82,6 @@ static ssize_t exemple_read(struct file * filp, char * buffer,
 }
 
 
-
 static long exemple_ioctl (struct file * filp,
                            unsigned int cmd,
                            unsigned long arg)
@@ -115,5 +107,8 @@ static long exemple_ioctl (struct file * filp,
 
 	module_init(exemple_init);
 	module_exit(exemple_exit);
+
+	MODULE_DESCRIPTION("ioctl() system call implementation.");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
 

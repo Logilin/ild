@@ -1,24 +1,19 @@
 /************************************************************************\
-  Chapitre "Peripheriques USB"
-  exemple_05
-  
-  Driver pour carte d'entrees-sorties Velleman K8055
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Ecriture de driver USB"
 
-  Fonctions de lecture des donnees
-
-  Exemples de la formation "Programmation Noyau sous Linux"
-
-  (c) 2005-2014 Christophe Blaess
+  (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
-
 
 #include <linux/version.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/usb.h>
 #include <asm/uaccess.h>
+
 
 #define EXEMPLE_ID_VENDEUR   0x10CF  /* Velleman  */
 #define EXEMPLE_ID_PRODUIT   0x5500  /* Kit K8055 */
@@ -42,7 +37,6 @@
 		.probe      = exemple_probe,
 		.disconnect = exemple_disconnect,
 	};
-
 
 	static int     exemple_open    (struct inode *, struct file *);
 	static int     exemple_release (struct inode *, struct file *);
@@ -83,13 +77,6 @@
 	static DEFINE_MUTEX(exemple_out_mtx);
 	static DECLARE_WAIT_QUEUE_HEAD(exemple_out_wq);
 	#define EXEMPLE_OUT_BUFFER_SIZE  8
-
-	/*
-	 * Le buffer intr_in_buffer sera rempli automatiquement par le
-	 * sous-systeme usb-core puis la routine read_callback() sera invoquee.
-	 * Elle recopiera le contenu du buffer dans in_data_read[] qui sera
-	 * consulte lors des appels-systeme read().
-	 */
 
 	static struct usb_endpoint_descriptor * exemple_in_endpoint  = NULL;
 	static struct urb                     * exemple_in_urb       = NULL;
@@ -355,7 +342,7 @@ static ssize_t exemple_read(struct file * file, char __user * data,
 	size_t lg;
 	static char k_buffer[64];
 
-	// Ne fair eune nouvelle requete que si (*offset) est a zero.
+	// Ne faire une nouvelle requete que si (*offset) est a zero.
 	if ((*offset) == 0) {
 
 		if (mutex_lock_interruptible(& exemple_in_mtx) != 0)
@@ -468,7 +455,10 @@ static void __exit exemple_exit(void)
 }
 
 
-module_init (exemple_init);
-module_exit (exemple_exit);
-MODULE_LICENSE("GPL");
+	module_init (exemple_init);
+	module_exit (exemple_exit);
+
+	MODULE_DESCRIPTION("read() system call implementation.");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
+	MODULE_LICENSE("GPL");
 

@@ -1,12 +1,14 @@
 /************************************************************************\
-  cat_nonblock - Chapitre "Ecriture de driver - peripherique caractere"
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Ecriture de driver en mode caractere"
 
-  Equivalent d'un "cat" non-bloquant pour tester l'exemple 16
-
-  Exemples de la formation "Programmation Noyau sous Linux"
-  (c) 2005-2015 Christophe Blaess - http://www.blaess.fr/christophe/
+  (c) 2005-2015 Christophe Blaess
+  http://www.blaess.fr/christophe/
 
 \************************************************************************/
+
+// A small non-blocking cat implementation 
 
 	#include <stdio.h>
 	#include <stdlib.h>
@@ -18,7 +20,6 @@ void nonblocking_cat(int fd)
 {
 	char buffer[4096];
 	int n;
-
 	char * prompt = "|/-\\";
 	int i = 0;
 
@@ -57,3 +58,4 @@ int main(int argc, char * argv[])
 
 	return 0;
 }
+

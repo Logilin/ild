@@ -1,4 +1,13 @@
 /************************************************************************\
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Ecriture de driver en mode block"
+
+  (c) 2005-2015 Christophe Blaess
+  http://www.blaess.fr/christophe/
+
+\************************************************************************/
+/************************************************************************\
   Chapitre "Peripheriques en mode bloc"
   exemple_02
 
@@ -18,13 +27,10 @@
 	#include <linux/vmalloc.h>
 	#include <linux/spinlock.h>
 
+
 	static int exemple_major = 0;
 	module_param_named(major, exemple_major, int, 0444);
 
-	/* Le numero mineur 0 correspond au disque dans son entier.
-	 * Les numeros 1, 2, etc. correspondent aux partitions creees sur le disque.
-	 * Le nombre maximal de mineurs influe sur le nombre maximal de partitions.
-	 */
 	#define EXEMPLE_MINORS 7
 
 	#define EXEMPLE_SECTOR_SIZE 512
@@ -46,7 +52,6 @@
 	};
 
 
-
 static int exemple_open(struct block_device * blkdev, fmode_t mode)
 {
 	printk(KERN_INFO "%s - %s()\n", THIS_MODULE->name, __FUNCTION__);
@@ -54,12 +59,10 @@ static int exemple_open(struct block_device * blkdev, fmode_t mode)
 }
 
 
-
 static void exemple_release(struct gendisk * disk, fmode_t mode)
 {
 	printk(KERN_INFO "%s - %s()\n", THIS_MODULE->name, __FUNCTION__);
 }
-
 
 
 static void exemple_request(struct request_queue * rqueue)
@@ -69,7 +72,6 @@ static void exemple_request(struct request_queue * rqueue)
 	struct request * rq;
 	int err;
 
-	/* Lire les requetes de la file. */
 	rq = blk_fetch_request(rqueue);
 	while (rq != NULL) {
 
@@ -96,7 +98,6 @@ request_end:
 			rq = blk_fetch_request(rqueue);
 	}
 }
-
 
 
 static int __init exemple_init (void)
@@ -150,7 +151,6 @@ static int __init exemple_init (void)
 }
 
 
-
 static void __exit exemple_exit (void)
 {
 	del_gendisk(exemple_gendisk);
@@ -162,4 +162,8 @@ static void __exit exemple_exit (void)
 
 	module_init(exemple_init);
 	module_exit(exemple_exit);
+
+	MODULE_DESCRIPTION("Virtual block device implementation.");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
+

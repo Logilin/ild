@@ -1,9 +1,7 @@
 /************************************************************************\
-  exemple_02 - Chapitre "Ecriture de driver - peripherique caractere"
-
-  Fonctions d'ouverture et fermeture du fichier
-
-  Exemples de la formation "Programmation Noyau sous Linux"
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Ecriture de driver en mode caractere"
 
   (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
@@ -32,7 +30,6 @@
 	};
 
 
-
 static int __init exemple_init (void)
 {
 	int err;
@@ -59,7 +56,6 @@ static int __init exemple_init (void)
 }
 
 
-
 static void __exit exemple_exit (void)
 {
 	cdev_del(& exemple_cdev);
@@ -67,13 +63,11 @@ static void __exit exemple_exit (void)
 }
 
 
-
 static int exemple_open(struct inode * ind, struct file * filp)
 {
 	printk(KERN_INFO "%s - %s()\n", THIS_MODULE->name, __FUNCTION__);
 	return 0;
 }
-
 
 
 static int exemple_release(struct inode * ind, struct file * filp)
@@ -85,5 +79,8 @@ static int exemple_release(struct inode * ind, struct file * filp)
 
 	module_init(exemple_init);
 	module_exit(exemple_exit);
+
+	MODULE_DESCRIPTION("open() and release() system calls implementations");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
 

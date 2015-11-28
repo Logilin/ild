@@ -1,9 +1,7 @@
 /************************************************************************\
-  Chapitre "Ecriture de driver - peripherique caractere"
-
-  test_mmap
-
-  Exemples de la formation "Programmation Noyau sous Linux"
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Ecriture de driver en mode caractere"
 
   (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
@@ -44,3 +42,4 @@ int main(int argc, char * argv[])
 
 	return 0;
 }
+

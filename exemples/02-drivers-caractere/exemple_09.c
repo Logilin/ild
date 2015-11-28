@@ -1,9 +1,7 @@
 /************************************************************************\
-  exemple_09 - Chapitre "Ecriture de driver - peripherique caractere"
-
-  Driver permettant les entrees-sorties sur broches GPIO
-
-  Exemples de la formation "Programmation Noyau sous Linux"
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Ecriture de driver en mode caractere"
 
   (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
@@ -27,20 +25,17 @@
 	static ssize_t exemple_write (struct file * filp, const char * buffer,
 	                              size_t length, loff_t * offset);
 
-
 	static struct file_operations fops_exemple = {
 		.owner   =  THIS_MODULE,
 		.read    =  exemple_read,
 		.write   =  exemple_write,
 	};
 
-
 	static struct miscdevice exemple_misc_driver = {
 		    .minor          = MISC_DYNAMIC_MINOR,
 		    .name           = THIS_MODULE->name,
 		    .fops           = & fops_exemple,
 	};
-
 
 
 static int __init exemple_init (void)
@@ -72,14 +67,12 @@ static int __init exemple_init (void)
 }
 
 
-
 static void __exit exemple_exit (void)
 {
 	misc_deregister(& exemple_misc_driver);
 	gpio_free(EXEMPLE_GPIO_OUT);
 	gpio_free(EXEMPLE_GPIO_IN);
 }
-
 
 
 static ssize_t exemple_read(struct file * filp, char * buffer,
@@ -95,7 +88,6 @@ static ssize_t exemple_read(struct file * filp, char * buffer,
 
 	return 2;
 }
-
 
 
 static ssize_t exemple_write(struct file * filp, const char * buffer,
@@ -119,4 +111,8 @@ static ssize_t exemple_write(struct file * filp, const char * buffer,
 
 	module_init(exemple_init);
 	module_exit(exemple_exit);
+
+	MODULE_DESCRIPTION("Read and write system call on GPIO pins.");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
+

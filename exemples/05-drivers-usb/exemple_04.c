@@ -1,15 +1,9 @@
 /************************************************************************\
-  Chapitre "Peripheriques USB"
-  exemple_04
-  
-  Driver pour carte d'entrees-sorties Velleman K8055
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Ecriture de driver USB"
 
-  Traitement des ecritures successives rapides, deconnexions intempestives
-  et acces concurrents
-
-  Exemples de la formation "Programmation Noyau sous Linux"
-
-  (c) 2005-2014 Christophe Blaess
+  (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -20,16 +14,15 @@
 #include <linux/usb.h>
 #include <asm/uaccess.h>
 
-#define EXEMPLE_ID_VENDEUR   0x10CF  /* Velleman  */
-#define EXEMPLE_ID_PRODUIT   0x5500  /* Kit K8055 */
 
+	#define EXEMPLE_ID_VENDEUR   0x10CF  /* Velleman  */
+	#define EXEMPLE_ID_PRODUIT   0x5500  /* Kit K8055 */
 
 	static struct usb_device_id   exemple_id_table [] = {
 		{ USB_DEVICE(EXEMPLE_ID_VENDEUR, EXEMPLE_ID_PRODUIT) },
 		{ }
 	};
 	MODULE_DEVICE_TABLE(usb, exemple_id_table);
-
 
 	static int  exemple_probe      (struct usb_interface * intf,
 	                                const struct usb_device_id * dev_id);
@@ -288,7 +281,10 @@ static void __exit exemple_exit(void)
 }
 
 
-module_init (exemple_init);
-module_exit (exemple_exit);
-MODULE_LICENSE("GPL");
+	module_init (exemple_init);
+	module_exit (exemple_exit);
+
+	MODULE_DESCRIPTION("write() system call improvement.");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
+	MODULE_LICENSE("GPL");
 

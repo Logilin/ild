@@ -1,9 +1,7 @@
 /************************************************************************\
-  exemple_13 - Chapitre "Programmer pour le noyau Linux"
-
-  Callback d'ecriture dans /proc
-
-  Exemples de la formation "Programmation Noyau sous Linux"
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Programmer pour le noyau Linux"
 
   (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
@@ -39,12 +37,10 @@ static int __init exemple_init (void)
 }
 
 
-
 static void __exit exemple_exit (void)
 {
 	remove_proc_entry(THIS_MODULE->name, NULL);
 }
-
 
 
 static ssize_t exemple_read(struct file * filp, char __user * u_buffer, size_t max, loff_t * offset)
@@ -71,7 +67,6 @@ static ssize_t exemple_read(struct file * filp, char __user * u_buffer, size_t m
 }
 
 
-
 static ssize_t exemple_write(struct file * filp, const char __user * u_buffer, size_t nb, loff_t * unused)
 {
 	char buffer[128];
@@ -87,7 +82,10 @@ static ssize_t exemple_write(struct file * filp, const char __user * u_buffer, s
 }
 
 
+	module_init(exemple_init);
+	module_exit(exemple_exit);
 
-module_init(exemple_init);
-module_exit(exemple_exit);
-MODULE_LICENSE("GPL");
+	MODULE_DESCRIPTION("/proc write callback.");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
+	MODULE_LICENSE("GPL");
+

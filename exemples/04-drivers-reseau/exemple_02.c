@@ -1,18 +1,17 @@
 /************************************************************************\
-  Chapitre "Peripheriques et protocoles reseau"
-  exemple_02
-
-  Peripheriques virtuels lies
-
-  Exemples de la formation "Programmation Noyau sous Linux"
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Ecriture de driver reseau"
 
   (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
->
-  Librement inspire d'un exemple du livre "Linux Device Driver"
-  d'Alessandro Rubini et Jonathan Corbet.
 
 \************************************************************************/
+
+/*
+  Librement inspire d'un exemple du livre "Linux Device Driver"
+  d'Alessandro Rubini et Jonathan Corbet.
+*/
 
 	#include <linux/module.h>
 	#include <linux/interrupt.h>
@@ -33,7 +32,6 @@
 		unsigned char data[ETH_DATA_LEN]; // Data to send
 		int data_len;
 	};
-
 
 
 	static irqreturn_t exemple_irq_tx_handler(int irq, void * irq_id, struct pt_regs * regs);
@@ -62,7 +60,6 @@ static int exemple_open (struct net_device * net_dev)
 }
 
 
-
 static int exemple_stop (struct net_device * net_dev)
 {
 	printk(KERN_INFO "%s - %s(%p):\n",
@@ -72,7 +69,6 @@ static int exemple_stop (struct net_device * net_dev)
 
 	return 0;
 }
-
 
 
 static int exemple_start_xmit(struct sk_buff * sk_b, struct net_device * src)
@@ -144,7 +140,6 @@ static int exemple_start_xmit(struct sk_buff * sk_b, struct net_device * src)
 }
 
 
-
 static irqreturn_t exemple_irq_rx_handler(int irq, void * irq_id, struct pt_regs * regs)
 {
 	unsigned char * data;
@@ -176,7 +171,6 @@ static irqreturn_t exemple_irq_rx_handler(int irq, void * irq_id, struct pt_regs
 }
 
 
-
 static irqreturn_t exemple_irq_tx_handler(int irq, void * irq_id, struct pt_regs * regs)
 {
 	struct net_device * net_dev;
@@ -193,7 +187,6 @@ static irqreturn_t exemple_irq_tx_handler(int irq, void * irq_id, struct pt_regs
 	dev_kfree_skb(priv->sk_b);
 	return IRQ_HANDLED;
 }
-
 
 
 static int exemple_hard_header(struct sk_buff * sk_b, struct net_device * net_dev,
@@ -222,8 +215,6 @@ static int exemple_hard_header(struct sk_buff * sk_b, struct net_device * net_de
 }
 
 
-
-
 static const struct header_ops exemple_header_ops = {
         .create = exemple_hard_header,
 };
@@ -234,7 +225,6 @@ struct net_device_ops exemple_netdev_ops = {
 	.ndo_stop       = exemple_stop,
 	.ndo_start_xmit = exemple_start_xmit,
 };
-
 
 
 static void exemple_setup (struct net_device * net_dev)
@@ -254,7 +244,6 @@ static void exemple_setup (struct net_device * net_dev)
 	private = netdev_priv(net_dev);
 	memset(private, 0, sizeof(struct exemple_net_dev_priv));
 }
-
 
 
 static void exemple_exit(void);
@@ -297,7 +286,6 @@ static int __init exemple_init(void)
 }
 
 
-
 static void exemple_exit(void)
 {
 	printk(KERN_INFO "%s - %s()\n", THIS_MODULE->name, __FUNCTION__);
@@ -315,7 +303,10 @@ static void exemple_exit(void)
 	}
 }
 
-
 	module_init(exemple_init)
 	module_exit(exemple_exit)
+
+	MODULE_DESCRIPTION("Two virtual linked netdevices.");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
+

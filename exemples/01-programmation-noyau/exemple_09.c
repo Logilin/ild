@@ -1,9 +1,7 @@
 /************************************************************************\
-  exemple_09 - Chapitre "Programmer pour le noyau Linux"
-
-  Affichage au chargement et dechargement des PID et PPID de l'appelant
-
-  Exemples de la formation "Programmation Noyau sous Linux"
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Programmer pour le noyau Linux"
 
   (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
@@ -15,7 +13,6 @@
 	#include <linux/version.h>
 
 
-
 static int __init exemple_init (void)
 {
 	printk(KERN_INFO "%s - %s(): PID = %u  PPID = %u\n",
@@ -24,7 +21,6 @@ static int __init exemple_init (void)
 	          current->real_parent->pid);
 	return 0;
 }
-
 
 
 static void __exit exemple_exit (void)
@@ -39,4 +35,7 @@ static void __exit exemple_exit (void)
 	module_init(exemple_init);
 	module_exit(exemple_exit);
 
+	MODULE_DESCRIPTION("Informations about current process.");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
+

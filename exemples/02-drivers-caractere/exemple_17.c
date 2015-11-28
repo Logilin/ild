@@ -1,15 +1,12 @@
 /************************************************************************\
-  exemple_17 - Chapitre "Ecriture de driver - peripherique caractere"
-
-  Appel-systeme read() bloquant en attente d'interruption GPIO
-
-  Exemples de la formation "Programmation Noyau sous Linux"
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Ecriture de driver en mode caractere"
 
   (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
-
 
 	#include <linux/device.h>
 	#include <linux/fs.h>
@@ -24,7 +21,6 @@
 	#include "gpio_exemples.h"
 
 
-
 	#define EXEMPLE_BUFFER_SIZE 1024
 	static unsigned long exemple_buffer[EXEMPLE_BUFFER_SIZE];
 	static int           exemple_buffer_end = 0;
@@ -34,23 +30,19 @@
 
 	static irqreturn_t exemple_handler(int irq, void * ident);
 
-
 	static ssize_t exemple_read  (struct file * filp, char * buffer,
 	                              size_t length, loff_t * offset);
-
 
 	static struct file_operations exemple_fops = {
 		.owner   =  THIS_MODULE,
 		.read    =  exemple_read,
 	};
 
-
 	static struct miscdevice exemple_misc_driver = {
 		    .minor          = MISC_DYNAMIC_MINOR,
 		    .name           = THIS_MODULE->name,
 		    .fops           = & exemple_fops,
 	};
-
 
 
 static int __init exemple_init (void)
@@ -84,14 +76,12 @@ static int __init exemple_init (void)
 }
 
 
-
 static void __exit exemple_exit (void)
 {
 	misc_deregister(& exemple_misc_driver);
 	free_irq(gpio_to_irq(EXEMPLE_GPIO_IN), THIS_MODULE->name);
 	gpio_free(EXEMPLE_GPIO_IN);
 }
-
 
 
 static ssize_t exemple_read(struct file * filp, char * buffer,
@@ -104,6 +94,8 @@ static ssize_t exemple_read(struct file * filp, char * buffer,
 
 	while (exemple_buffer_end == 0) {
 		spin_unlock_irqrestore(& exemple_buffer_spl, irqs);
+		if (filp->f_flags & O_NONBLOCK)
+			return -EAGAIN;
 		if (wait_event_interruptible(exemple_buffer_wq,
 		                    (exemple_buffer_end != 0)) != 0)
 			return -ERESTARTSYS;
@@ -129,7 +121,6 @@ static ssize_t exemple_read(struct file * filp, char * buffer,
 }
 
 
-
 static irqreturn_t exemple_handler(int irq, void * ident)
 {
 	spin_lock(& exemple_buffer_spl);
@@ -145,7 +136,10 @@ static irqreturn_t exemple_handler(int irq, void * ident)
 }
 
 
-
 	module_init(exemple_init);
 	module_exit(exemple_exit);
+
+	MODULE_DESCRIPTION("Blocking and non-blocking read() system call.");
+	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
+

@@ -1,11 +1,10 @@
 /************************************************************************\
-  Chapitre "Ecriture de driver - peripherique caractere"
-  test_exemple_06
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Ecriture de driver en mode caractere"
 
-  Fonction d'ioctl
-
-  Exemples de la formation "Programmation Noyau sous Linux"
-  (c) 2005-2015 Christophe Blaess - http://www.blaess.fr/christophe/
+  (c) 2005-2015 Christophe Blaess
+  http://www.blaess.fr/christophe/
 
 \************************************************************************/
 
@@ -16,6 +15,7 @@
 	#include <sys/ioctl.h>
 
 	#include "exemple_06.h"
+
 
 int main(int argc, char * argv[])
 {

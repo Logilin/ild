@@ -1,9 +1,7 @@
 /************************************************************************\
-  exemple_03 - Chapitre "Programmer pour le noyau Linux"
-
-  Exportation d'un symbole a destination des autres modules.
-
-  Exemples de la formation "Programmation Noyau sous Linux"
+  Exemples de la formation
+    "Ecriture de drivers et programmation noyau Linux"
+  Chapitre "Programmer pour le noyau Linux"
 
   (c) 2005-2015 Christophe Blaess
   http://www.blaess.fr/christophe/
