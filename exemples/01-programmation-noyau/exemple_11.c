@@ -7,17 +7,6 @@
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
-/************************************************************************\
-  exemple_11 - Chapitre "Programmer pour le noyau Linux"
-
-  Callback de lecture depuis /proc
-
-  Exemples de la formation "Programmation Noyau sous Linux"
-
-  (c) 2005-2015 Christophe Blaess
-  http://www.blaess.fr/christophe/
-
-\************************************************************************/
 
 	#include <linux/module.h>
 	#include <linux/proc_fs.h>
@@ -76,4 +65,3 @@ static ssize_t exemple_read(struct file * filp, char __user * u_buffer, size_t m
 	MODULE_DESCRIPTION("/proc read callback function.");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
-
