@@ -7,18 +7,6 @@
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
-/************************************************************************\
-  Chapitre "Peripheriques en mode bloc"
-  exemple_02
-
-  Appels-systeme d'acces au disque
-
-  Exemples de la formation "Programmation Noyau sous Linux"
-
-  (c) 2005-2015 Christophe Blaess
-  http://www.blaess.fr/christophe/
-
-\************************************************************************/
 
 	#include <linux/fs.h>
 	#include <linux/genhd.h>
