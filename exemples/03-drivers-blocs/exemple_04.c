@@ -60,10 +60,14 @@ static void exemple_request(struct request_queue * rqueue)
 		length = blk_rq_cur_sectors(rq);
 
 		if (rq_data_dir(rq)) { /* write */
+			printk(KERN_INFO "%s - %s(): Write *(%p) -> start=%lu, nb=%lu\n",
+			       THIS_MODULE->name, __FUNCTION__, bio_data(rq->bio), start, length);
 			memmove(& exemple_data[start * EXEMPLE_SECTOR_SIZE],
 			        bio_data(rq->bio),
 			        length * EXEMPLE_SECTOR_SIZE);
 		} else /* read */ {
+			printk(KERN_INFO "%s - %s(): Read  *(%p) <- start=%lu, nb=%lu\n",
+			       THIS_MODULE->name, __FUNCTION__, bio_data(rq->bio), start, length);
 			memmove(bio_data(rq->bio),
 			        & exemple_data[start * EXEMPLE_SECTOR_SIZE],
 			        length * EXEMPLE_SECTOR_SIZE);
