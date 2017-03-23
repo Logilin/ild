@@ -14,7 +14,6 @@
 
 
 	static const struct file_operations exemple_fops = {
-		.owner	= THIS_MODULE,
 	};
 
 

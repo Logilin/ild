@@ -22,7 +22,6 @@
 	static int exemple_value = 0;
 
 	static const struct file_operations exemple_proc_fops = {
-		.owner	= THIS_MODULE,
 		.read   = exemple_read,
 		.write  = exemple_write,
 	};

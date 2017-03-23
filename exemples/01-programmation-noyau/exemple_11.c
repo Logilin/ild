@@ -18,7 +18,6 @@
 	static ssize_t exemple_read (struct file *, char __user *, size_t, loff_t *);
 
 	static const struct file_operations exemple_fops = {
-		.owner	= THIS_MODULE,
 		.read   = exemple_read,
 	};
 
