@@ -19,7 +19,7 @@
 	static int exemple_major = 0;
 	module_param_named(major, exemple_major, int, 0444);
 
-	#define EXEMPLE_MINORS 7
+	#define EXEMPLE_MINORS 9
 
 	#define EXEMPLE_SECTOR_SIZE 512
 	static int exemple_sectors = 4096;
