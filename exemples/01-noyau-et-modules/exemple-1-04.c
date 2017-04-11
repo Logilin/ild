@@ -1,27 +1,27 @@
 /************************************************************************\
   Exemples de la formation
     "Ecriture de drivers et programmation noyau Linux"
-  Chapitre "Programmer pour le noyau Linux"
+  Chapitre "Le noyau Linux et ses modules"
 
-  (c) 2005-2015 Christophe Blaess
+  (c) 2001-2017 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
 
 	#include <linux/module.h>
-	#include "exemple_03.h"
+	#include "exemple-1-03.h"
 
 
 static int __init exemple_init (void)
 {
-	exemple_03_hello(10);
+	exemple_hello(10);
 	return 0;
 }
 
 
 static void __exit exemple_exit (void)
 {
-	exemple_03_hello(20);
+	exemple_hello(20);
 }
 
 
