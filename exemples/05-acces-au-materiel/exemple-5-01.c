@@ -1,9 +1,9 @@
 /************************************************************************\
   Exemples de la formation
     "Ecriture de drivers et programmation noyau Linux"
-  Chapitre "Ecriture de driver en mode caractere"
+  Chapitre "Acces au materiel"
 
-  (c) 2005-2015 Christophe Blaess
+  (c) 2005-2017 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -16,7 +16,7 @@
 	#include <linux/module.h>
 	#include <asm/uaccess.h>
 
-	#include "gpio_exemples.h"
+	#include "gpio-exemples.h"
 
 
 	static ssize_t exemple_read  (struct file * filp, char * buffer,

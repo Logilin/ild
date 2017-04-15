@@ -1,25 +1,21 @@
 /************************************************************************\
   Exemples de la formation
     "Ecriture de drivers et programmation noyau Linux"
-  Chapitre "Ecriture de driver en mode caractere"
+  Chapitre "Acces au materiel"
 
-  (c) 2005-2015 Christophe Blaess
+  (c) 2005-2017 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
 
-
 	#include <linux/gpio.h>
 	#include <linux/interrupt.h>
 	#include <linux/module.h>
-	#include <linux/workqueue.h>
 
-	#include "gpio_exemples.h"
+	#include "gpio-exemples.h"
+
 
 	static irqreturn_t exemple_handler(int irq, void * ident);
-
-	static void exemple_workqueue_function(struct work_struct * inutilise);
-	static DECLARE_WORK(exemple_workqueue, exemple_workqueue_function);
 
 
 static int __init exemple_init (void)
@@ -55,7 +51,6 @@ static int __init exemple_init (void)
 static void __exit exemple_exit (void)
 {
 	free_irq(gpio_to_irq(EXEMPLE_GPIO_IN), THIS_MODULE->name);
-	flush_scheduled_work();
 	gpio_free(EXEMPLE_GPIO_OUT);
 	gpio_free(EXEMPLE_GPIO_IN);
 }
@@ -63,24 +58,18 @@ static void __exit exemple_exit (void)
 
 static irqreturn_t exemple_handler(int irq, void * ident)
 {
-	schedule_work(& exemple_workqueue);
-	return IRQ_HANDLED;
-}
-
-
-static void exemple_workqueue_function(struct work_struct * inutilise)
-{
 	static int value = 1;
-
 	gpio_set_value(EXEMPLE_GPIO_OUT, value);
+
 	value = 1 - value;
+	return IRQ_HANDLED;
 }
 
 
 	module_init(exemple_init);
 	module_exit(exemple_exit);
 
-	MODULE_DESCRIPTION("Workqueue bottom-half implementation");
+	MODULE_DESCRIPTION("GPIO interrupt handler.");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
 

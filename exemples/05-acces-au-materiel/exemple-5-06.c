@@ -1,24 +1,23 @@
 /************************************************************************\
   Exemples de la formation
     "Ecriture de drivers et programmation noyau Linux"
-  Chapitre "Ecriture de driver en mode caractere"
+  Chapitre "Acces au materiel"
 
-  (c) 2005-2015 Christophe Blaess
+  (c) 2005-2017 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
+
 
 	#include <linux/gpio.h>
 	#include <linux/interrupt.h>
 	#include <linux/module.h>
 
-	#include "gpio_exemples.h"
+	#include "gpio-exemples.h"
 
 
-	static irqreturn_t exemple_handler(int irq, void * ident);
-
-	static void exemple_tasklet_function(unsigned long unused);
-	static DECLARE_TASKLET(exemple_tasklet, exemple_tasklet_function, 0);
+	static irqreturn_t exemple_handler (int irq, void * ident);
+	static irqreturn_t exemple_thread  (int irq, void * ident);
 
 
 static int __init exemple_init (void)
@@ -40,14 +39,17 @@ static int __init exemple_init (void)
 		return err;
 	}
 
-	if ((err = request_irq(gpio_to_irq(EXEMPLE_GPIO_IN), exemple_handler,
-	                       IRQF_SHARED | IRQF_TRIGGER_RISING,
-	                       THIS_MODULE->name, THIS_MODULE->name)) != 0) {
+	err = request_threaded_irq(gpio_to_irq(EXEMPLE_GPIO_IN),
+	                           exemple_handler,
+	                           exemple_thread,
+	                           IRQF_SHARED,
+	                           THIS_MODULE->name,
+	                           THIS_MODULE->name);
+	if (err != 0) {
 		gpio_free(EXEMPLE_GPIO_OUT);
 		gpio_free(EXEMPLE_GPIO_IN);
 		return err;
 	}
-
 	return 0;
 }
 
@@ -55,7 +57,6 @@ static int __init exemple_init (void)
 static void __exit exemple_exit (void)
 {
 	free_irq(gpio_to_irq(EXEMPLE_GPIO_IN), THIS_MODULE->name);
-	tasklet_kill(& exemple_tasklet);
 	gpio_free(EXEMPLE_GPIO_OUT);
 	gpio_free(EXEMPLE_GPIO_IN);
 }
@@ -63,24 +64,24 @@ static void __exit exemple_exit (void)
 
 static irqreturn_t exemple_handler(int irq, void * ident)
 {
-	tasklet_schedule(& exemple_tasklet);
-	return IRQ_HANDLED;
+	return IRQ_WAKE_THREAD;
 }
 
 
-static void exemple_tasklet_function(unsigned long inutilise)
+static irqreturn_t exemple_thread(int irq, void * ident)
 {
 	static int value = 1;
-
 	gpio_set_value(EXEMPLE_GPIO_OUT, value);
+
 	value = 1 - value;
+	return IRQ_HANDLED;
 }
 
 
 	module_init(exemple_init);
 	module_exit(exemple_exit);
 
-	MODULE_DESCRIPTION("Tasklet bottom half implementation");
+	MODULE_DESCRIPTION("Threaded interrupt handler.");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
 
