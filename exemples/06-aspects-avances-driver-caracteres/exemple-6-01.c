@@ -1,9 +1,9 @@
 /************************************************************************\
   Exemples de la formation
     "Ecriture de drivers et programmation noyau Linux"
-  Chapitre "Ecriture de driver en mode caractere"
+  Chapitre "Aspects avances d'un driver caracteres"
 
-  (c) 2005-2015 Christophe Blaess
+  (c) 2005-2017 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -18,7 +18,7 @@
 
 	#include <asm/uaccess.h>
 
-	#include "gpio_exemples.h"
+	#include "gpio-exemples.h"
 
 
 	#define EXEMPLE_BUFFER_SIZE 1024

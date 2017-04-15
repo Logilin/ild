@@ -1,25 +1,8 @@
 ifneq (${KERNELRELEASE},)
 
-	obj-m  = exemple_01.o
-	obj-m += exemple_02.o
-	obj-m += exemple_03.o
-	obj-m += exemple_04.o
-	obj-m += exemple_05.o
-	obj-m += exemple_06.o
-	obj-m += exemple_07.o
-	obj-m += exemple_08.o
-	obj-m += exemple_09.o
-	obj-m += exemple_10.o
-	obj-m += exemple_11.o
-	obj-m += exemple_12.o
-	obj-m += exemple_13.o
-	obj-m += exemple_14.o
-	obj-m += exemple_15.o
-	obj-m += exemple_16.o
-	obj-m += exemple_17.o
-	obj-m += exemple_18.o
-	obj-m += exemple_19.o
-
+	obj-m  = exemple-6-01.o
+	obj-m += exemple-6-02.o
+	obj-m += exemple-6-03.o
 
 else
 
@@ -32,11 +15,9 @@ else
 	KERNEL_DIR ?= /lib/modules/$(shell uname -r)/build
 	MODULE_DIR := $(shell pwd)
 
-	USER_PROGS :=                \
-	          exemple_ioctl      \
-	          ioctl_exemple_06   \
-	          cat_nonblock       \
-	          test_mmap          \
+	USER_PROGS :=  cat-non-block    \
+	               test-mmap        \
+
 
 .PHONY: all
 all: user modules
