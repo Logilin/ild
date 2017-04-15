@@ -1,12 +1,17 @@
 /************************************************************************\
   Exemples de la formation
     "Ecriture de drivers et programmation noyau Linux"
-  Chapitre "Ecriture de driver reseau"
+  Chapitre "Driver reseau"
 
-  (c) 2005-2015 Christophe Blaess
+  (c) 2005-2017 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
+
+/*
+  Librement inspire d'un exemple du livre "Linux Device Driver"
+  d'Alessandro Rubini et Jonathan Corbet.
+*/
 
 	#include <linux/module.h>
 	#include <linux/interrupt.h>
@@ -22,13 +27,12 @@
 
 	struct exemple_net_dev_priv {
 
-		struct sk_buff * sk_b;
+		struct sk_buff * sk_b; // Packet to send
 
-		unsigned char data[ETH_DATA_LEN];
+		unsigned char data[ETH_DATA_LEN]; // Data to send
 		int data_len;
-
-		struct net_device_stats net_dev_stats;
 	};
+
 
 	static irqreturn_t exemple_irq_tx_handler(int irq, void * irq_id, struct pt_regs * regs);
 	static irqreturn_t exemple_irq_rx_handler(int irq, void * irq_id, struct pt_regs * regs);
@@ -106,7 +110,7 @@ static int exemple_start_xmit(struct sk_buff * sk_b, struct net_device * src)
 	if (len > ETH_DATA_LEN)
 		return -ENOMEM;
 
-	src->trans_start = jiffies; // for timeout
+	src->trans_start = jiffies; // for timeout...
 
 	src_priv->sk_b = sk_b;
 
@@ -124,12 +128,12 @@ static int exemple_start_xmit(struct sk_buff * sk_b, struct net_device * src)
 	ip_header->check = 0;
 	ip_header->check = ip_fast_csum((unsigned char *)ip_header, ip_header->ihl);
 
+
 	memcpy(dst_priv->data, data, len);
 	dst_priv->data_len = len;
 
 	exemple_irq_rx_handler (0, (void *) dst, NULL);
-	src_priv->net_dev_stats.tx_packets ++;
-	src_priv->net_dev_stats.tx_bytes += len;
+
 	exemple_irq_tx_handler (0, (void *) src, NULL);
 
 	return NETDEV_TX_OK;
@@ -150,17 +154,17 @@ static irqreturn_t exemple_irq_rx_handler(int irq, void * irq_id, struct pt_regs
 	priv = netdev_priv(net_dev);
 	if (priv == NULL)
 		return IRQ_NONE;
+
 	sk_b = dev_alloc_skb(priv->data_len);
 	if (! sk_b)
 		return IRQ_HANDLED;
+
 	data = skb_put(sk_b, priv->data_len);
 	memcpy(data, priv->data, priv->data_len);
-	priv->net_dev_stats.rx_packets ++;
-	priv->net_dev_stats.rx_bytes += priv->data_len;
-
 	sk_b->dev = net_dev;
 	sk_b->protocol = eth_type_trans(sk_b, net_dev);
 	sk_b->ip_summed = CHECKSUM_UNNECESSARY;
+
 	netif_rx(sk_b);
 
 	return IRQ_HANDLED;
@@ -211,17 +215,6 @@ static int exemple_hard_header(struct sk_buff * sk_b, struct net_device * net_de
 }
 
 
-static struct net_device_stats * exemple_get_stats(struct net_device * net_dev)
-{
-	struct exemple_net_dev_priv * priv = netdev_priv(net_dev);
-
-	printk(KERN_INFO "%s - %s(%p)\n",
-	       THIS_MODULE->name, __FUNCTION__, net_dev);
-
-	return & (priv->net_dev_stats);
-}
-
-
 static const struct header_ops exemple_header_ops = {
         .create = exemple_hard_header,
 };
@@ -231,7 +224,6 @@ struct net_device_ops exemple_netdev_ops = {
 	.ndo_open       = exemple_open,
 	.ndo_stop       = exemple_stop,
 	.ndo_start_xmit = exemple_start_xmit,
-	.ndo_get_stats  = exemple_get_stats,
 };
 
 
@@ -314,7 +306,7 @@ static void exemple_exit(void)
 	module_init(exemple_init)
 	module_exit(exemple_exit)
 
-	MODULE_DESCRIPTION("Netdevice statistic collections.");
+	MODULE_DESCRIPTION("Two virtual linked netdevices.");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
 

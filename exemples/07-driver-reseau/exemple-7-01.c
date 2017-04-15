@@ -1,9 +1,9 @@
 /************************************************************************\
   Exemples de la formation
     "Ecriture de drivers et programmation noyau Linux"
-  Chapitre "Ecriture de driver reseau"
+  Chapitre "Driver reseau"
 
-  (c) 2005-2015 Christophe Blaess
+  (c) 2005-2017 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
