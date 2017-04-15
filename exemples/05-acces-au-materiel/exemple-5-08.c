@@ -1,7 +1,7 @@
 /************************************************************************\
   Exemples de la formation
     "Ecriture de drivers et programmation noyau Linux"
-  Chapitre "Aspects avances d'un driver caracteres"
+  Chapitre "Acces au materiel"
 
   (c) 2005-2017 Christophe Blaess
   http://www.blaess.fr/christophe/
@@ -94,8 +94,6 @@ static ssize_t exemple_read(struct file * filp, char * buffer,
 
 	while (exemple_buffer_end == 0) {
 		spin_unlock_irqrestore(& exemple_buffer_spl, irqs);
-		if (filp->f_flags & O_NONBLOCK)
-			return -EAGAIN;
 		if (wait_event_interruptible(exemple_buffer_wq,
 		                    (exemple_buffer_end != 0)) != 0)
 			return -ERESTARTSYS;
@@ -139,7 +137,7 @@ static irqreturn_t exemple_handler(int irq, void * ident)
 	module_init(exemple_init);
 	module_exit(exemple_exit);
 
-	MODULE_DESCRIPTION("Blocking and non-blocking read() system call.");
+	MODULE_DESCRIPTION("Blocking read() system call.");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
 

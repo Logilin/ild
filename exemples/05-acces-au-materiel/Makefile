@@ -7,6 +7,9 @@ ifneq (${KERNELRELEASE},)
 	obj-m += exemple-5-05.o
 	obj-m += exemple-5-06.o
 	obj-m += exemple-5-07.o
+	obj-m += exemple-5-08.o
+	obj-m += exemple-5-09.o
+	obj-m += exemple-5-10.o
 
 else
 
@@ -19,7 +22,8 @@ else
 	KERNEL_DIR ?= /lib/modules/$(shell uname -r)/build
 	MODULE_DIR := $(shell pwd)
 
-	USER_PROGS :=                \
+	USER_PROGS :=    cat-non-block        \
+	                 test-mmap            \
 
 .PHONY: all
 all: user modules

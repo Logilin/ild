@@ -1,7 +1,7 @@
 /************************************************************************\
   Exemples de la formation
     "Ecriture de drivers et programmation noyau Linux"
-  Chapitre "Aspects avances d'un driver caracteres"
+  Chapitre "Acces au materiel"
 
   (c) 2005-2017 Christophe Blaess
   http://www.blaess.fr/christophe/
