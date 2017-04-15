@@ -1,9 +1,9 @@
 /************************************************************************\
   Exemples de la formation
     "Ecriture de drivers et programmation noyau Linux"
-  Chapitre "Ecriture de driver en mode caractere"
+  Chapitre "Driver en mode caracteres"
 
-  (c) 2005-2015 Christophe Blaess
+  (c) 2005-2017 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -14,7 +14,7 @@
 	#include <fcntl.h>
 	#include <sys/ioctl.h>
 
-	#include "exemple_06.h"
+	#include "exemple-4-06.h"
 
 
 int main(int argc, char * argv[])

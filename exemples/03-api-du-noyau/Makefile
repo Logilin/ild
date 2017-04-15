@@ -1,6 +1,11 @@
 ifneq (${KERNELRELEASE},)
 
 	obj-m += exemple-3-01.o
+	obj-m += exemple-3-02.o
+	obj-m += exemple-3-03.o
+	obj-m += exemple-3-04.o
+	obj-m += exemple-3-05.o
+	obj-m += exemple-3-06.o
 
 else
 
