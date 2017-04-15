@@ -1,10 +1,10 @@
 ifneq (${KERNELRELEASE},)
 
-	obj-m += exemple_01.o
-	obj-m += exemple_02.o
-	obj-m += exemple_03.o
-	obj-m += exemple_04.o
-	obj-m += exemple_05.o
+	obj-m += exemple-8-01.o
+	obj-m += exemple-8-02.o
+	obj-m += exemple-8-03.o
+	obj-m += exemple-8-04.o
+	obj-m += exemple-8-05.o
 
 else
 
@@ -13,12 +13,11 @@ else
 
 	CFLAGS := -Wall -g
 
-all: progs_utilisateur modules
+all: modules
 
 modules:
 	${MAKE} -C ${KERNEL_DIR} SUBDIRS=${MODULE_DIR}  modules
 
-progs_utilisateur: 
 
 clean:
 	rm -f *.o *.ko *.mod.c .*.o .*.ko .*.mod.c .*.cmd *~ *.ko.unsigned
