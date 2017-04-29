@@ -1,6 +1,8 @@
 ild
 ===
-(c) Christophe BLAESS 2005-2015
+(c) Christophe BLAESS 2005-2016
+
+Version 5.0
 
 Exemples de notre cours _"Écriture de drivers pour Linux"_
 
