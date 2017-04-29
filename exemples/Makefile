@@ -1,17 +1,19 @@
 SUBDIRS	= $(wildcard *)
 
+.PHONY:all
 all:
 	@set -e;                \
 	for i in $(SUBDIRS);    \
 	do                      \
-		if [ -d $$i ]; then	\
+		if [ -d $$i ]; then \
 		cd $$i;             \
 		make;               \
 		cd -;               \
 		fi;                 \
 	done
 
-clean: 
+.PHONY: clean
+clean:
 	@set -e;                \
 	for i in $(SUBDIRS);    \
 	do                      \
