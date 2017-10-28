@@ -1,13 +1,13 @@
 ifneq (${KERNELRELEASE},)
 
-	obj-m += exemple-4-01.o
-	obj-m += exemple-4-02.o
-	obj-m += exemple-4-03.o
-	obj-m += exemple-4-04.o
-	obj-m += exemple-4-05.o
-	obj-m += exemple-4-06.o
-	obj-m += exemple-4-07.o
-	obj-m += exemple-4-08.o
+	obj-m += exemple-IV-01.o
+	obj-m += exemple-IV-02.o
+	obj-m += exemple-IV-03.o
+	obj-m += exemple-IV-04.o
+	obj-m += exemple-IV-05.o
+	obj-m += exemple-IV-06.o
+	obj-m += exemple-IV-07.o
+	obj-m += exemple-IV-08.o
 
 else
 
@@ -15,7 +15,7 @@ else
 	MODULE_DIR := $(shell pwd)
 
 	USERSPACE  := exemple-ioctl
-	USERSPACE  += ioctl-exemple-4-06
+	USERSPACE  += ioctl-exemple-IV-06
 
 .PHONY: all
 
