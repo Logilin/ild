@@ -1,15 +1,15 @@
 ifneq (${KERNELRELEASE},)
 
-	obj-m  = exemple-5-01.o
-	obj-m += exemple-5-02.o
-	obj-m += exemple-5-03.o
-	obj-m += exemple-5-04.o
-	obj-m += exemple-5-05.o
-	obj-m += exemple-5-06.o
-	obj-m += exemple-5-07.o
-	obj-m += exemple-5-08.o
-	obj-m += exemple-5-09.o
-	obj-m += exemple-5-10.o
+	obj-m  = exemple-V-01.o
+	obj-m += exemple-V-02.o
+	obj-m += exemple-V-03.o
+	obj-m += exemple-V-04.o
+	obj-m += exemple-V-05.o
+	obj-m += exemple-V-06.o
+	obj-m += exemple-V-07.o
+	obj-m += exemple-V-08.o
+	obj-m += exemple-V-09.o
+	obj-m += exemple-V-10.o
 
 else
 
