@@ -1,8 +1,8 @@
 ifneq (${KERNELRELEASE},)
 
-	obj-m += exemple-7-01.o
-	obj-m += exemple-7-02.o
-	obj-m += exemple-7-03.o
+	obj-m += exemple-VII-01.o
+	obj-m += exemple-VII-02.o
+	obj-m += exemple-VII-03.o
 
 else
 
