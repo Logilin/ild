@@ -15,10 +15,10 @@
 	#include "gpio-exemples.h"
 
 
-	static irqreturn_t exemple_handler(int irq, void * ident);
+	static irqreturn_t exemple_top_half(int irq, void * ident);
 
-	static void exemple_tasklet_function(unsigned long unused);
-	static DECLARE_TASKLET(exemple_tasklet, exemple_tasklet_function, 0);
+	static void exemple_bottom_half(unsigned long unused);
+	static DECLARE_TASKLET(exemple_tasklet, exemple_bottom_half, 0);
 
 
 static int __init exemple_init (void)
@@ -40,7 +40,7 @@ static int __init exemple_init (void)
 		return err;
 	}
 
-	if ((err = request_irq(gpio_to_irq(EXEMPLE_GPIO_IN), exemple_handler,
+	if ((err = request_irq(gpio_to_irq(EXEMPLE_GPIO_IN), exemple_top_half,
 	                       IRQF_SHARED | IRQF_TRIGGER_RISING,
 	                       THIS_MODULE->name, THIS_MODULE->name)) != 0) {
 		gpio_free(EXEMPLE_GPIO_OUT);
@@ -61,14 +61,14 @@ static void __exit exemple_exit (void)
 }
 
 
-static irqreturn_t exemple_handler(int irq, void * ident)
+static irqreturn_t exemple_top_half(int irq, void * ident)
 {
 	tasklet_schedule(& exemple_tasklet);
 	return IRQ_HANDLED;
 }
 
 
-static void exemple_tasklet_function(unsigned long inutilise)
+static void exemple_bottom_half(unsigned long inutilise)
 {
 	static int value = 1;
 

@@ -16,10 +16,10 @@
 
 	#include "gpio-exemples.h"
 
-	static irqreturn_t exemple_handler(int irq, void * ident);
+	static irqreturn_t exemple_top_half(int irq, void * ident);
 
-	static void exemple_workqueue_function(struct work_struct * inutilise);
-	static DECLARE_WORK(exemple_workqueue, exemple_workqueue_function);
+	static void exemple_bottom_half(struct work_struct * inutilise);
+	static DECLARE_WORK(exemple_workqueue, exemple_bottom_half);
 
 
 static int __init exemple_init (void)
@@ -41,7 +41,7 @@ static int __init exemple_init (void)
 		return err;
 	}
 
-	if ((err = request_irq(gpio_to_irq(EXEMPLE_GPIO_IN), exemple_handler,
+	if ((err = request_irq(gpio_to_irq(EXEMPLE_GPIO_IN), exemple_top_half,
 	                       IRQF_SHARED | IRQF_TRIGGER_RISING,
 	                       THIS_MODULE->name, THIS_MODULE->name)) != 0) {
 		gpio_free(EXEMPLE_GPIO_OUT);
@@ -61,14 +61,14 @@ static void __exit exemple_exit (void)
 }
 
 
-static irqreturn_t exemple_handler(int irq, void * ident)
+static irqreturn_t exemple_top_half(int irq, void * ident)
 {
 	schedule_work(& exemple_workqueue);
 	return IRQ_HANDLED;
 }
 
 
-static void exemple_workqueue_function(struct work_struct * inutilise)
+static void exemple_bottom_half(struct work_struct * inutilise)
 {
 	static int value = 1;
 

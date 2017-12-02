@@ -16,8 +16,8 @@
 	#include "gpio-exemples.h"
 
 
-	static irqreturn_t exemple_handler (int irq, void * ident);
-	static irqreturn_t exemple_thread  (int irq, void * ident);
+	static irqreturn_t exemple_top_half    (int irq, void * ident);
+	static irqreturn_t exemple_bottom_half (int irq, void * ident);
 
 
 static int __init exemple_init (void)
@@ -40,8 +40,8 @@ static int __init exemple_init (void)
 	}
 
 	err = request_threaded_irq(gpio_to_irq(EXEMPLE_GPIO_IN),
-	                           exemple_handler,
-	                           exemple_thread,
+	                           exemple_top_half,
+	                           exemple_bottom_half,
 	                           IRQF_SHARED,
 	                           THIS_MODULE->name,
 	                           THIS_MODULE->name);
@@ -62,13 +62,13 @@ static void __exit exemple_exit (void)
 }
 
 
-static irqreturn_t exemple_handler(int irq, void * ident)
+static irqreturn_t exemple_top_half(int irq, void * ident)
 {
 	return IRQ_WAKE_THREAD;
 }
 
 
-static irqreturn_t exemple_thread(int irq, void * ident)
+static irqreturn_t exemple_bottom_half(int irq, void * ident)
 {
 	static int value = 1;
 	gpio_set_value(EXEMPLE_GPIO_OUT, value);
