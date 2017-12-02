@@ -44,31 +44,24 @@ static void exemple_request(struct request_queue * rqueue)
 	unsigned long start;
 	unsigned long length;
 	struct request * rq;
-	int err;
 
 	rq = blk_fetch_request(rqueue);
 	while (rq != NULL) {
-
-		err = 0;
-		if (rq->cmd_type != REQ_TYPE_FS) {
-			err = -EIO;
-			goto request_end;
-		}
 
 		start  = blk_rq_pos(rq);
 		length = blk_rq_cur_sectors(rq);
 
 		if (rq_data_dir(rq)) { /* write */
-			memmove(& exemple_data[start * EXEMPLE_SECTOR_SIZE],
-			        bio_data(rq->bio),
-			        length * EXEMPLE_SECTOR_SIZE);
+			memcpy(& exemple_data[start * EXEMPLE_SECTOR_SIZE],
+			       bio_data(rq->bio),
+			       length * EXEMPLE_SECTOR_SIZE);
 		} else /* read */ {
-			memmove(bio_data(rq->bio),
-			        & exemple_data[start * EXEMPLE_SECTOR_SIZE],
-			        length * EXEMPLE_SECTOR_SIZE);
+			memcpy(bio_data(rq->bio),
+			       & exemple_data[start * EXEMPLE_SECTOR_SIZE],
+			       length * EXEMPLE_SECTOR_SIZE);
 		}
-request_end:
-		if (__blk_end_request_cur(rq, err) == 0)
+
+		if (__blk_end_request_cur(rq, 0) == 0)
 			rq = blk_fetch_request(rqueue);
 	}
 }
