@@ -106,8 +106,6 @@ static int exemple_start_xmit(struct sk_buff * sk_b, struct net_device * src)
 	if (len > ETH_DATA_LEN)
 		return -ENOMEM;
 
-	src->trans_start = jiffies; // for timeout
-
 	src_priv->sk_b = sk_b;
 
 
