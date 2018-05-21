@@ -1,6 +1,6 @@
-ild
-===
-(c) Christophe BLAESS 2005-2017
+ild v. 7.2
+==========
+(c) Christophe BLAESS 2005-2018
 
 Exemples de notre cours _"Écriture de drivers pour Linux"_
 
