@@ -12,7 +12,9 @@
 	#include <linux/proc_fs.h>
 	#include <linux/sched.h>
 	#include <linux/version.h>
+
 	#include <asm/uaccess.h>
+	#include <linux/uaccess.h>
 
 
 	static ssize_t exemple_read (struct file *, char __user *, size_t, loff_t *);
