@@ -15,10 +15,21 @@
 
 static int __init exemple_init (void)
 {
-	printk(KERN_INFO "%s - %s(): PID = %u  PPID = %u\n",
-	          THIS_MODULE->name, __FUNCTION__,
-	          current->pid,
-	          current->real_parent->pid);
+	int i;
+	struct task_struct *task;
+
+	task = current;
+	i = 0;
+	while (task != NULL) {
+		printk(KERN_INFO "%s: (%d)  PID = %u, COMM = %s\n",
+	          THIS_MODULE->name, i, task->pid, task->comm);
+		if (task->real_parent == task) {
+			printk(KERN_INFO "real_parent = parent\n");
+			break;
+		}
+		task = task->real_parent;
+		i ++;
+	}
 	return 0;
 }
 

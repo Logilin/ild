@@ -13,6 +13,7 @@
 #include <linux/slab.h>
 #include <linux/usb.h>
 #include <asm/uaccess.h>
+#include <linux/uaccess.h>
 
 
 #define EXEMPLE_ID_VENDEUR   0x10CF  /* Velleman  */

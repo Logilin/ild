@@ -15,7 +15,7 @@
 	#include <linux/gpio.h>
 	#include <linux/interrupt.h>
 	#include <linux/sched.h>
-
+	#include <linux/uaccess.h>
 	#include <asm/uaccess.h>
 
 	#include "gpio-exemples.h"
