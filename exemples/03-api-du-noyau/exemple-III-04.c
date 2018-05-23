@@ -10,6 +10,7 @@
 
 	#include <linux/module.h>
 	#include <linux/sched.h>
+	#include <linux/version.h>
 
 
 	static void exemple_timer_function(unsigned long);
@@ -18,8 +19,12 @@
 
 static int __init exemple_init (void)
 {
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
 	init_timer (& exemple_timer);
 	exemple_timer.function = exemple_timer_function;
+#else
+	timer_setup (& exemple_timer, exemple_timer_function);
+#endif
 	exemple_timer.data = (unsigned long) (& exemple_timer);
 	exemple_timer.expires = jiffies + HZ;
 	add_timer(& exemple_timer);
