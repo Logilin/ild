@@ -30,7 +30,7 @@ static void exemple_timer_function(unsigned long arg)
 	mod_timer(timer, jiffies + HZ);
 }
 #else
-static void exemple_timer_function(struct timer_list *timer);
+static void exemple_timer_function(struct timer_list *timer)
 {
 	struct timeval time_of_day;
 
