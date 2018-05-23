@@ -18,6 +18,7 @@
 	#include <linux/sched.h>
 	#include <linux/slab.h>
 	#include <linux/timer.h>
+	#include <linux/version.h>
 
 	#include <asm/io.h>
 
@@ -35,11 +36,20 @@
 		    .fops           = & exemple_fops,
 	};
 
-	static void exemple_timer_function (unsigned long arg);
-
 	struct timer_list exemple_timer;
 
 	static char * exemple_buffer = NULL;
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
+static void exemple_timer_function(unsigned long unused)
+#else
+static void exemple_timer_function(struct timer_list *unused)
+#endif
+{
+	sprintf(exemple_buffer, "\r%s - %s(): %lu", THIS_MODULE->name, __FUNCTION__, jiffies);
+	mod_timer(& exemple_timer, jiffies + HZ);
+}
+
 
 
 static int __init exemple_init (void)
@@ -64,8 +74,12 @@ static int __init exemple_init (void)
 		return err;
 	}
 
-	init_timer(& exemple_timer);
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
+	init_timer (& exemple_timer);
 	exemple_timer.function = exemple_timer_function;
+#else
+	timer_setup (& exemple_timer, exemple_timer_function, 0);
+#endif
 	exemple_timer.expires = jiffies + HZ;
 	add_timer(& exemple_timer);
 
@@ -106,12 +120,6 @@ static int exemple_mmap (struct file * filp, struct vm_area_struct * vma)
 	return 0;
 }
 
-
-static void exemple_timer_function (unsigned long arg)
-{
-	sprintf(exemple_buffer, "\r%s - %s(): %lu", THIS_MODULE->name, __FUNCTION__, jiffies);
-	mod_timer(& exemple_timer, jiffies + HZ);
-}
 
 
 	module_init(exemple_init);
