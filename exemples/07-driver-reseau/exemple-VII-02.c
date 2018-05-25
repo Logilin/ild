@@ -29,7 +29,7 @@
 
 		struct sk_buff * sk_b; // Packet to send
 
-		unsigned char data[ETH_DATA_LEN]; // Data to send
+		unsigned char data[ETH_DATA_LEN]; // Data received
 		int data_len;
 	};
 
