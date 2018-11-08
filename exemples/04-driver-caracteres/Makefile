@@ -31,7 +31,7 @@ modules:
 clean:
 	rm -f *.o *.ko *.mod.c .*.o .*.ko .*.mod.c .*.cmd *~ *.ko.unsigned
 	rm -f Module.symvers Module.markers modules.order
-	rm -rf .tmp_versions
+	rm -rf .tmp_versions .cache.mk
 	rm -f $(USERSPACE)
 
 endif
