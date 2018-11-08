@@ -34,8 +34,8 @@ static int __init exemple_init (void)
 	printk(KERN_INFO "%s: nb_items = %d\n", THIS_MODULE->name, nb_items);
 	printk(KERN_INFO "%s: Table = ", THIS_MODULE->name);
 	for (i = 0; i < nb_items; i ++)
-		printk("%d ", param_table[i]);
-	printk("\n");
+		printk(KERN_CONT "%d ", param_table[i]);
+	printk(KERN_CONT "\n");
 
 	return 0;
 }
