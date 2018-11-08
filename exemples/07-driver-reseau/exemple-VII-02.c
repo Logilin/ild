@@ -40,7 +40,7 @@
 
 static int exemple_open (struct net_device * net_dev)
 {
-	printk(KERN_INFO "%s - %s(%p):\n",
+	printk(KERN_INFO "%s - %s(%pK):\n",
 	       THIS_MODULE->name, __FUNCTION__, net_dev);
 
 	net_dev->dev_addr[0] = 0x00;
@@ -62,7 +62,7 @@ static int exemple_open (struct net_device * net_dev)
 
 static int exemple_stop (struct net_device * net_dev)
 {
-	printk(KERN_INFO "%s - %s(%p):\n",
+	printk(KERN_INFO "%s - %s(%pK):\n",
 	       THIS_MODULE->name, __FUNCTION__, net_dev);
 
 	netif_stop_queue(net_dev);
@@ -86,7 +86,7 @@ static int exemple_start_xmit(struct sk_buff * sk_b, struct net_device * src)
 	int    len;
 	char   short_packet[ETH_ZLEN];
 
-	printk(KERN_INFO "%s -%s(%p, %p)\n",
+	printk(KERN_INFO "%s -%s(%pK, %pK)\n",
 	       THIS_MODULE->name, __FUNCTION__, sk_b, src);
 
 	if (src == net_dev_ex_0)
@@ -145,7 +145,7 @@ static irqreturn_t exemple_irq_rx_handler(int irq, void * irq_id, struct pt_regs
 	struct net_device * net_dev;
 	struct exemple_net_dev_priv * priv;
 
-	printk(KERN_INFO "%s -%s(%d, %p)\n",
+	printk(KERN_INFO "%s -%s(%d, %pK)\n",
 	       THIS_MODULE->name, __FUNCTION__, irq, irq_id);
 
 	net_dev = (struct net_device *) irq_id;
@@ -174,7 +174,7 @@ static irqreturn_t exemple_irq_tx_handler(int irq, void * irq_id, struct pt_regs
 	struct net_device * net_dev;
 	struct exemple_net_dev_priv * priv;
 
-	printk(KERN_INFO "%s -%s(%d, %p)\n",
+	printk(KERN_INFO "%s -%s(%d, %pK)\n",
 	       THIS_MODULE->name, __FUNCTION__, irq, irq_id);
 
 	net_dev = (struct net_device *) irq_id;
@@ -229,7 +229,7 @@ static void exemple_setup (struct net_device * net_dev)
 {
 	struct exemple_net_dev_priv * private = NULL;
 
-	printk(KERN_INFO "%s - %s(%p)\n",
+	printk(KERN_INFO "%s - %s(%pK)\n",
 	       THIS_MODULE->name, __FUNCTION__, net_dev);
 
 	ether_setup(net_dev);

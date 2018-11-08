@@ -21,7 +21,7 @@
 
 static int exemple_open (struct net_device * net_dev)
 {
-	printk(KERN_INFO "%s - %s(%p):\n",
+	printk(KERN_INFO "%s - %s(%pK):\n",
 	       THIS_MODULE->name, __FUNCTION__, net_dev);
 
 	net_dev->dev_addr[0] = 0x00;
@@ -39,7 +39,7 @@ static int exemple_open (struct net_device * net_dev)
 
 static int exemple_stop (struct net_device * net_dev)
 {
-	printk(KERN_INFO "%s - %s(%p)\n",
+	printk(KERN_INFO "%s - %s(%pK)\n",
 	       THIS_MODULE->name, __FUNCTION__, net_dev);
 
 	netif_stop_queue(net_dev);
@@ -50,7 +50,7 @@ static int exemple_stop (struct net_device * net_dev)
 
 static int exemple_start_xmit(struct sk_buff * sk_b, struct net_device * src)
 {
-	printk(KERN_INFO "%s - %s(%p,%p)\n",
+	printk(KERN_INFO "%s - %s(%pK, %pK)\n",
 	       THIS_MODULE->name, __FUNCTION__, sk_b, src);
 
 	dev_kfree_skb(sk_b);
@@ -67,7 +67,7 @@ struct net_device_ops exemple_netdev_ops = {
 
 static void exemple_setup (struct net_device * net_dev)
 {
-	printk(KERN_INFO "%s - %s(%p)\n",
+	printk(KERN_INFO "%s - %s(%pK)\n",
 	       THIS_MODULE->name, __FUNCTION__, net_dev);
 
 	ether_setup(net_dev);
