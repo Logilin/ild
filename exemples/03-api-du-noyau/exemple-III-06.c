@@ -26,7 +26,7 @@ static int __init exemple_init (void)
 	if (buffer == NULL)
 		return -ENOMEM;
 
-	printk("%s: kmalloc()      -> %p\n",
+	printk("%s: kmalloc()      -> %pK\n",
 	       THIS_MODULE->name, buffer);
 
 	printk("%s: virt-to-phys() -> %llx\n",
@@ -38,7 +38,7 @@ static int __init exemple_init (void)
 
 	pg = pfn_to_page(pfn);
 	if (pg != NULL)
-		printk("%s: page_address   -> %p\n",
+		printk("%s: page_address   -> %pK\n",
 		       THIS_MODULE->name, page_address(pg));
 
 	kfree(buffer);

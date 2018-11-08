@@ -47,7 +47,7 @@ static ssize_t exemple_read (struct file * filp, char __user * u_buffer, size_t 
 	char buffer[128];
 	int  nb;
 
-	printk(KERN_INFO "%s - %s(%p, %p, %u, %lld)", THIS_MODULE->name, __FUNCTION__, filp, u_buffer, (unsigned int) max, *offset);
+	printk(KERN_INFO "%s - %s(%pK, %p, %u, %lld)", THIS_MODULE->name, __FUNCTION__, filp, u_buffer, (unsigned int) max, *offset);
 
 	snprintf(buffer, 128, "PID=%u, PPID=%u, Name=%s\n",
 	         current->pid, 
