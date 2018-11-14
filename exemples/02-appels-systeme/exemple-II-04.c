@@ -56,7 +56,7 @@ static ssize_t exemple_read (struct file * filp, char __user * u_buffer, size_t 
 
 	nb = strlen(buffer) - (*offset);
 	if (nb <= 0) {
-		printk(" -> 0\n");
+		printk(KERN_CONT " -> 0\n");
 		return 0;
 	}
 
@@ -64,11 +64,11 @@ static ssize_t exemple_read (struct file * filp, char __user * u_buffer, size_t 
 		nb = max;
 
 	if (copy_to_user(u_buffer, & (buffer[*offset]), nb) != 0) {
-		printk(" -> error\n");
+		printk(KERN_CONT " -> error\n");
 		return -EFAULT;
 	}
 	(*offset) += nb;
-	printk(" -> %d\n", nb);
+	printk(KERN_CONT " -> %d\n", nb);
 	return nb;
 }
 
