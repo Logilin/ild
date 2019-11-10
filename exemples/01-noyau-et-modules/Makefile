@@ -17,7 +17,7 @@ all: modules
 .PHONY: modules
 
 modules:
-	${MAKE} -C ${KERNEL_DIR} SUBDIRS=${MODULE_DIR}  modules
+	${MAKE} -C ${KERNEL_DIR} M=${MODULE_DIR}  modules
 
 .PHONY: clean
 

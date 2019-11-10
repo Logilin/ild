@@ -3,7 +3,7 @@
     "Ecriture de drivers et programmation noyau Linux"
   Chapitre "Le noyau Linux et ses modules"
 
-  (c) 2001-2017 Christophe Blaess
+  (c) 2001-2019 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
