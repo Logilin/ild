@@ -3,7 +3,7 @@
     "Ecriture de drivers et programmation noyau Linux"
   Chapitre "Utilisation du bus USB"
 
-  (c) 2005-2017 Christophe Blaess
+  (c) 2005-2019 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -20,53 +20,53 @@
 	#define EXEMPLE_ID_PRODUIT   0x5500  /* Kit K8055 */
 
 
-	static struct usb_device_id   exemple_id_table [] = {
+	static struct usb_device_id   example_id_table [] = {
 		{ USB_DEVICE(EXEMPLE_ID_VENDEUR, EXEMPLE_ID_PRODUIT) },
 		{ }
 	};
-	MODULE_DEVICE_TABLE(usb, exemple_id_table);
+	MODULE_DEVICE_TABLE(usb, example_id_table);
 
 
-	static int  exemple_probe      (struct usb_interface * intf,
+	static int  example_probe      (struct usb_interface * intf,
 	                                const struct usb_device_id * dev_id);
-	static void exemple_disconnect (struct usb_interface * intf);
+	static void example_disconnect (struct usb_interface * intf);
 
 
-	static struct usb_driver exemple_usb_driver = {
+	static struct usb_driver example_usb_driver = {
 		.name       = "Velleman K8055",
-		.id_table   = exemple_id_table,
-		.probe      = exemple_probe,
-		.disconnect = exemple_disconnect,
+		.id_table   = example_id_table,
+		.probe      = example_probe,
+		.disconnect = example_disconnect,
 	};
 
-	static int     exemple_open    (struct inode *, struct file *);
-	static int     exemple_release (struct inode *, struct file *);
-	static ssize_t exemple_write   (struct file *, const char __user *,
+	static int     example_open    (struct inode *, struct file *);
+	static int     example_release (struct inode *, struct file *);
+	static ssize_t example_write   (struct file *, const char __user *,
 	                                size_t, loff_t *);
-	static void    exemple_write_callback (struct urb *);
+	static void    example_write_callback (struct urb *);
 
-	static struct file_operations exemple_file_operations = {
+	static struct file_operations example_file_operations = {
 		.owner   = THIS_MODULE,
-		.open    = exemple_open,
-		.release = exemple_release,
-		.write   = exemple_write,
+		.open    = example_open,
+		.release = example_release,
+		.write   = example_write,
 	};
 
-	static struct usb_class_driver exemple_usb_class_driver = {
+	static struct usb_class_driver example_usb_class_driver = {
 		.name       = "usb/velleman%d",
-		.fops       = & exemple_file_operations,
+		.fops       = & example_file_operations,
 		.minor_base = 0,
 	};
 
 
-	static struct usb_device              * exemple_usb_device   = NULL;
-	static struct usb_endpoint_descriptor * exemple_out_endpoint = NULL;
-	static struct urb                     * exemple_out_urb      = NULL;
-	static char                           * exemple_out_buffer   = NULL;
+	static struct usb_device              * example_usb_device   = NULL;
+	static struct usb_endpoint_descriptor * example_out_endpoint = NULL;
+	static struct urb                     * example_out_urb      = NULL;
+	static char                           * example_out_buffer   = NULL;
 	#define EXEMPLE_OUT_BUFFER_SIZE  8
 
 
-static int exemple_probe(struct usb_interface * intf,
+static int example_probe(struct usb_interface * intf,
                          const struct usb_device_id * dev_id)
 {
 	int i;
@@ -75,7 +75,7 @@ static int exemple_probe(struct usb_interface * intf,
 	struct usb_endpoint_descriptor * endpoint_desc;
 
 	/* Stocker l'identifiant du peripherique. */	
-	exemple_usb_device = usb_get_dev(interface_to_usbdev(intf));
+	example_usb_device = usb_get_dev(interface_to_usbdev(intf));
 
 	host_intf = intf->cur_altsetting;
 	
@@ -85,7 +85,7 @@ static int exemple_probe(struct usb_interface * intf,
 		if (! (endpoint_desc->bEndpointAddress & USB_DIR_IN)) {
 			switch (endpoint_desc->bmAttributes & USB_ENDPOINT_XFERTYPE_MASK) {
 				case USB_ENDPOINT_XFER_INT:
-					exemple_out_endpoint = endpoint_desc;
+					example_out_endpoint = endpoint_desc;
 					break;
 				default:
 					break;
@@ -93,77 +93,77 @@ static int exemple_probe(struct usb_interface * intf,
 		}
 	}
 
-	if (exemple_out_endpoint == NULL) {
+	if (example_out_endpoint == NULL) {
 		printk(KERN_INFO "%s: no endpoint interrupt out in probe()\n",
 		       THIS_MODULE->name);
 		return -ENODEV;
 	}
 
 	/* Verifier si le endpoint INTERRUPT OUT a une bande passante suffisante. */
-	if (exemple_out_endpoint->wMaxPacketSize < EXEMPLE_OUT_BUFFER_SIZE) {
+	if (example_out_endpoint->wMaxPacketSize < EXEMPLE_OUT_BUFFER_SIZE) {
 		printk(KERN_INFO "%s: Interrupt out max packet size too small\n",
 		       THIS_MODULE->name);
-		exemple_out_endpoint = NULL;
-		exemple_usb_device  = NULL;
+		example_out_endpoint = NULL;
+		example_usb_device  = NULL;
 		return -EINVAL;
 	}
 
 	/* Allouer un URB pour les requetes en ecriture a venir */
-	exemple_out_urb = usb_alloc_urb(0, GFP_KERNEL);
-	if (exemple_out_urb == NULL) {
-		exemple_out_endpoint = NULL;
-		exemple_usb_device = NULL;
+	example_out_urb = usb_alloc_urb(0, GFP_KERNEL);
+	if (example_out_urb == NULL) {
+		example_out_endpoint = NULL;
+		example_usb_device = NULL;
 		return -ENOMEM;
 	}
 
-	exemple_out_buffer = kmalloc(EXEMPLE_OUT_BUFFER_SIZE, GFP_KERNEL);
-	if (exemple_out_buffer == NULL) {
-		usb_free_urb(exemple_out_urb);
-		exemple_out_urb = NULL;
-		exemple_out_endpoint = NULL;
-		exemple_usb_device   = NULL;
+	example_out_buffer = kmalloc(EXEMPLE_OUT_BUFFER_SIZE, GFP_KERNEL);
+	if (example_out_buffer == NULL) {
+		usb_free_urb(example_out_urb);
+		example_out_urb = NULL;
+		example_out_endpoint = NULL;
+		example_usb_device   = NULL;
 		return -ENOMEM;
 	}
 	
-	err = usb_register_dev(intf, & exemple_usb_class_driver);
+	err = usb_register_dev(intf, & example_usb_class_driver);
 	if (err != 0) {
-		kfree(exemple_out_buffer);
-		exemple_out_buffer = NULL;
-		usb_free_urb(exemple_out_urb);
-		exemple_out_urb = NULL;
-		exemple_out_endpoint = NULL;
-		exemple_usb_device   = NULL;
+		kfree(example_out_buffer);
+		example_out_buffer = NULL;
+		usb_free_urb(example_out_urb);
+		example_out_urb = NULL;
+		example_out_endpoint = NULL;
+		example_usb_device   = NULL;
 		return err;
 	}
 	return 0;
 }
 
 
-static void exemple_disconnect(struct usb_interface * intf)
+static void example_disconnect(struct usb_interface * intf)
 {
-	usb_deregister_dev(intf, & exemple_usb_class_driver);
-	kfree(exemple_out_buffer);
-	usb_free_urb(exemple_out_urb);
-	exemple_out_urb = NULL;
-	exemple_out_buffer   = NULL;
-	exemple_out_endpoint = NULL;
-	exemple_usb_device   = NULL;
+	usb_deregister_dev(intf, & example_usb_class_driver);
+	kfree(example_out_buffer);
+	usb_free_urb(example_out_urb);
+	example_out_urb = NULL;
+	example_out_buffer   = NULL;
+	example_out_endpoint = NULL;
+	example_usb_device   = NULL;
 }
 
 
-static int exemple_open(struct inode *inode, struct file *filp)
-{
-	return 0;
-}
-
-
-static int exemple_release(struct inode *inode, struct file *filp)
+static int example_open(struct inode *inode, struct file *filp)
 {
 	return 0;
 }
 
 
-static ssize_t exemple_write (struct file * file,
+static int example_release(struct inode *inode, struct file *filp)
+{
+	return 0;
+}
+
+
+static ssize_t example_write (struct file * file,
                               const char __user * data,
                               size_t length, loff_t * offset)
 {
@@ -186,42 +186,42 @@ static ssize_t exemple_write (struct file * file,
 	if (err)
 		return -EINVAL;
 	
-	exemple_out_buffer[0] = o0 & 0xFF; 
-	exemple_out_buffer[1] = o1 & 0xFF;
-	exemple_out_buffer[2] = o2 & 0xFF;
-	exemple_out_buffer[3] = o3 & 0xFF;
-	exemple_out_buffer[4] = o4 & 0xFF;
-	exemple_out_buffer[5] = o5 & 0xFF;
-	exemple_out_buffer[6] = o6 & 0xFF;
-	exemple_out_buffer[7] = o7 & 0xFF;
+	example_out_buffer[0] = o0 & 0xFF; 
+	example_out_buffer[1] = o1 & 0xFF;
+	example_out_buffer[2] = o2 & 0xFF;
+	example_out_buffer[3] = o3 & 0xFF;
+	example_out_buffer[4] = o4 & 0xFF;
+	example_out_buffer[5] = o5 & 0xFF;
+	example_out_buffer[6] = o6 & 0xFF;
+	example_out_buffer[7] = o7 & 0xFF;
 
-	usb_fill_int_urb(exemple_out_urb,
-	                 exemple_usb_device,
-	                 usb_sndintpipe(exemple_usb_device,
-					        exemple_out_endpoint->bEndpointAddress),
-	                 exemple_out_buffer,
+	usb_fill_int_urb(example_out_urb,
+	                 example_usb_device,
+	                 usb_sndintpipe(example_usb_device,
+					        example_out_endpoint->bEndpointAddress),
+	                 example_out_buffer,
 					 EXEMPLE_OUT_BUFFER_SIZE,
-					 exemple_write_callback,
+					 example_write_callback,
 					 NULL, /* donnees privees non utilisees */
-					 exemple_out_endpoint->bInterval);
+					 example_out_endpoint->bInterval);
 
-	err = usb_submit_urb(exemple_out_urb, GFP_KERNEL);
+	err = usb_submit_urb(example_out_urb, GFP_KERNEL);
 	if (err == 0)
 		return length;
 	return err;
 }
 
 
-static void exemple_write_callback(struct urb * urb)
+static void example_write_callback(struct urb * urb)
 {
 }
 
 
-static int __init exemple_init(void)
+static int __init example_init(void)
 {
 	int err;
 
-	err = usb_register(& exemple_usb_driver);
+	err = usb_register(& example_usb_driver);
 	if (err) {
 		printk(KERN_ERR "%s: Erreur dans usb_register(): %d\n",
 		       THIS_MODULE->name, err);
@@ -231,14 +231,14 @@ static int __init exemple_init(void)
 }
 
 
-static void __exit exemple_exit(void)
+static void __exit example_exit(void)
 {
-	usb_deregister(& exemple_usb_driver);
+	usb_deregister(& example_usb_driver);
 }
 
 
-	module_init (exemple_init);
-	module_exit (exemple_exit);
+	module_init (example_init);
+	module_exit (example_exit);
 
 	MODULE_DESCRIPTION("write() system call implementation.");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");

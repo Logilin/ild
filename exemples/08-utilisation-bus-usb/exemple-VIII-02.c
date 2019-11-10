@@ -3,7 +3,7 @@
     "Ecriture de drivers et programmation noyau Linux"
   Chapitre "Utilisation du bus USB"
 
-  (c) 2005-2017 Christophe Blaess
+  (c) 2005-2019 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -17,26 +17,26 @@
 #define ID_PRODUIT_EXEMPLE   0x5500  /* Kit K8055 */
 
 
-	static struct usb_device_id   id_table_exemple [] = {
+	static struct usb_device_id   id_table_example [] = {
 		{ USB_DEVICE(ID_VENDEUR_EXEMPLE, ID_PRODUIT_EXEMPLE) },
 		{ }
 	};
-	MODULE_DEVICE_TABLE(usb, id_table_exemple);
+	MODULE_DEVICE_TABLE(usb, id_table_example);
 
-	static int  probe_exemple      (struct usb_interface * intf,
+	static int  probe_example      (struct usb_interface * intf,
 	                                const struct usb_device_id * dev_id);
-	static void disconnect_exemple (struct usb_interface * intf);
+	static void disconnect_example (struct usb_interface * intf);
 
 
-	static struct usb_driver usb_driver_exemple = {
+	static struct usb_driver usb_driver_example = {
 		.name       = "Velleman K8055",
-		.id_table   = id_table_exemple,
-		.probe      = probe_exemple,
-		.disconnect = disconnect_exemple,
+		.id_table   = id_table_example,
+		.probe      = probe_example,
+		.disconnect = disconnect_example,
 	};
 
 
-static int probe_exemple(struct usb_interface * intf,
+static int probe_example(struct usb_interface * intf,
                   const struct usb_device_id  * dev_id)
 {
 	int i;
@@ -91,16 +91,16 @@ static int probe_exemple(struct usb_interface * intf,
 }
 
 
-static void disconnect_exemple(struct usb_interface * interface)
+static void disconnect_example(struct usb_interface * interface)
 {
 }
 
 
-static int __init exemple_init(void)
+static int __init example_init(void)
 {
 	int err;
 
-	err = usb_register(& usb_driver_exemple);
+	err = usb_register(& usb_driver_example);
 	if (err) {
 		printk(KERN_ERR "%s: usb_register(): error %d\n",
 		       THIS_MODULE->name, err);
@@ -113,14 +113,14 @@ static int __init exemple_init(void)
 }
 
 
-static void __exit exemple_exit(void)
+static void __exit example_exit(void)
 {
-	usb_deregister(& usb_driver_exemple);
+	usb_deregister(& usb_driver_example);
 }
 
 
-	module_init (exemple_init);
-	module_exit (exemple_exit);
+	module_init (example_init);
+	module_exit (example_exit);
 
 	MODULE_DESCRIPTION("Endpoint analysis.");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
