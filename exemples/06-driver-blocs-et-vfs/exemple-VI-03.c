@@ -3,7 +3,7 @@
     "Ecriture de drivers et programmation noyau Linux"
   Chapitre "Driver blocs et VFS"
 
-  (c) 2005-2017 Christophe Blaess
+  (c) 2005-2019 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -17,29 +17,29 @@
 	#include <linux/spinlock.h>
 
 
-	static int exemple_major = 0;
-	module_param_named(major, exemple_major, int, 0444);
+	static int example_major = 0;
+	module_param_named(major, example_major, int, 0444);
 
 	#define EXEMPLE_MINORS 9
 
 	#define EXEMPLE_SECTOR_SIZE 512
-	static int exemple_sectors = 4096;
-	module_param_named(sectors, exemple_sectors, int, 0444);
+	static int example_sectors = 4096;
+	module_param_named(sectors, example_sectors, int, 0444);
 
-	static char * exemple_data = NULL;
-	static struct request_queue  * exemple_request_queue;
-	static struct gendisk        * exemple_gendisk;
-	static spinlock_t              exemple_spinlock;
+	static char * example_data = NULL;
+	static struct request_queue  * example_request_queue;
+	static struct gendisk        * example_gendisk;
+	static spinlock_t              example_spinlock;
 
-	static int exemple_getgeo (struct block_device *, struct hd_geometry *);
+	static int example_getgeo (struct block_device *, struct hd_geometry *);
 
-	static struct block_device_operations exemple_devops = {
+	static struct block_device_operations example_devops = {
 		.owner   = THIS_MODULE,
-		.getgeo  = exemple_getgeo,
+		.getgeo  = example_getgeo,
 	};
 
 
-static void exemple_request(struct request_queue * rqueue)
+static void example_request(struct request_queue * rqueue)
 {
 	unsigned long start;
 	unsigned long length;
@@ -52,12 +52,12 @@ static void exemple_request(struct request_queue * rqueue)
 		length = blk_rq_cur_sectors(rq);
 
 		if (rq_data_dir(rq)) { /* write */
-			memcpy(& exemple_data[start * EXEMPLE_SECTOR_SIZE],
+			memcpy(& example_data[start * EXEMPLE_SECTOR_SIZE],
 			       bio_data(rq->bio),
 			       length * EXEMPLE_SECTOR_SIZE);
 		} else /* read */ {
 			memcpy(bio_data(rq->bio),
-			       & exemple_data[start * EXEMPLE_SECTOR_SIZE],
+			       & example_data[start * EXEMPLE_SECTOR_SIZE],
 			       length * EXEMPLE_SECTOR_SIZE);
 		}
 
@@ -73,78 +73,78 @@ static void exemple_request(struct request_queue * rqueue)
  * On simule un disque avec 4 tetes, 8 secteurs par cylindres,
  * et un nombre de cylindres dependant de sa capacite totale.
  */
-static int exemple_getgeo(struct block_device *bdev, struct hd_geometry *geo)
+static int example_getgeo(struct block_device *bdev, struct hd_geometry *geo)
 {
 	geo->heads = 4;
 	geo->sectors = 8;
-	geo->cylinders = exemple_sectors / geo->heads / geo->sectors;
+	geo->cylinders = example_sectors / geo->heads / geo->sectors;
 	geo->start = 0;
 	return 0;
 }
 
 
-static int __init exemple_init (void)
+static int __init example_init (void)
 {
 	int ret;
 
-	if (exemple_sectors <= 0)
+	if (example_sectors <= 0)
 		return -EINVAL;
 
-	exemple_data = vmalloc(exemple_sectors * EXEMPLE_SECTOR_SIZE);
-	if (exemple_data == NULL)
+	example_data = vmalloc(example_sectors * EXEMPLE_SECTOR_SIZE);
+	if (example_data == NULL)
 		return -ENOMEM;
-	memset(exemple_data, 0, exemple_sectors * EXEMPLE_SECTOR_SIZE);
+	memset(example_data, 0, example_sectors * EXEMPLE_SECTOR_SIZE);
 
-	ret = register_blkdev(exemple_major, THIS_MODULE->name);
+	ret = register_blkdev(example_major, THIS_MODULE->name);
 	if (ret < 0) {
-		vfree(exemple_data);
+		vfree(example_data);
 		return ret;
 	}
 
-	if (exemple_major == 0)
-		exemple_major = ret;
+	if (example_major == 0)
+		example_major = ret;
 
-	spin_lock_init(& exemple_spinlock);
+	spin_lock_init(& example_spinlock);
 
-	exemple_request_queue = blk_init_queue(exemple_request,
-	                                     & exemple_spinlock);
-	if (exemple_request_queue == NULL) {
-		unregister_blkdev(exemple_major, THIS_MODULE->name);
-		vfree(exemple_data);
+	example_request_queue = blk_init_queue(example_request,
+	                                     & example_spinlock);
+	if (example_request_queue == NULL) {
+		unregister_blkdev(example_major, THIS_MODULE->name);
+		vfree(example_data);
 		return -ENOMEM;
 	}
 
-	exemple_gendisk = alloc_disk(EXEMPLE_MINORS);
-	if (exemple_gendisk == NULL) {
-		blk_cleanup_queue(exemple_request_queue);
-		unregister_blkdev(exemple_major, THIS_MODULE->name);
-		vfree(exemple_data);
+	example_gendisk = alloc_disk(EXEMPLE_MINORS);
+	if (example_gendisk == NULL) {
+		blk_cleanup_queue(example_request_queue);
+		unregister_blkdev(example_major, THIS_MODULE->name);
+		vfree(example_data);
 		return -ENOMEM;
 	}
-	exemple_gendisk->major       = exemple_major;
-	exemple_gendisk->first_minor = 0;
-	exemple_gendisk->fops        = &exemple_devops;
-	exemple_gendisk->queue       = exemple_request_queue;
-	snprintf(exemple_gendisk->disk_name, 32, THIS_MODULE->name);
-	set_capacity(exemple_gendisk, exemple_sectors);
+	example_gendisk->major       = example_major;
+	example_gendisk->first_minor = 0;
+	example_gendisk->fops        = &example_devops;
+	example_gendisk->queue       = example_request_queue;
+	snprintf(example_gendisk->disk_name, 32, THIS_MODULE->name);
+	set_capacity(example_gendisk, example_sectors);
 
-	add_disk(exemple_gendisk);
+	add_disk(example_gendisk);
 
 	return 0;
 }
 
 
-static void __exit exemple_exit (void)
+static void __exit example_exit (void)
 {
-	del_gendisk(exemple_gendisk);
-	blk_cleanup_queue(exemple_request_queue);
-	unregister_blkdev(exemple_major, THIS_MODULE->name);
-	vfree(exemple_data);
+	del_gendisk(example_gendisk);
+	blk_cleanup_queue(example_request_queue);
+	unregister_blkdev(example_major, THIS_MODULE->name);
+	vfree(example_data);
 }
 
 
-	module_init(exemple_init);
-	module_exit(exemple_exit);
+	module_init(example_init);
+	module_exit(example_exit);
 
 	MODULE_DESCRIPTION("Block device get_geo() system call.");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
