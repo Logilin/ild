@@ -3,7 +3,7 @@
     "Ecriture de drivers et programmation noyau Linux"
   Chapitre "A.P.I. du noyau"
 
-  (c) 2005-2017 Christophe Blaess
+  (c) 2005-2019 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -13,11 +13,11 @@
 	#include <linux/timer.h>
 	#include <linux/version.h>
 
-	static struct timer_list exemple_timer;
+	static struct timer_list example_timer;
 
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
-static void exemple_timer_function(unsigned long arg)
+static void example_timer_function(unsigned long arg)
 {
 	struct timer_list * timer = (struct timer_list *) arg;
 	struct timeval time_of_day;
@@ -30,7 +30,7 @@ static void exemple_timer_function(unsigned long arg)
 	mod_timer(timer, jiffies + HZ);
 }
 #else
-static void exemple_timer_function(struct timer_list *timer)
+static void example_timer_function(struct timer_list *timer)
 {
 	struct timeval time_of_day;
 
@@ -45,30 +45,30 @@ static void exemple_timer_function(struct timer_list *timer)
 
 
 
-static int __init exemple_init (void)
+static int __init example_init (void)
 {
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
-	init_timer (& exemple_timer);
-	exemple_timer.function = exemple_timer_function;
-	exemple_timer.data = (unsigned long) (& exemple_timer);
+	init_timer (& example_timer);
+	example_timer.function = example_timer_function;
+	example_timer.data = (unsigned long) (& example_timer);
 #else
-	timer_setup (& exemple_timer, exemple_timer_function, 0);
+	timer_setup (& example_timer, example_timer_function, 0);
 #endif
-	exemple_timer.expires = jiffies + HZ;
-	add_timer(& exemple_timer);
+	example_timer.expires = jiffies + HZ;
+	add_timer(& example_timer);
 
 	return 0;
 }
 
 
-static void __exit exemple_exit (void)
+static void __exit example_exit (void)
 {
-	del_timer(& exemple_timer);
+	del_timer(& example_timer);
 }
 
 
-	module_init(exemple_init);
-	module_exit(exemple_exit);
+	module_init(example_init);
+	module_exit(example_exit);
 
 	MODULE_DESCRIPTION("Periodic message (current time).");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
