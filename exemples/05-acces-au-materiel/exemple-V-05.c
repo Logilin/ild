@@ -3,7 +3,7 @@
     "Ecriture de drivers et programmation noyau Linux"
   Chapitre "Acces au materiel"
 
-  (c) 2005-2017 Christophe Blaess
+  (c) 2005-2019 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -16,13 +16,13 @@
 
 	#include "gpio-exemples.h"
 
-	static irqreturn_t exemple_top_half(int irq, void * ident);
+	static irqreturn_t example_top_half(int irq, void * ident);
 
-	static void exemple_bottom_half(struct work_struct * inutilise);
-	static DECLARE_WORK(exemple_workqueue, exemple_bottom_half);
+	static void example_bottom_half(struct work_struct * inutilise);
+	static DECLARE_WORK(example_workqueue, example_bottom_half);
 
 
-static int __init exemple_init (void)
+static int __init example_init (void)
 {
 	int err;
 
@@ -41,7 +41,7 @@ static int __init exemple_init (void)
 		return err;
 	}
 
-	if ((err = request_irq(gpio_to_irq(EXEMPLE_GPIO_IN), exemple_top_half,
+	if ((err = request_irq(gpio_to_irq(EXEMPLE_GPIO_IN), example_top_half,
 	                       IRQF_SHARED | IRQF_TRIGGER_RISING,
 	                       THIS_MODULE->name, THIS_MODULE->name)) != 0) {
 		gpio_free(EXEMPLE_GPIO_OUT);
@@ -52,7 +52,7 @@ static int __init exemple_init (void)
 }
 
 
-static void __exit exemple_exit (void)
+static void __exit example_exit (void)
 {
 	free_irq(gpio_to_irq(EXEMPLE_GPIO_IN), THIS_MODULE->name);
 	flush_scheduled_work();
@@ -61,14 +61,14 @@ static void __exit exemple_exit (void)
 }
 
 
-static irqreturn_t exemple_top_half(int irq, void * ident)
+static irqreturn_t example_top_half(int irq, void * ident)
 {
-	schedule_work(& exemple_workqueue);
+	schedule_work(& example_workqueue);
 	return IRQ_HANDLED;
 }
 
 
-static void exemple_bottom_half(struct work_struct * inutilise)
+static void example_bottom_half(struct work_struct * inutilise)
 {
 	static int value = 1;
 
@@ -77,8 +77,8 @@ static void exemple_bottom_half(struct work_struct * inutilise)
 }
 
 
-	module_init(exemple_init);
-	module_exit(exemple_exit);
+	module_init(example_init);
+	module_exit(example_exit);
 
 	MODULE_DESCRIPTION("Workqueue bottom-half implementation");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");

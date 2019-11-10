@@ -3,7 +3,7 @@
     "Ecriture de drivers et programmation noyau Linux"
   Chapitre "Acces au materiel"
 
-  (c) 2005-2017 Christophe Blaess
+  (c) 2005-2019 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -20,26 +20,26 @@
 	#include "gpio-exemples.h"
 
 
-	static ssize_t exemple_read  (struct file * filp, char * buffer,
+	static ssize_t example_read  (struct file * filp, char * buffer,
 	                              size_t length, loff_t * offset);
 
-	static ssize_t exemple_write (struct file * filp, const char * buffer,
+	static ssize_t example_write (struct file * filp, const char * buffer,
 	                              size_t length, loff_t * offset);
 
 	static struct file_operations fops_exemple = {
 		.owner   =  THIS_MODULE,
-		.read    =  exemple_read,
-		.write   =  exemple_write,
+		.read    =  example_read,
+		.write   =  example_write,
 	};
 
-	static struct miscdevice exemple_misc_driver = {
+	static struct miscdevice example_misc_driver = {
 		    .minor          = MISC_DYNAMIC_MINOR,
 		    .name           = THIS_MODULE->name,
 		    .fops           = & fops_exemple,
 	};
 
 
-static int __init exemple_init (void)
+static int __init example_init (void)
 {
 	int err;
 
@@ -58,7 +58,7 @@ static int __init exemple_init (void)
 		return err;
 	}
 
-	if ((err = misc_register(& exemple_misc_driver)) != 0) {
+	if ((err = misc_register(& example_misc_driver)) != 0) {
 		gpio_free(EXEMPLE_GPIO_OUT);
 		gpio_free(EXEMPLE_GPIO_IN);
 		return err;
@@ -68,15 +68,15 @@ static int __init exemple_init (void)
 }
 
 
-static void __exit exemple_exit (void)
+static void __exit example_exit (void)
 {
-	misc_deregister(& exemple_misc_driver);
+	misc_deregister(& example_misc_driver);
 	gpio_free(EXEMPLE_GPIO_OUT);
 	gpio_free(EXEMPLE_GPIO_IN);
 }
 
 
-static ssize_t exemple_read(struct file * filp, char * buffer,
+static ssize_t example_read(struct file * filp, char * buffer,
                             size_t length, loff_t * offset)
 {
 	char k_buffer [8];
@@ -91,7 +91,7 @@ static ssize_t exemple_read(struct file * filp, char * buffer,
 }
 
 
-static ssize_t exemple_write(struct file * filp, const char * buffer,
+static ssize_t example_write(struct file * filp, const char * buffer,
                              size_t length, loff_t * offset)
 {
 	char k_buffer[80];
@@ -110,8 +110,8 @@ static ssize_t exemple_write(struct file * filp, const char * buffer,
 }
 
 
-	module_init(exemple_init);
-	module_exit(exemple_exit);
+	module_init(example_init);
+	module_exit(example_exit);
 
 	MODULE_DESCRIPTION("Read and write system call on GPIO pins.");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");

@@ -3,7 +3,7 @@
     "Ecriture de drivers et programmation noyau Linux"
   Chapitre "Acces au materiel"
 
-  (c) 2005-2017 Christophe Blaess
+  (c) 2005-2019 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -23,86 +23,86 @@
 	#include <asm/io.h>
 
 
-	static int  exemple_mmap (struct file * filp, struct vm_area_struct * vm);
+	static int  example_mmap (struct file * filp, struct vm_area_struct * vm);
 
-	static struct file_operations exemple_fops = {
+	static struct file_operations example_fops = {
 		.owner   =  THIS_MODULE,
-		.mmap    =  exemple_mmap,
+		.mmap    =  example_mmap,
 	};
 
-	static struct miscdevice exemple_misc_driver = {
+	static struct miscdevice example_misc_driver = {
 		    .minor          = MISC_DYNAMIC_MINOR,
 		    .name           = THIS_MODULE->name,
-		    .fops           = & exemple_fops,
+		    .fops           = & example_fops,
 	};
 
-	struct timer_list exemple_timer;
+	struct timer_list example_timer;
 
-	static char * exemple_buffer = NULL;
+	static char * example_buffer = NULL;
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
-static void exemple_timer_function(unsigned long unused)
+static void example_timer_function(unsigned long unused)
 #else
-static void exemple_timer_function(struct timer_list *unused)
+static void example_timer_function(struct timer_list *unused)
 #endif
 {
-	sprintf(exemple_buffer, "\r%s - %s(): %lu", THIS_MODULE->name, __FUNCTION__, jiffies);
-	mod_timer(& exemple_timer, jiffies + HZ);
+	sprintf(example_buffer, "\r%s - %s(): %lu", THIS_MODULE->name, __FUNCTION__, jiffies);
+	mod_timer(& example_timer, jiffies + HZ);
 }
 
 
 
-static int __init exemple_init (void)
+static int __init example_init (void)
 {
 	int err;
 	struct page * pg = NULL;
 
-	exemple_buffer = kmalloc(PAGE_SIZE, GFP_KERNEL);
-	if (exemple_buffer == NULL)
+	example_buffer = kmalloc(PAGE_SIZE, GFP_KERNEL);
+	if (example_buffer == NULL)
 		return -ENOMEM;
 
-	exemple_buffer[0] = '\0';
+	example_buffer[0] = '\0';
 
-	pg = virt_to_page(exemple_buffer);
+	pg = virt_to_page(example_buffer);
 	SetPageReserved(pg);
 
-	err =  misc_register(& exemple_misc_driver);
+	err =  misc_register(& example_misc_driver);
 	if (err != 0) {
 		ClearPageReserved(pg);
-		kfree(exemple_buffer);
-		exemple_buffer = NULL;
+		kfree(example_buffer);
+		example_buffer = NULL;
 		return err;
 	}
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
-	init_timer (& exemple_timer);
-	exemple_timer.function = exemple_timer_function;
+	init_timer (& example_timer);
+	example_timer.function = example_timer_function;
 #else
-	timer_setup (& exemple_timer, exemple_timer_function, 0);
+	timer_setup (& example_timer, example_timer_function, 0);
 #endif
-	exemple_timer.expires = jiffies + HZ;
-	add_timer(& exemple_timer);
+	example_timer.expires = jiffies + HZ;
+	add_timer(& example_timer);
 
 	return 0;
 }
 
 
-static void __exit exemple_exit (void)
+static void __exit example_exit (void)
 {
 	struct page * pg;
 
-	del_timer(& exemple_timer);
+	del_timer(& example_timer);
 
-	pg = virt_to_page(exemple_buffer);
+	pg = virt_to_page(example_buffer);
 	ClearPageReserved(pg);
-	kfree(exemple_buffer);
-	exemple_buffer = NULL;
+	kfree(example_buffer);
+	example_buffer = NULL;
 
-	misc_deregister(& exemple_misc_driver);
+	misc_deregister(& example_misc_driver);
 }
 
 
-static int exemple_mmap (struct file * filp, struct vm_area_struct * vma)
+static int example_mmap (struct file * filp, struct vm_area_struct * vma)
 {
 	int err;
 
@@ -111,7 +111,7 @@ static int exemple_mmap (struct file * filp, struct vm_area_struct * vma)
 
 	err = remap_pfn_range(vma,
 	                    (unsigned long) (vma->vm_start),
-	                    virt_to_phys(exemple_buffer) >> PAGE_SHIFT,
+	                    virt_to_phys(example_buffer) >> PAGE_SHIFT,
 	                    vma->vm_end - vma->vm_start,
 	                    vma->vm_page_prot);
 	if (err != 0)
@@ -122,8 +122,8 @@ static int exemple_mmap (struct file * filp, struct vm_area_struct * vma)
 
 
 
-	module_init(exemple_init);
-	module_exit(exemple_exit);
+	module_init(example_init);
+	module_exit(example_exit);
 
 	MODULE_DESCRIPTION("mmap() system call installation");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");

@@ -3,7 +3,7 @@
     "Ecriture de drivers et programmation noyau Linux"
   Chapitre "Acces au materiel"
 
-  (c) 2005-2017 Christophe Blaess
+  (c) 2005-2019 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -16,11 +16,11 @@
 	#include "gpio-exemples.h"
 
 
-	static irqreturn_t exemple_top_half    (int irq, void * ident);
-	static irqreturn_t exemple_bottom_half (int irq, void * ident);
+	static irqreturn_t example_top_half    (int irq, void * ident);
+	static irqreturn_t example_bottom_half (int irq, void * ident);
 
 
-static int __init exemple_init (void)
+static int __init example_init (void)
 {
 	int err;
 
@@ -40,8 +40,8 @@ static int __init exemple_init (void)
 	}
 
 	err = request_threaded_irq(gpio_to_irq(EXEMPLE_GPIO_IN),
-	                           exemple_top_half,
-	                           exemple_bottom_half,
+	                           example_top_half,
+	                           example_bottom_half,
 	                           IRQF_SHARED,
 	                           THIS_MODULE->name,
 	                           THIS_MODULE->name);
@@ -54,7 +54,7 @@ static int __init exemple_init (void)
 }
 
 
-static void __exit exemple_exit (void)
+static void __exit example_exit (void)
 {
 	free_irq(gpio_to_irq(EXEMPLE_GPIO_IN), THIS_MODULE->name);
 	gpio_free(EXEMPLE_GPIO_OUT);
@@ -62,13 +62,13 @@ static void __exit exemple_exit (void)
 }
 
 
-static irqreturn_t exemple_top_half(int irq, void * ident)
+static irqreturn_t example_top_half(int irq, void * ident)
 {
 	return IRQ_WAKE_THREAD;
 }
 
 
-static irqreturn_t exemple_bottom_half(int irq, void * ident)
+static irqreturn_t example_bottom_half(int irq, void * ident)
 {
 	static int value = 1;
 	gpio_set_value(EXEMPLE_GPIO_OUT, value);
@@ -78,8 +78,8 @@ static irqreturn_t exemple_bottom_half(int irq, void * ident)
 }
 
 
-	module_init(exemple_init);
-	module_exit(exemple_exit);
+	module_init(example_init);
+	module_exit(example_exit);
 
 	MODULE_DESCRIPTION("Threaded interrupt handler.");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");

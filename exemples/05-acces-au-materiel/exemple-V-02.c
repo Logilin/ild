@@ -3,7 +3,7 @@
     "Ecriture de drivers et programmation noyau Linux"
   Chapitre "Acces au materiel"
 
-  (c) 2005-2017 Christophe Blaess
+  (c) 2005-2019 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -14,50 +14,50 @@
 	#include <linux/kthread.h>
 	#include <linux/module.h>
 
-	static DECLARE_COMPLETION(exemple_started);
-	static DECLARE_COMPLETION(exemple_stopped);
+	static DECLARE_COMPLETION(example_started);
+	static DECLARE_COMPLETION(example_stopped);
 
-	static int exemple_stop = 0;
+	static int example_stop = 0;
 
 
-int exemple_thread(void * arg)
+int example_thread(void * arg)
 {
-	complete(& exemple_started);
+	complete(& example_started);
 
-	while (! exemple_stop) {
+	while (! example_stop) {
 		printk(KERN_INFO "%s - %s(): Thread running, jiffies = %lu\n",
 		                 THIS_MODULE->name, __FUNCTION__, jiffies);
 		ssleep(1);
 	}
-	complete_and_exit(& exemple_stopped, 0);
+	complete_and_exit(& example_stopped, 0);
 }
 
 
-static int __init exemple_init (void)
+static int __init example_init (void)
 {
 	struct task_struct * thread;
 
-	thread = kthread_run(exemple_thread, NULL, THIS_MODULE->name);
+	thread = kthread_run(example_thread, NULL, THIS_MODULE->name);
 	if (IS_ERR(thread))
               return -ENOMEM;
-        wait_for_completion(& exemple_started);
+        wait_for_completion(& example_started);
 	printk(KERN_INFO "%s - %s(): Thread started\n", THIS_MODULE->name, __FUNCTION__);
 
 	return 0; 
 }
 
 
-static void __exit exemple_exit (void)
+static void __exit example_exit (void)
 {
-	exemple_stop = 1;
-	wait_for_completion(& exemple_stopped);
+	example_stop = 1;
+	wait_for_completion(& example_stopped);
 
 	printk(KERN_INFO "%s - %s(): Thread terminated\n", THIS_MODULE->name, __FUNCTION__);
 }
 
 
-	module_init(exemple_init);
-	module_exit(exemple_exit);
+	module_init(example_init);
+	module_exit(example_exit);
 
 	MODULE_DESCRIPTION("Kernel thread implementation.");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");

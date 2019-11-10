@@ -1,5 +1,5 @@
 /****************************************************************************\
-   exemple_fpga.c - Driver pour carte Altera - Projet #####
+   example_fpga.c - Driver pour carte Altera - Projet #####
 
    2012 Logilin pour #####
 \****************************************************************************/
@@ -58,7 +58,7 @@ static char * module_names [] = {
 
 
 // Une structure specifique dans laquelle on stocke les donnees privées.
-struct exemple_fpga_s {
+struct example_fpga_s {
 
 	// Adresse de projection des modules 
 	unsigned char * module_mem;
@@ -90,102 +90,102 @@ struct exemple_fpga_s {
 
 
 // Un parametre pour desactiver totalement les interruptions
-static int exemple_fpga_disable_irq = 0;
-	module_param_named(disable_irq, exemple_fpga_disable_irq, int, 0644);
+static int example_fpga_disable_irq = 0;
+	module_param_named(disable_irq, example_fpga_disable_irq, int, 0644);
 	MODULE_PARM_DESC(disable_irq, "disable all interrupt handling");
 
 
 // Une classe de peripherique specifique pour notre driver.
-static struct class * exemple_fpga_class = NULL;
+static struct class * example_fpga_class = NULL;
 // Un mutex pour proteger l'acces a cette structure.
-DEFINE_MUTEX(exemple_fpga_class_mtx);
+DEFINE_MUTEX(example_fpga_class_mtx);
 
 
 
 // Methodes definies ci-dessous (appels-systeme depuis espace utlisateur).
-static int  exemple_fpga_open    (struct inode *,  struct file *);
-static int  exemple_fpga_release (struct inode *,  struct file *);
-static ssize_t exemple_fpga_read (struct file *,   char __user *, size_t, loff_t *);
-static ssize_t exemple_fpga_write(struct file *,   const char __user *, size_t, loff_t *);
-static int  exemple_fpga_mmap    (struct file *,   struct vm_area_struct *);
-static long exemple_fpga_ioctl   (struct file *,   unsigned int, unsigned long int);
+static int  example_fpga_open    (struct inode *,  struct file *);
+static int  example_fpga_release (struct inode *,  struct file *);
+static ssize_t example_fpga_read (struct file *,   char __user *, size_t, loff_t *);
+static ssize_t example_fpga_write(struct file *,   const char __user *, size_t, loff_t *);
+static int  example_fpga_mmap    (struct file *,   struct vm_area_struct *);
+static long example_fpga_ioctl   (struct file *,   unsigned int, unsigned long int);
 
 
 
 // Methodes du peripherique caractere.
-static struct file_operations exemple_fpga_fops = {
+static struct file_operations example_fpga_fops = {
 	.owner   =  THIS_MODULE,
-	.open    =  exemple_fpga_open,
-	.release =  exemple_fpga_release,
-	.read    =  exemple_fpga_read,
-	.write   =  exemple_fpga_write,
-	.mmap    =  exemple_fpga_mmap,
-	.unlocked_ioctl = exemple_fpga_ioctl,
+	.open    =  example_fpga_open,
+	.release =  example_fpga_release,
+	.read    =  example_fpga_read,
+	.write   =  example_fpga_write,
+	.mmap    =  example_fpga_mmap,
+	.unlocked_ioctl = example_fpga_ioctl,
 };
 
 
 
 // Enregistrement d'un nouveau peripherique de type caractere
-static int exemple_fpga_initialize_char_device(struct exemple_fpga_s * exemple_fpga)
+static int example_fpga_initialize_char_device(struct example_fpga_s * example_fpga)
 {
 	int i;
 	int err;
 
 	// Reserver un numero majeur dont le mineur 0 soit libre
-	err = alloc_chrdev_region(& (exemple_fpga->dev), EXEMPLE_FPGA_FIRST_MINOR, EXEMPLE_FPGA_NB_MINORS, THIS_MODULE->name);
+	err = alloc_chrdev_region(& (example_fpga->dev), EXEMPLE_FPGA_FIRST_MINOR, EXEMPLE_FPGA_NB_MINORS, THIS_MODULE->name);
 	if (err < 0) {
-		kfree(exemple_fpga);
+		kfree(example_fpga);
 		return EINVAL;
 	}
 
 	// Inscrire un peripherique dans la classe specifique
-	mutex_lock(&exemple_fpga_class_mtx);
+	mutex_lock(&example_fpga_class_mtx);
 	for (i = 0; i < EXEMPLE_FPGA_NB_MINORS; i ++) 
-		device_create(exemple_fpga_class, NULL, MKDEV(MAJOR(exemple_fpga->dev), MINOR(exemple_fpga->dev) + i), NULL, module_names[i]);
+		device_create(example_fpga_class, NULL, MKDEV(MAJOR(example_fpga->dev), MINOR(example_fpga->dev) + i), NULL, module_names[i]);
 
 	// Associer le peripherique caractere et ses methodes
-	cdev_init(& (exemple_fpga->cdev), & exemple_fpga_fops);
+	cdev_init(& (example_fpga->cdev), & example_fpga_fops);
 
 	// Enregistrer le peripherique avec les numeros majeur/mineur obtenus
-	if ((err = cdev_add(& (exemple_fpga->cdev), exemple_fpga->dev, EXEMPLE_FPGA_NB_MINORS)) != 0) {
-		device_destroy(exemple_fpga_class, exemple_fpga->dev);
-		mutex_unlock(&exemple_fpga_class_mtx);
-		unregister_chrdev_region(exemple_fpga->dev, EXEMPLE_FPGA_NB_MINORS);
+	if ((err = cdev_add(& (example_fpga->cdev), example_fpga->dev, EXEMPLE_FPGA_NB_MINORS)) != 0) {
+		device_destroy(example_fpga_class, example_fpga->dev);
+		mutex_unlock(&example_fpga_class_mtx);
+		unregister_chrdev_region(example_fpga->dev, EXEMPLE_FPGA_NB_MINORS);
 		return err;
 	}
-	mutex_unlock(&exemple_fpga_class_mtx);
+	mutex_unlock(&example_fpga_class_mtx);
 	return 0;
 }
 
 
 
 // Liberation d'un peripherique de type caractere.
-static void exemple_fpga_release_char_device(struct exemple_fpga_s * exemple_fpga)
+static void example_fpga_release_char_device(struct example_fpga_s * example_fpga)
 {
 	int i;
-	mutex_lock(&exemple_fpga_class_mtx);
-	cdev_del (& (exemple_fpga->cdev));
+	mutex_lock(&example_fpga_class_mtx);
+	cdev_del (& (example_fpga->cdev));
 	for (i = 0; i < EXEMPLE_FPGA_NB_MINORS; i ++) 
-		device_destroy(exemple_fpga_class, MKDEV(MAJOR(exemple_fpga->dev), MINOR(exemple_fpga->dev) + i));
-	mutex_unlock(&exemple_fpga_class_mtx);
-	unregister_chrdev_region(exemple_fpga->dev, EXEMPLE_FPGA_NB_MINORS);
+		device_destroy(example_fpga_class, MKDEV(MAJOR(example_fpga->dev), MINOR(example_fpga->dev) + i));
+	mutex_unlock(&example_fpga_class_mtx);
+	unregister_chrdev_region(example_fpga->dev, EXEMPLE_FPGA_NB_MINORS);
 }
 
 
 
 // Une structure pour regrouper la configuration et le numero mineur.
-struct exemple_fpga_file_private_s {
-	struct exemple_fpga_s * exemple_fpga;
+struct example_fpga_file_private_s {
+	struct example_fpga_s * example_fpga;
 	int                 minor;
 };
 
 
 
 // Methode d'ouverture du peripherique caractere
-static int exemple_fpga_open(struct inode * indp,  struct file * filp)
+static int example_fpga_open(struct inode * indp,  struct file * filp)
 {
-	struct exemple_fpga_s * exemple_fpga;
-	struct exemple_fpga_file_private_s * private_data;
+	struct example_fpga_s * example_fpga;
+	struct example_fpga_file_private_s * private_data;
 
 	// Le mode d'ouverture pourrait etre consulte avec
 	//     filp->f_mode & FMODE_READ
@@ -193,43 +193,43 @@ static int exemple_fpga_open(struct inode * indp,  struct file * filp)
 
 
 	// Rechercher la structure de configuration correspondant.
-	exemple_fpga = container_of(indp->i_cdev, struct exemple_fpga_s, cdev);
+	example_fpga = container_of(indp->i_cdev, struct example_fpga_s, cdev);
 
 	// Assurer l'unicite d'ouverture du module
-	mutex_lock(& (exemple_fpga->mtx_open));
-	if (exemple_fpga->module_open[iminor(indp)] != 0) {
-		mutex_unlock(& (exemple_fpga->mtx_open));
+	mutex_lock(& (example_fpga->mtx_open));
+	if (example_fpga->module_open[iminor(indp)] != 0) {
+		mutex_unlock(& (example_fpga->mtx_open));
 		return -EBUSY;
 	}
 
 	// Allouer une structure privee
-	if ((private_data = kmalloc(sizeof(struct exemple_fpga_file_private_s), GFP_KERNEL)) == NULL) {
-		mutex_unlock(& (exemple_fpga->mtx_open));
+	if ((private_data = kmalloc(sizeof(struct example_fpga_file_private_s), GFP_KERNEL)) == NULL) {
+		mutex_unlock(& (example_fpga->mtx_open));
 		return -ENOMEM;
 	}
 
 	// Y sauver la configuration et le mineur (pour les autres methodes).
-	private_data->exemple_fpga = exemple_fpga;
+	private_data->example_fpga = example_fpga;
 	private_data->minor = iminor(indp);
 	filp->private_data = private_data;
 
 	// Ouverture Ok.
-	exemple_fpga->module_open[iminor(indp)] ++;
-	mutex_unlock(& (exemple_fpga->mtx_open));
+	example_fpga->module_open[iminor(indp)] ++;
+	mutex_unlock(& (example_fpga->mtx_open));
 	return 0;
 }
 
 
 
 // Methode de fermeture du peripherique caractere
-static int exemple_fpga_release(struct inode * indp,  struct file * filp)
+static int example_fpga_release(struct inode * indp,  struct file * filp)
 {
-	struct exemple_fpga_file_private_s * private_data = filp->private_data;
-	struct exemple_fpga_s * exemple_fpga = private_data->exemple_fpga;
+	struct example_fpga_file_private_s * private_data = filp->private_data;
+	struct example_fpga_s * example_fpga = private_data->example_fpga;
 
-	mutex_lock(& (exemple_fpga->mtx_open));
-	exemple_fpga->module_open[iminor(indp)]--;
-	mutex_unlock(& (exemple_fpga->mtx_open));
+	mutex_lock(& (example_fpga->mtx_open));
+	example_fpga->module_open[iminor(indp)]--;
+	mutex_unlock(& (example_fpga->mtx_open));
 
 	// Fermeture Ok.
 	return 0;
@@ -238,7 +238,7 @@ static int exemple_fpga_release(struct inode * indp,  struct file * filp)
 
 
 // Methode de lecture sur un module
-static ssize_t exemple_fpga_read  (struct file * filp, char __user * buffer, size_t size, loff_t * offset)
+static ssize_t example_fpga_read  (struct file * filp, char __user * buffer, size_t size, loff_t * offset)
 {
 	int i;
 	int err;
@@ -246,22 +246,22 @@ static ssize_t exemple_fpga_read  (struct file * filp, char __user * buffer, siz
 	unsigned char * kbuffer;
 	unsigned char * start;
 
-	struct exemple_fpga_file_private_s * private_data = filp->private_data;
-	struct exemple_fpga_s * exemple_fpga = private_data->exemple_fpga;
+	struct example_fpga_file_private_s * private_data = filp->private_data;
+	struct example_fpga_s * example_fpga = private_data->example_fpga;
 	int minor = private_data->minor;
 
 	switch (minor) {
 		case EXEMPLE_FPGA_MINOR_MEM:
 			length = EXEMPLE_FPGA_MODULE_MEM_LENGTH - (* offset);
-			start  = exemple_fpga->module_mem + (* offset);
+			start  = example_fpga->module_mem + (* offset);
 			break;
 		case EXEMPLE_FPGA_MINOR_LEDS:
 			length = 4;
-			start  = exemple_fpga->module_leds;
+			start  = example_fpga->module_leds;
 			break;
 		case EXEMPLE_FPGA_MINOR_SWITCHES:
 			length = 4;
-			start  = exemple_fpga->module_switches;
+			start  = example_fpga->module_switches;
 			break;
 		default:
 			return  -EINVAL;
@@ -293,25 +293,25 @@ static ssize_t exemple_fpga_read  (struct file * filp, char __user * buffer, siz
 
 
 // Methode d'ecriture vers un module
-static ssize_t exemple_fpga_write (struct file * filp, const char __user * buffer, size_t size, loff_t * offset)
+static ssize_t example_fpga_write (struct file * filp, const char __user * buffer, size_t size, loff_t * offset)
 {
 	int i;
 	int length;
 	unsigned char * kbuffer;
 	unsigned char * start;
 
-	struct exemple_fpga_file_private_s * private_data = filp->private_data;
-	struct exemple_fpga_s * exemple_fpga = private_data->exemple_fpga;
+	struct example_fpga_file_private_s * private_data = filp->private_data;
+	struct example_fpga_s * example_fpga = private_data->example_fpga;
 	int minor = private_data->minor;
 
 	switch (minor) {
 		case EXEMPLE_FPGA_MINOR_MEM:
 			length = EXEMPLE_FPGA_MODULE_MEM_LENGTH - (* offset);
-			start  = exemple_fpga->module_mem + (* offset);
+			start  = example_fpga->module_mem + (* offset);
 			break;
 		case EXEMPLE_FPGA_MINOR_LEDS:
 			length = 4;
-			start  = exemple_fpga->module_leds;
+			start  = example_fpga->module_leds;
 			break;
 		case EXEMPLE_FPGA_MINOR_SWITCHES:
 		default:
@@ -348,27 +348,27 @@ static ssize_t exemple_fpga_write (struct file * filp, const char __user * buffe
 
 
 // Fonction de projection en memoire virtuelle (pas sur PXA168)
-static int exemple_fpga_mmap(struct file * filp, struct vm_area_struct * vma)
+static int example_fpga_mmap(struct file * filp, struct vm_area_struct * vma)
 {
 	int length;
 	unsigned long start;
 
-	struct exemple_fpga_file_private_s * private_data = filp->private_data;
-	struct exemple_fpga_s * exemple_fpga = private_data->exemple_fpga;
+	struct example_fpga_file_private_s * private_data = filp->private_data;
+	struct example_fpga_s * example_fpga = private_data->example_fpga;
 	int minor = private_data->minor;
 
 	switch (minor) {
 		case EXEMPLE_FPGA_MINOR_MEM:
 			length = EXEMPLE_FPGA_MODULE_MEM_LENGTH;
-			start  = exemple_fpga->iobase + EXEMPLE_FPGA_MODULE_MEM_START;
+			start  = example_fpga->iobase + EXEMPLE_FPGA_MODULE_MEM_START;
 			break;
 		case EXEMPLE_FPGA_MINOR_LEDS:
 			length = 4;
-			start  = exemple_fpga->iobase + EXEMPLE_FPGA_MODULE_LEDS_START;
+			start  = example_fpga->iobase + EXEMPLE_FPGA_MODULE_LEDS_START;
 			break;
 		case EXEMPLE_FPGA_MINOR_SWITCHES:
 			length = 4;
-			start  = exemple_fpga->iobase + EXEMPLE_FPGA_MODULE_SWITCHES_START;;
+			start  = example_fpga->iobase + EXEMPLE_FPGA_MODULE_SWITCHES_START;;
 			break;
 		default:
 			return  -EINVAL;
@@ -387,10 +387,10 @@ static int exemple_fpga_mmap(struct file * filp, struct vm_area_struct * vma)
 
 
 // Methode d'ioctl sur un module
-static long exemple_fpga_ioctl (struct file * filp, unsigned int cmd, unsigned long int arg)
+static long example_fpga_ioctl (struct file * filp, unsigned int cmd, unsigned long int arg)
 {
-	struct exemple_fpga_file_private_s * private_data = filp->private_data;
-	struct exemple_fpga_s * exemple_fpga = private_data->exemple_fpga;
+	struct example_fpga_file_private_s * private_data = filp->private_data;
+	struct example_fpga_s * example_fpga = private_data->example_fpga;
 
 	// Verifier si la commande est bien destinee a notre driver
 	if (_IOC_TYPE(cmd) != EXEMPLE_FPGA_IOCTL_MAGIC_NUMBER)
@@ -412,12 +412,12 @@ static long exemple_fpga_ioctl (struct file * filp, unsigned int cmd, unsigned l
 	switch(_IOC_NR(cmd)) {
 		// Lecture de l'etat d'activation de l'IRQ
 		case EXEMPLE_FPGA_IOCTL_COMMAND_GET_ENABLE_IRQ:
-			if (copy_to_user((void __user *) arg, & (exemple_fpga->irq_handling), sizeof(int)) != 0)
+			if (copy_to_user((void __user *) arg, & (example_fpga->irq_handling), sizeof(int)) != 0)
 				return -EFAULT;
 			break;
 		// Ecriture d'un nouvel etat d'activation de l'IRQ
 		case EXEMPLE_FPGA_IOCTL_COMMAND_SET_ENABLE_IRQ:
-			if (copy_from_user(& (exemple_fpga->irq_handling), (void __user *) arg, sizeof(int)) != 0)
+			if (copy_from_user(& (example_fpga->irq_handling), (void __user *) arg, sizeof(int)) != 0)
 				return -EFAULT;
 			break;
 		default :
@@ -436,12 +436,12 @@ static long exemple_fpga_ioctl (struct file * filp, unsigned int cmd, unsigned l
 
 
 // Handler d'interruption defini plus bas.
-static irqreturn_t exemple_fpga_interrupt_handler(int, void *);
+static irqreturn_t example_fpga_interrupt_handler(int, void *);
 
 
 
 // Initialisation de la communication avec le FPGA
-static int exemple_fpga_initialize_pci_device (struct pci_dev * dev, struct exemple_fpga_s * exemple_fpga)
+static int example_fpga_initialize_pci_device (struct pci_dev * dev, struct example_fpga_s * example_fpga)
 {
 	int err;
 
@@ -452,13 +452,13 @@ static int exemple_fpga_initialize_pci_device (struct pci_dev * dev, struct exem
 	// Verifier si on supporte les interruptions MSI
 	if (pci_enable_msi(dev) == 0) {
 		printk (KERN_DEBUG "EXEMPLE-FPGA uses MSI\n");
-		exemple_fpga->msi_enabled = 1;
+		example_fpga->msi_enabled = 1;
 	} else {
-		exemple_fpga->msi_enabled = 0;
+		example_fpga->msi_enabled = 0;
 	}
 
 	// Adresse de depart de la BAR0
-	exemple_fpga->iobase = pci_resource_start(dev, 0); // 0 -> BAR0
+	example_fpga->iobase = pci_resource_start(dev, 0); // 0 -> BAR0
 
 	// Acces a la memoire du port PCIe
 	err = pci_request_region(dev, 0, THIS_MODULE->name);
@@ -469,8 +469,8 @@ static int exemple_fpga_initialize_pci_device (struct pci_dev * dev, struct exem
 	}
 
 	// Projection en memoire du module RAM
-	exemple_fpga->module_mem = ioremap_nocache(exemple_fpga->iobase + EXEMPLE_FPGA_MODULE_MEM_START, EXEMPLE_FPGA_MODULE_MEM_LENGTH);
-	if (exemple_fpga->module_mem == NULL) {
+	example_fpga->module_mem = ioremap_nocache(example_fpga->iobase + EXEMPLE_FPGA_MODULE_MEM_START, EXEMPLE_FPGA_MODULE_MEM_LENGTH);
+	if (example_fpga->module_mem == NULL) {
 		printk(KERN_DEBUG "Error on ioremap for PIO MEM");
 		pci_release_region(dev, 0);
 		pci_disable_device(dev);
@@ -478,50 +478,50 @@ static int exemple_fpga_initialize_pci_device (struct pci_dev * dev, struct exem
 	}
 
 	// Projection en memoire du module LED
-	exemple_fpga->module_leds = ioremap_nocache(exemple_fpga->iobase + EXEMPLE_FPGA_MODULE_LEDS_START, EXEMPLE_FPGA_MODULE_LEDS_LENGTH);
-	if (exemple_fpga->module_leds == NULL) {
+	example_fpga->module_leds = ioremap_nocache(example_fpga->iobase + EXEMPLE_FPGA_MODULE_LEDS_START, EXEMPLE_FPGA_MODULE_LEDS_LENGTH);
+	if (example_fpga->module_leds == NULL) {
 		printk(KERN_DEBUG "Error on ioremap for PIO LED");
-		iounmap(exemple_fpga->module_mem);
+		iounmap(example_fpga->module_mem);
 		pci_release_region(dev, 0);
 		pci_disable_device(dev);
 		return EINVAL;
 	}
 
 	// Projection en memoire du module Switch
-	exemple_fpga->module_switches = ioremap_nocache(exemple_fpga->iobase + EXEMPLE_FPGA_MODULE_SWITCHES_START, EXEMPLE_FPGA_MODULE_SWITCHES_LENGTH);
-	if (exemple_fpga->module_switches == NULL) {
+	example_fpga->module_switches = ioremap_nocache(example_fpga->iobase + EXEMPLE_FPGA_MODULE_SWITCHES_START, EXEMPLE_FPGA_MODULE_SWITCHES_LENGTH);
+	if (example_fpga->module_switches == NULL) {
 		printk(KERN_DEBUG "Error on ioremap for PIO SWITCH");
-		iounmap(exemple_fpga->module_leds);
-		iounmap(exemple_fpga->module_mem);
+		iounmap(example_fpga->module_leds);
+		iounmap(example_fpga->module_mem);
 		pci_release_region(dev, 0);
 		pci_disable_device(dev);
 		return EINVAL;
 	}
 
 	// Projection en memoire du module Controls
-	exemple_fpga->module_controls = ioremap_nocache(exemple_fpga->iobase + EXEMPLE_FPGA_MODULE_CONTROLS_START, EXEMPLE_FPGA_MODULE_CONTROLS_LENGTH);
-	if (exemple_fpga->module_controls == NULL) {
+	example_fpga->module_controls = ioremap_nocache(example_fpga->iobase + EXEMPLE_FPGA_MODULE_CONTROLS_START, EXEMPLE_FPGA_MODULE_CONTROLS_LENGTH);
+	if (example_fpga->module_controls == NULL) {
 		printk(KERN_DEBUG "Error on ioremap for PIO CONTROL");
-		iounmap(exemple_fpga->module_switches);
-		iounmap(exemple_fpga->module_leds);
-		iounmap(exemple_fpga->module_mem);
+		iounmap(example_fpga->module_switches);
+		iounmap(example_fpga->module_leds);
+		iounmap(example_fpga->module_mem);
 		pci_release_region(dev, 0);
 		pci_disable_device(dev);
 		return EINVAL;
 	}
 
-	// Le parametre exemple_fpga_disable_irq peut etre fourni sur la ligne
+	// Le parametre example_fpga_disable_irq peut etre fourni sur la ligne
 	// de commande de insmod pour interdire tout traitement d'interruption.
-	if (! exemple_fpga_disable_irq) {
+	if (! example_fpga_disable_irq) {
 
 		// Inscription du handler d'interruption
 		if (dev->irq != 0) {
-			if (request_irq(dev->irq, exemple_fpga_interrupt_handler, IRQF_SHARED, THIS_MODULE->name, exemple_fpga) != 0) {
+			if (request_irq(dev->irq, example_fpga_interrupt_handler, IRQF_SHARED, THIS_MODULE->name, example_fpga) != 0) {
 				printk(KERN_DEBUG "Error on request_irq");
-				iounmap(exemple_fpga->module_controls);
-				iounmap(exemple_fpga->module_switches);
-				iounmap(exemple_fpga->module_leds);
-				iounmap(exemple_fpga->module_mem);
+				iounmap(example_fpga->module_controls);
+				iounmap(example_fpga->module_switches);
+				iounmap(example_fpga->module_leds);
+				iounmap(example_fpga->module_mem);
 				pci_release_region(dev, 0);
 				pci_disable_device(dev);
 				return EINVAL;
@@ -529,11 +529,11 @@ static int exemple_fpga_initialize_pci_device (struct pci_dev * dev, struct exem
 		}
 
 		// Edge Capture 
-		iowrite32(0x00000003, exemple_fpga->module_switches + 0x0C);
+		iowrite32(0x00000003, example_fpga->module_switches + 0x0C);
 		// Enable PIO IRQ
-		iowrite32(0x00000003, exemple_fpga->module_switches + 0x08);
+		iowrite32(0x00000003, example_fpga->module_switches + 0x08);
 		// Enable PCIe IRQ
-		iowrite32(0x00000001, exemple_fpga->module_controls + 0x50);
+		iowrite32(0x00000001, example_fpga->module_controls + 0x50);
 	}
 
 	return 0;
@@ -542,31 +542,31 @@ static int exemple_fpga_initialize_pci_device (struct pci_dev * dev, struct exem
 
 
 // Liberation de la partie basse du driver
-static void exemple_fpga_release_pci_device (struct pci_dev * dev, struct exemple_fpga_s * exemple_fpga)
+static void example_fpga_release_pci_device (struct pci_dev * dev, struct example_fpga_s * example_fpga)
 {
-	if (! exemple_fpga_disable_irq) {
+	if (! example_fpga_disable_irq) {
 
 		// Arret des interruptions
-		iowrite32(0x00000000, exemple_fpga->module_controls + 0x50);
-		iowrite32(0x00000000, exemple_fpga->module_switches + 8);
+		iowrite32(0x00000000, example_fpga->module_controls + 0x50);
+		iowrite32(0x00000000, example_fpga->module_switches + 8);
 
 		// Supprimer le handler d'interruption
 		if (dev->irq) {
-			free_irq(dev->irq, exemple_fpga);
+			free_irq(dev->irq, example_fpga);
 		}
 	}
 
 	// retirer la projection des PIO
-	iounmap(exemple_fpga->module_controls);
-	iounmap(exemple_fpga->module_switches);
-	iounmap(exemple_fpga->module_leds);
-	iounmap(exemple_fpga->module_mem);
+	iounmap(example_fpga->module_controls);
+	iounmap(example_fpga->module_switches);
+	iounmap(example_fpga->module_leds);
+	iounmap(example_fpga->module_mem);
 
 	// Liberer l'occupation de la memoire PCI
 	pci_release_region(dev, 0);
 
 	// Desactiver eventuellement le MSI
-	if (exemple_fpga->msi_enabled == 1)
+	if (example_fpga->msi_enabled == 1)
 		pci_disable_msi(dev);
 
 	// Desactiver le peripherique PCI
@@ -576,47 +576,47 @@ static void exemple_fpga_release_pci_device (struct pci_dev * dev, struct exempl
 
 
 // Handler d'interruption (commutation des switches)
-static irqreturn_t exemple_fpga_interrupt_handler(int num, void * arg)
+static irqreturn_t example_fpga_interrupt_handler(int num, void * arg)
 {
-	struct exemple_fpga_s * exemple_fpga = (struct exemple_fpga_s *) arg;
+	struct example_fpga_s * example_fpga = (struct example_fpga_s *) arg;
 	static int value = 0x00;
 	int n;
 
 	// Le PCIe a-t-il declenche une interruption ?
-	n = ioread32(exemple_fpga->module_controls + 0x40);
+	n = ioread32(example_fpga->module_controls + 0x40);
 
 	printk(KERN_DEBUG "controls+0x40=%d\n", n);
 
 	// Sinon indiquer au kernel que l'interruption n'etait pas pour nous.
 	if (n == 0) {
 		// Clear the PIO Interrupt Mask (to ack the IRQ)
-		// iowrite32(0x00000000, exemple_fpga->module_switches + 0x08);
+		// iowrite32(0x00000000, example_fpga->module_switches + 0x08);
 		return IRQ_NONE;
 	}
 
 	// Quel switch ?
-	n = ioread32(exemple_fpga->module_switches + 0x0C);
+	n = ioread32(example_fpga->module_switches + 0x0C);
 
-	if (exemple_fpga->irq_handling) {
+	if (example_fpga->irq_handling) {
 		// Toggle the bit corresponding to the switch
 		value = value ^ n;
 		// Output the value to the leds
-		iowrite8(value, exemple_fpga->module_leds);
+		iowrite8(value, example_fpga->module_leds);
 
 	}
 
 	// Clear the PIO Interrupt Mask (to ack the IRQ)
-	iowrite32(0x00000000, exemple_fpga->module_switches + 0x08);
+	iowrite32(0x00000000, example_fpga->module_switches + 0x08);
 	// Reset edge trigerring register
-	iowrite32(0x00000003, exemple_fpga->module_switches + 0x0C);
+	iowrite32(0x00000003, example_fpga->module_switches + 0x0C);
 	// Then re-enable all PIO interrupts 
-	iowrite32(0x00000003, exemple_fpga->module_switches + 0x08);
+	iowrite32(0x00000003, example_fpga->module_switches + 0x08);
 
 	// Clear the interrupt bit in the Avalon-MM Status Register
-	//	iowrite32(0x00000000, exemple_fpga->module_controls + 0x40);
+	//	iowrite32(0x00000000, example_fpga->module_controls + 0x40);
 
 	// Re-enable interrupt bit in the Avalon-MM Enable Register
-	iowrite32(0x00000001, exemple_fpga->module_controls + 0x50);
+	iowrite32(0x00000001, example_fpga->module_controls + 0x50);
 
 	return IRQ_HANDLED;
 }
@@ -631,10 +631,10 @@ static irqreturn_t exemple_fpga_interrupt_handler(int num, void * arg)
 
 
 // Methode invoquee à la detection du peripherique (ou au chargement module).
-static int exemple_fpga_probe (struct pci_dev *dev, const struct pci_device_id *id)
+static int example_fpga_probe (struct pci_dev *dev, const struct pci_device_id *id)
 {
 	int err;
-	struct exemple_fpga_s * exemple_fpga = NULL;
+	struct example_fpga_s * example_fpga = NULL;
 
 	// Donnees privees encore invalides.
 	pci_set_drvdata(dev, NULL);
@@ -644,24 +644,24 @@ static int exemple_fpga_probe (struct pci_dev *dev, const struct pci_device_id *
 		return 0;
 
 	// Allouer la memoire pour nos donnees privees.
-	if ((exemple_fpga = kzalloc(sizeof(struct exemple_fpga_s), GFP_KERNEL)) == NULL)
+	if ((example_fpga = kzalloc(sizeof(struct example_fpga_s), GFP_KERNEL)) == NULL)
 		return -ENOMEM;
-	mutex_init(&(exemple_fpga->mtx_open));
-	exemple_fpga->irq_handling = 1;
+	mutex_init(&(example_fpga->mtx_open));
+	example_fpga->irq_handling = 1;
 
 	// Initialiser la partie basse du driver (materiel).
-	if ((err = exemple_fpga_initialize_pci_device(dev, exemple_fpga)) != 0) {
-		kfree(exemple_fpga);
+	if ((err = example_fpga_initialize_pci_device(dev, example_fpga)) != 0) {
+		kfree(example_fpga);
 		return err;
 	}
 
 	// Inscrire les donnees privees.
-	pci_set_drvdata(dev, exemple_fpga);
+	pci_set_drvdata(dev, example_fpga);
 
 	// Initialiser la partie haute du driver (interface espace user).
-	if ((err = exemple_fpga_initialize_char_device(exemple_fpga)) != 0) {
-		exemple_fpga_release_pci_device(dev, exemple_fpga);
-		kfree(exemple_fpga);
+	if ((err = example_fpga_initialize_char_device(example_fpga)) != 0) {
+		example_fpga_release_pci_device(dev, example_fpga);
+		kfree(example_fpga);
 		return err;
 	}
 	return 0;
@@ -670,22 +670,22 @@ static int exemple_fpga_probe (struct pci_dev *dev, const struct pci_device_id *
 
 
 // Methode invoquee au retrait du driver (ou du peripherique si hotplug)
-static void exemple_fpga_remove (struct pci_dev *dev)
+static void example_fpga_remove (struct pci_dev *dev)
 {
-	struct exemple_fpga_s * exemple_fpga = NULL;
+	struct example_fpga_s * example_fpga = NULL;
 
 	// Recuperer les donnees privees du driver.
-	if ((exemple_fpga = pci_get_drvdata(dev)) == NULL)
+	if ((example_fpga = pci_get_drvdata(dev)) == NULL)
 		return;
 
 	// Terminer la partie haute du driver.
-	exemple_fpga_release_char_device(exemple_fpga);
+	example_fpga_release_char_device(example_fpga);
 
 	// Terminer la partie basse du driver.
-	exemple_fpga_release_pci_device (dev, exemple_fpga);
+	example_fpga_release_pci_device (dev, example_fpga);
 
 	// Liberer la memoire privee du driver.
-	kfree(exemple_fpga);
+	kfree(example_fpga);
 }
 
 
@@ -710,7 +710,7 @@ static void exemple_fpga_remove (struct pci_dev *dev)
 
 
 // Liste des peripheriques PCI geres par le driver defini ci-dessous.
-static struct pci_device_id   exemple_id_table [] = {
+static struct pci_device_id   example_id_table [] = {
 
 	{ PCI_DEVICE(PCI_VENDOR_ID_ALTERA, PCI_DEVICE_ID_EXEMPLE_FPGA) },
 	{ } // Entree vide pour terminer la table.
@@ -719,39 +719,39 @@ static struct pci_device_id   exemple_id_table [] = {
 
 
 // Liste des peripheriques PCI geres par le module (si chargemt automatique).
-MODULE_DEVICE_TABLE(pci, exemple_id_table);
+MODULE_DEVICE_TABLE(pci, example_id_table);
 
 
 
 // La structure decrivant le module PCI
-static struct pci_driver exemple_pci_driver = {
+static struct pci_driver example_pci_driver = {
 	.name       = "EXEMPLE FPGA DRIVER",
-	.id_table   = exemple_id_table,
-	.probe      = exemple_fpga_probe,
-	.remove     = exemple_fpga_remove,
+	.id_table   = example_id_table,
+	.probe      = example_fpga_probe,
+	.remove     = example_fpga_remove,
 };
 
 
 
 // Fonction appelee automatiquement au chargement du module.
-static int __init exemple_fpga_init(void)
+static int __init example_fpga_init(void)
 {
 	int err;
 
 	// Creer la classe specifique pour notre peripherique.
-	exemple_fpga_class = class_create(THIS_MODULE, THIS_MODULE->name);
-	if (IS_ERR(exemple_fpga_class)) {
-		exemple_fpga_class = NULL;
+	example_fpga_class = class_create(THIS_MODULE, THIS_MODULE->name);
+	if (IS_ERR(example_fpga_class)) {
+		example_fpga_class = NULL;
 		return -EINVAL;
 	}
 
 	// L'enregistrement du driver provoque l'appel de la methode probe
 	// (si le materiel est present).
-	if ((err = pci_register_driver(& exemple_pci_driver)) != 0) {
+	if ((err = pci_register_driver(& example_pci_driver)) != 0) {
 		printk(KERN_ERR "%s: Erreur dans pci_register(): %d\n",
 		       THIS_MODULE->name, err);
-		class_destroy(exemple_fpga_class);
-		exemple_fpga_class = NULL;
+		class_destroy(example_fpga_class);
+		example_fpga_class = NULL;
 		return err;
 	}
 	return 0; // Chargement Ok
@@ -760,21 +760,21 @@ static int __init exemple_fpga_init(void)
 
 
 // Fonction invoquee au retrait du module.
-static void __exit exemple_fpga_exit(void)
+static void __exit example_fpga_exit(void)
 {
 	// Le des-enregistrement du driver va appeler sa methode "remove".
-	pci_unregister_driver(& exemple_pci_driver);
+	pci_unregister_driver(& example_pci_driver);
 
 	// Suppression de la classe specifique.
-	if (exemple_fpga_class != NULL)
-		class_destroy(exemple_fpga_class);
+	if (example_fpga_class != NULL)
+		class_destroy(example_fpga_class);
 }
 
 
 
 // Points d'entree du module.
-module_init (exemple_fpga_init);
-module_exit (exemple_fpga_exit);
+module_init (example_fpga_init);
+module_exit (example_fpga_exit);
 
 
 

@@ -3,7 +3,7 @@
     "Ecriture de drivers et programmation noyau Linux"
   Chapitre "Acces au materiel"
 
-  (c) 2005-2017 Christophe Blaess
+  (c) 2005-2019 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -15,10 +15,10 @@
 	#include "gpio-exemples.h"
 
 
-	static irqreturn_t exemple_handler(int irq, void * ident);
+	static irqreturn_t example_handler(int irq, void * ident);
 
 
-static int __init exemple_init (void)
+static int __init example_init (void)
 {
 	int err;
 
@@ -37,7 +37,7 @@ static int __init exemple_init (void)
 		return err;
 	}
 
-	if ((err = request_irq(gpio_to_irq(EXEMPLE_GPIO_IN), exemple_handler,
+	if ((err = request_irq(gpio_to_irq(EXEMPLE_GPIO_IN), example_handler,
 	                       IRQF_SHARED | IRQF_TRIGGER_RISING,
 	                       THIS_MODULE->name, THIS_MODULE->name)) != 0) {
 		gpio_free(EXEMPLE_GPIO_OUT);
@@ -48,7 +48,7 @@ static int __init exemple_init (void)
 }
 
 
-static void __exit exemple_exit (void)
+static void __exit example_exit (void)
 {
 	free_irq(gpio_to_irq(EXEMPLE_GPIO_IN), THIS_MODULE->name);
 	gpio_free(EXEMPLE_GPIO_OUT);
@@ -56,7 +56,7 @@ static void __exit exemple_exit (void)
 }
 
 
-static irqreturn_t exemple_handler(int irq, void * ident)
+static irqreturn_t example_handler(int irq, void * ident)
 {
 	static int value = 1;
 	gpio_set_value(EXEMPLE_GPIO_OUT, value);
@@ -66,8 +66,8 @@ static irqreturn_t exemple_handler(int irq, void * ident)
 }
 
 
-	module_init(exemple_init);
-	module_exit(exemple_exit);
+	module_init(example_init);
+	module_exit(example_exit);
 
 	MODULE_DESCRIPTION("GPIO interrupt handler.");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
