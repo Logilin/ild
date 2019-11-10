@@ -3,7 +3,7 @@
     "Ecriture de drivers et programmation noyau Linux"
   Chapitre "Le noyau Linux et ses modules"
 
-  (c) 2001-2017 Christophe Blaess
+  (c) 2001-2019 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -14,7 +14,7 @@
 	#include <linux/version.h>
 
 
-int __init exemple_init(void)
+int __init example_init(void)
 {
 	/* Module initialization. */
 
@@ -22,15 +22,15 @@ int __init exemple_init(void)
 }
 
 
-void __exit exemple_exit(void)
+void __exit example_exit(void)
 {
 	/* Module cleanup. */
 
 }
 
 
-	module_init(exemple_init);
-	module_exit(exemple_exit);
+	module_init(example_init);
+	module_exit(example_exit);
 
 	MODULE_DESCRIPTION("Empty module skeleton");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");

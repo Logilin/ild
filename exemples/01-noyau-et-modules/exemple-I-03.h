@@ -11,6 +11,6 @@
 #ifndef EXEMPLE_1_03_H
 #define EXEMPLE_1_03_H
 
-	void exemple_hello(int number);
+	void example_hello(int number);
 
 #endif

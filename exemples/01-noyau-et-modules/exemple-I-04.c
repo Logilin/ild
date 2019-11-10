@@ -12,21 +12,21 @@
 	#include "exemple-I-03.h"
 
 
-static int __init exemple_init (void)
+static int __init example_init (void)
 {
-	exemple_hello(10);
+	example_hello(10);
 	return 0;
 }
 
 
-static void __exit exemple_exit (void)
+static void __exit example_exit (void)
 {
-	exemple_hello(20);
+	example_hello(20);
 }
 
 
-	module_init(exemple_init);
-	module_exit(exemple_exit);
+	module_init(example_init);
+	module_exit(example_exit);
 
 	MODULE_DESCRIPTION("External symbol importation.");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
