@@ -11,12 +11,10 @@ else
 
 	CFLAGS := -Wall -g
 
-all: progs_utilisateur modules
+all: modules
 
 modules:
-	${MAKE} -C ${KERNEL_DIR} SUBDIRS=${MODULE_DIR}  modules
-
-progs_utilisateur: 
+	${MAKE} -C ${KERNEL_DIR} M=${MODULE_DIR}  modules
 
 
 clean:
