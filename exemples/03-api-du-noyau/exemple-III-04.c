@@ -43,33 +43,31 @@ static void __exit example_exit (void)
 
 static enum hrtimer_restart example_htimer_function(struct hrtimer * unused)
 {
-	struct timeval tv;
-	static struct timeval tv_prev = {0, 0};
+	ktime_t  now;
+	static ktime_t  previous = 0;
 
-	long long int elapsed_us;
-	static long long int elapsed_min = -1;
-	static long long int elapsed_max = -1;
+	ktime_t elapsed;
+	static ktime_t elapsed_min = -1;
+	static ktime_t elapsed_max = -1;
 
 	hrtimer_forward_now(& example_htimer, example_period_kt);
 
-	do_gettimeofday(& tv);
+	now = ktime_get_real_ns();
 
-	if (tv_prev.tv_sec > 0) {
-		elapsed_us  = tv.tv_sec - tv_prev.tv_sec;
-		elapsed_us *= 1000000;
-		elapsed_us += tv.tv_usec - tv_prev.tv_usec;
-		if ((elapsed_min < 0) || (elapsed_us < elapsed_min)) {
-			elapsed_min = elapsed_us;
+	if (previous > 0) {
+		elapsed  = ktime_sub(now, previous);
+		if ((elapsed_min < 0) || (ktime_compare(elapsed, elapsed_min) < 0)) {
+			elapsed_min = elapsed;
 			printk(KERN_INFO "%s - %s: min=%lld  max=%lld\n",
 			       THIS_MODULE->name, __FUNCTION__, elapsed_min, elapsed_max);
 		}
-		if ((elapsed_max < 0) || (elapsed_us > elapsed_max)) {
-			elapsed_max = elapsed_us;
+		if ((elapsed_max < 0) || (ktime_compare(elapsed, elapsed_max) > 0)) {
+			elapsed_max = elapsed;
 			printk(KERN_INFO "%s - %s: min=%lld  max=%lld\n",
 			       THIS_MODULE->name, __FUNCTION__, elapsed_min, elapsed_max);
 		}
 	}
-	tv_prev = tv;
+	previous = now;
 
 	return HRTIMER_RESTART;
 }
