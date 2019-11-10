@@ -3,7 +3,7 @@
     "Ecriture de drivers et programmation noyau Linux"
   Chapitre "Driver en mode caracteres"
 
-  (c) 2005-2017 Christophe Blaess
+  (c) 2005-2019 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/

@@ -3,7 +3,7 @@
     "Ecriture de drivers et programmation noyau Linux"
   Chapitre "Driver en mode caracteres"
 
-  (c) 2005-2017 Christophe Blaess
+  (c) 2005-2019 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -15,51 +15,51 @@
 	#include <linux/module.h>
 
 
-	static int exemple_open    (struct inode * ind, struct file * filp);
-	static int exemple_release (struct inode * ind, struct file * filp);
+	static int example_open    (struct inode * ind, struct file * filp);
+	static int example_release (struct inode * ind, struct file * filp);
 
 
-	static struct file_operations fops_exemple = {
+	static struct file_operations fops_example = {
 		.owner   =  THIS_MODULE,
-		.open    =  exemple_open,
-		.release =  exemple_release,
+		.open    =  example_open,
+		.release =  example_release,
 	};
 
-	static struct miscdevice exemple_misc_driver = {
+	static struct miscdevice example_misc_driver = {
 		    .minor          = MISC_DYNAMIC_MINOR,
 		    .name           = THIS_MODULE->name,
-		    .fops           = & fops_exemple,
+		    .fops           = & fops_example,
 	};
 
 
-static int __init exemple_init (void)
+static int __init example_init (void)
 {
-	return misc_register(& exemple_misc_driver);
+	return misc_register(& example_misc_driver);
 }
 
 
-static void __exit exemple_exit (void)
+static void __exit example_exit (void)
 {
-	misc_deregister(& exemple_misc_driver);
+	misc_deregister(& example_misc_driver);
 }
 
 
-static int exemple_open(struct inode * ind, struct file * filp)
-{
-	printk(KERN_INFO "%s - %s()\n", THIS_MODULE->name, __FUNCTION__);
-	return 0;
-}
-
-
-static int exemple_release(struct inode * ind, struct file * filp)
+static int example_open(struct inode * ind, struct file * filp)
 {
 	printk(KERN_INFO "%s - %s()\n", THIS_MODULE->name, __FUNCTION__);
 	return 0;
 }
 
 
-	module_init(exemple_init);
-	module_exit(exemple_exit);
+static int example_release(struct inode * ind, struct file * filp)
+{
+	printk(KERN_INFO "%s - %s()\n", THIS_MODULE->name, __FUNCTION__);
+	return 0;
+}
+
+
+	module_init(example_init);
+	module_exit(example_exit);
 
 	MODULE_DESCRIPTION("Registration into an existing class.");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
