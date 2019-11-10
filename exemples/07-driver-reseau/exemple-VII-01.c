@@ -3,7 +3,7 @@
     "Ecriture de drivers et programmation noyau Linux"
   Chapitre "Driver reseau"
 
-  (c) 2005-2017 Christophe Blaess
+  (c) 2005-2019 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -19,7 +19,7 @@
 	struct net_device * net_dev_ex = NULL;
 
 
-static int exemple_open (struct net_device * net_dev)
+static int example_open (struct net_device * net_dev)
 {
 	printk(KERN_INFO "%s - %s(%pK):\n",
 	       THIS_MODULE->name, __FUNCTION__, net_dev);
@@ -37,7 +37,7 @@ static int exemple_open (struct net_device * net_dev)
 }
 
 
-static int exemple_stop (struct net_device * net_dev)
+static int example_stop (struct net_device * net_dev)
 {
 	printk(KERN_INFO "%s - %s(%pK)\n",
 	       THIS_MODULE->name, __FUNCTION__, net_dev);
@@ -48,7 +48,7 @@ static int exemple_stop (struct net_device * net_dev)
 }
 
 
-static int exemple_start_xmit(struct sk_buff * sk_b, struct net_device * src)
+static int example_start_xmit(struct sk_buff * sk_b, struct net_device * src)
 {
 	printk(KERN_INFO "%s - %s(%pK, %pK)\n",
 	       THIS_MODULE->name, __FUNCTION__, sk_b, src);
@@ -58,33 +58,33 @@ static int exemple_start_xmit(struct sk_buff * sk_b, struct net_device * src)
 }
 
 
-struct net_device_ops exemple_netdev_ops = {
-	.ndo_open       = exemple_open,
-	.ndo_stop       = exemple_stop,
-	.ndo_start_xmit = exemple_start_xmit,
+struct net_device_ops example_netdev_ops = {
+	.ndo_open       = example_open,
+	.ndo_stop       = example_stop,
+	.ndo_start_xmit = example_start_xmit,
 };
 
 
-static void exemple_setup (struct net_device * net_dev)
+static void example_setup (struct net_device * net_dev)
 {
 	printk(KERN_INFO "%s - %s(%pK)\n",
 	       THIS_MODULE->name, __FUNCTION__, net_dev);
 
 	ether_setup(net_dev);
 
-	net_dev->netdev_ops = & exemple_netdev_ops;
+	net_dev->netdev_ops = & example_netdev_ops;
 }
 
 
-static int __init exemple_init(void)
+static int __init example_init(void)
 {
 
 	printk(KERN_INFO "%s: %s()\n", THIS_MODULE->name, __FUNCTION__);
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,17,0)
-	net_dev_ex = alloc_netdev(0, "ex%d", exemple_setup);
+	net_dev_ex = alloc_netdev(0, "ex%d", example_setup);
 #else
-	net_dev_ex = alloc_netdev(0, "ex%d", NET_NAME_UNKNOWN, exemple_setup);
+	net_dev_ex = alloc_netdev(0, "ex%d", NET_NAME_UNKNOWN, example_setup);
 #endif
 	if (net_dev_ex == NULL)
 		return -ENOMEM;
@@ -98,7 +98,7 @@ static int __init exemple_init(void)
 }
 
 
-static void exemple_exit(void)
+static void example_exit(void)
 {
 	printk(KERN_INFO "%s: %s()\n", THIS_MODULE->name, __FUNCTION__);
 
@@ -109,8 +109,8 @@ static void exemple_exit(void)
 }
 
 
-	module_init(exemple_init)
-	module_exit(exemple_exit)
+	module_init(example_init)
+	module_exit(example_exit)
 
 	MODULE_DESCRIPTION("False device implementation.");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
