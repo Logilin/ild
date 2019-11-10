@@ -8,54 +8,28 @@
 
 \************************************************************************/
 
+	#include <linux/hrtimer.h>
 	#include <linux/module.h>
 	#include <linux/sched.h>
-	#include <linux/timer.h>
-	#include <linux/version.h>
-
-	static struct timer_list exemple_timer;
 
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
-static void exemple_timer_function(unsigned long arg)
-{
-	struct timer_list * timer = (struct timer_list *) arg;
-	struct timeval time_of_day;
+	static enum hrtimer_restart exemple_htimer_function(struct hrtimer *);
+	static struct hrtimer exemple_htimer;
 
-	do_gettimeofday(& time_of_day);
-	printk(KERN_INFO "%s - %s: time_of_day=%ld.%06ld\n",
-	       THIS_MODULE->name, __FUNCTION__, 
-	       time_of_day.tv_sec, time_of_day.tv_usec);
+	static int period_us = 1000;
+	module_param(period_us, int, 0644);
 
-	mod_timer(timer, jiffies + HZ);
-}
-#else
-static void exemple_timer_function(struct timer_list *timer)
-{
-	struct timeval time_of_day;
-
-	do_gettimeofday(& time_of_day);
-	printk(KERN_INFO "%s - %s: time_of_day=%ld.%06ld\n",
-	       THIS_MODULE->name, __FUNCTION__, 
-	       time_of_day.tv_sec, time_of_day.tv_usec);
-
-	mod_timer(timer, jiffies + HZ);
-}
-#endif
-
+	static ktime_t exemple_period_kt;
 
 
 static int __init exemple_init (void)
 {
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
-	init_timer (& exemple_timer);
-	exemple_timer.function = exemple_timer_function;
-	exemple_timer.data = (unsigned long) (& exemple_timer);
-#else
-	timer_setup (& exemple_timer, exemple_timer_function, 0);
-#endif
-	exemple_timer.expires = jiffies + HZ;
-	add_timer(& exemple_timer);
+	exemple_period_kt = ktime_set(0, 1000 * period_us);
+
+	hrtimer_init (& exemple_htimer, CLOCK_REALTIME, HRTIMER_MODE_REL);
+	exemple_htimer.function = exemple_htimer_function;
+
+	hrtimer_start(& exemple_htimer, exemple_period_kt, HRTIMER_MODE_REL);
 
 	return 0;
 }
@@ -63,14 +37,48 @@ static int __init exemple_init (void)
 
 static void __exit exemple_exit (void)
 {
-	del_timer(& exemple_timer);
+	hrtimer_cancel(& exemple_htimer);
+}
+
+
+static enum hrtimer_restart exemple_htimer_function(struct hrtimer * unused)
+{
+	struct timeval tv;
+	static struct timeval tv_prev = {0, 0};
+
+	long long int elapsed_us;
+	static long long int elapsed_min = -1;
+	static long long int elapsed_max = -1;
+
+	hrtimer_forward_now(& exemple_htimer, exemple_period_kt);
+
+	do_gettimeofday(& tv);
+
+	if (tv_prev.tv_sec > 0) {
+		elapsed_us  = tv.tv_sec - tv_prev.tv_sec;
+		elapsed_us *= 1000000;
+		elapsed_us += tv.tv_usec - tv_prev.tv_usec;
+		if ((elapsed_min < 0) || (elapsed_us < elapsed_min)) {
+			elapsed_min = elapsed_us;
+			printk(KERN_INFO "%s - %s: min=%lld  max=%lld\n",
+			       THIS_MODULE->name, __FUNCTION__, elapsed_min, elapsed_max);
+		}
+		if ((elapsed_max < 0) || (elapsed_us > elapsed_max)) {
+			elapsed_max = elapsed_us;
+			printk(KERN_INFO "%s - %s: min=%lld  max=%lld\n",
+			       THIS_MODULE->name, __FUNCTION__, elapsed_min, elapsed_max);
+		}
+	}
+	tv_prev = tv;
+
+	return HRTIMER_RESTART;
 }
 
 
 	module_init(exemple_init);
 	module_exit(exemple_exit);
 
-	MODULE_DESCRIPTION("Periodic message (current time).");
+	MODULE_DESCRIPTION("Jitter of a precise timer.");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
 
