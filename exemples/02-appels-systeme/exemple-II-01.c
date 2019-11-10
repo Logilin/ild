@@ -3,7 +3,7 @@
     "Ecriture de drivers et programmation noyau Linux"
   Chapitre "Appels-systeme"
 
-  (c) 2005-2017 Christophe Blaess
+  (c) 2005-2019 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -13,7 +13,7 @@
 	#include <linux/version.h>
 
 
-static int __init exemple_init (void)
+static int __init example_init (void)
 {
 	int i;
 	struct task_struct *task;
@@ -34,7 +34,7 @@ static int __init exemple_init (void)
 }
 
 
-static void __exit exemple_exit (void)
+static void __exit example_exit (void)
 {
 	printk(KERN_INFO "%s - %s(): PID = %u, PPID = %u\n",
 	          THIS_MODULE->name, __FUNCTION__,
@@ -43,8 +43,8 @@ static void __exit exemple_exit (void)
 }
 
 
-	module_init(exemple_init);
-	module_exit(exemple_exit);
+	module_init(example_init);
+	module_exit(example_exit);
 
 	MODULE_DESCRIPTION("Informations about current process.");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
