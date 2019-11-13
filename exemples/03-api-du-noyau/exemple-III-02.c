@@ -10,50 +10,50 @@
 
 	#include <linux/jiffies.h>
 	#include <linux/module.h>
+	#include <linux/version.h>
+
+
+static void display_time_values(void)
+{
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0)
+
+	ktime_t   kgs =  ktime_get_seconds();
+	ktime_t   kgrs = ktime_get_real_seconds();
+	ktime_t   kgn =  ktime_get_ns();
+	ktime_t   kgrn = ktime_get_real_ns();
+
+	printk(KERN_INFO "[%s] %s\n", THIS_MODULE->name, __FUNCTION__);
+	printk(KERN_INFO "ktime_get_seconds(): %lld\n", kgs);
+	printk(KERN_INFO "ktime_get_real_seconds(): %lld\n", kgrs);
+	printk(KERN_INFO "ktime_get_ns(): %lld\n", kgn);
+	printk(KERN_INFO "ktime_get_real_ns(): %lld\n", kgrn);
+#else
+	struct timespec gnst;
+	int gs = get_seconds();
+
+	getnstimeofday(&gnst);
+
+	printk(KERN_INFO "[%s] %s\n", THIS_MODULE->name, __FUNCTION__);
+	printk(KERN_INFO "get_seconds(): %d\n", gs);
+	printk(KERN_INFO "getnstimeofday(): %ld.%09ld\n", gnst.tv_sec, gnst.tv_nsec);
+
+#endif
+
+}
 
 
 static int __init example_init (void)
 {
-	struct timeval  tv_jif, tv_tod;
-	struct timespec ts_ckt, ts_tod;
+	display_time_values();
 
-	jiffies_to_timeval(jiffies, & tv_jif);
-	do_gettimeofday(& tv_tod);
-	ts_ckt = current_kernel_time();
-	getnstimeofday(& ts_tod);
-
-	printk(KERN_INFO  "%s - %s():\n", THIS_MODULE->name, __FUNCTION__);
-	printk(KERN_INFO "tv_jif.tv_sec = %ld, tv_jif.tv_usec = %ld\n",
-	                  tv_jif.tv_sec, tv_jif.tv_usec);
-	printk(KERN_INFO "tv_tod.tv_sec = %ld, tv_tod.tv_usec = %ld\n",
-	                  tv_tod.tv_sec, tv_tod.tv_usec);
-	printk(KERN_INFO "ts_ckt.tv_sec = %ld, ts_ckt.tv_nsec = %ld\n",
-	                  ts_ckt.tv_sec, ts_ckt.tv_nsec);
-	printk(KERN_INFO "ts_tod.tv_sec = %ld, ts_tod.tv_nsec = %ld\n",
-	                  ts_tod.tv_sec, ts_tod.tv_nsec);
 	return 0;
 }
 
 
 static void __exit example_exit (void)
 {
-	struct timeval tv_jif, tv_tod;
-	struct timespec ts_ckt, ts_tod;
-
-	jiffies_to_timeval(jiffies, & tv_jif);
-	do_gettimeofday(& tv_tod);
-	ts_ckt = current_kernel_time();
-	getnstimeofday(& ts_tod);
-
-	printk(KERN_INFO  "%s - %s():\n", THIS_MODULE->name, __FUNCTION__);
-	printk(KERN_INFO "tv_jif.tv_sec = %ld, tv_jif.tv_usec = %ld\n",
-	                  tv_jif.tv_sec, tv_jif.tv_usec);
-	printk(KERN_INFO "tv_tod.tv_sec = %ld, tv_tod.tv_usec = %ld\n",
-	                  tv_tod.tv_sec, tv_tod.tv_usec);
-	printk(KERN_INFO "ts_ckt.tv_sec = %ld, ts_ckt.tv_nsec = %ld\n",
-	                  ts_ckt.tv_sec, ts_ckt.tv_nsec);
-	printk(KERN_INFO "ts_tod.tv_sec = %ld, ts_tod.tv_nsec = %ld\n",
-	                  ts_tod.tv_sec, ts_tod.tv_nsec);
+	display_time_values();
 }
 
 
