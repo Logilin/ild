@@ -1,9 +1,8 @@
 ifneq (${KERNELRELEASE},)
 
-	obj-m  = exemple-VI-01.o
+	obj-m += exemple-VI-01.o
 	obj-m += exemple-VI-02.o
 	obj-m += exemple-VI-03.o
-	obj-m += exemple-VI-04.o
 
 else
 
@@ -16,6 +15,7 @@ all: modules
 
 modules:
 	${MAKE} -C ${KERNEL_DIR} M=${MODULE_DIR}  modules
+
 
 clean:
 	rm -f *.o *.ko *.mod.c .*.o .*.ko .*.mod.c .*.cmd *~ *.ko.unsigned
