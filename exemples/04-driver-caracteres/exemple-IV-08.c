@@ -33,6 +33,7 @@
 		    .minor          = MISC_DYNAMIC_MINOR,
 		    .name           = THIS_MODULE->name,
 		    .fops           = & fops_example,
+		    .mode           = S_IRUGO,
 	};
 
 	static volatile int current_pid = 0;

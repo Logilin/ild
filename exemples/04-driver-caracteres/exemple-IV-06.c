@@ -37,6 +37,7 @@
 		    .minor          = MISC_DYNAMIC_MINOR,
 		    .name           = THIS_MODULE->name,
 		    .fops           = & fops_example,
+		    .mode           = S_IRUGO,
 	};
 
 	static int example_ppid_flag = 1;
