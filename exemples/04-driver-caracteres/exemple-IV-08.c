@@ -17,6 +17,7 @@
 	#include <linux/mutex.h>
 	#include <linux/sched.h>
 	#include <linux/uaccess.h>
+	#include <linux/version.h>
 
 	#include <asm/uaccess.h>
 
@@ -38,19 +39,6 @@
 
 	static volatile int current_pid = 0;
 	DEFINE_MUTEX(mtx_current_pid);
-
-
-static int __init example_init (void)
-{
-	return misc_register(& example_misc_driver);
-}
-
-
-static void __exit example_exit (void)
-{
-	misc_deregister(& example_misc_driver);
-}
-
 
 static ssize_t example_read(struct file * filp, char * buffer,
                             size_t length, loff_t * offset)
@@ -83,8 +71,11 @@ static ssize_t example_read(struct file * filp, char * buffer,
 }
 
 
-	module_init(example_init);
-	module_exit(example_exit);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,9,0)
+	module_misc_device(example_misc_driver);
+#else
+	module_driver(example_misc_driver, misc_register, misc_deregister)
+#endif
 
 	MODULE_DESCRIPTION("Use of a mutex for shared variable protection.");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
