@@ -24,7 +24,7 @@ static int __init example_init (void)
 		printk(KERN_INFO "%s: (%d)  PID = %u, COMM = %s\n",
 	          THIS_MODULE->name, i, task->pid, task->comm);
 		if (task->real_parent == task) {
-			printk(KERN_INFO "real_parent = parent\n");
+			printk(KERN_INFO "real_parent = self\n");
 			break;
 		}
 		task = task->real_parent;
