@@ -57,7 +57,7 @@ static int __init example_init (void)
 	int err;
 	struct page * pg = NULL;
 
-	example_buffer = kmalloc(PAGE_SIZE, GFP_KERNEL);
+	example_buffer = kzalloc(PAGE_SIZE, GFP_KERNEL);
 	if (example_buffer == NULL)
 		return -ENOMEM;
 
@@ -69,7 +69,7 @@ static int __init example_init (void)
 	err =  misc_register(& example_misc_driver);
 	if (err != 0) {
 		ClearPageReserved(pg);
-		kfree(example_buffer);
+		kzfree(example_buffer);
 		example_buffer = NULL;
 		return err;
 	}
@@ -95,7 +95,7 @@ static void __exit example_exit (void)
 
 	pg = virt_to_page(example_buffer);
 	ClearPageReserved(pg);
-	kfree(example_buffer);
+	kzfree(example_buffer);
 	example_buffer = NULL;
 
 	misc_deregister(& example_misc_driver);
