@@ -1,10 +1,10 @@
 ifneq (${KERNELRELEASE},)
 
-	obj-m  = exemple-I-00.o
-	obj-m += exemple-I-01.o
-	obj-m += exemple-I-02.o
-	obj-m += exemple-I-03.o
-	obj-m += exemple-I-04.o
+	obj-m  = example-I-00.o
+	obj-m += example-I-01.o
+	obj-m += example-I-02.o
+	obj-m += example-I-03.o
+	obj-m += example-I-04.o
 else
 
 	KERNEL_DIR ?= /lib/modules/$(shell uname -r)/build
