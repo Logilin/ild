@@ -16,7 +16,16 @@
 	static struct timer_list example_timer;
 
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,15,0)
+static void example_timer_function(struct timer_list *timer)
+{
+	printk (KERN_INFO "%s -%s: ktime_get_ns(): %lld\n",
+	       THIS_MODULE->name, __FUNCTION__,
+		ktime_get_ns());
+
+	mod_timer(timer, jiffies + HZ);
+}
+#else
 static void example_timer_function(unsigned long arg)
 {
 	struct timer_list * timer = (struct timer_list *) arg;
@@ -29,27 +38,18 @@ static void example_timer_function(unsigned long arg)
 
 	mod_timer(timer, jiffies + HZ);
 }
-#else
-static void example_timer_function(struct timer_list *timer)
-{
-	printk (KERN_INFO "%s -%s: ktime_get_ns(): %lld\n",
-	       THIS_MODULE->name, __FUNCTION__,
-		ktime_get_ns());
-
-	mod_timer(timer, jiffies + HZ);
-}
 #endif
 
 
 
 static int __init example_init (void)
 {
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,15,0)
+	timer_setup (& example_timer, example_timer_function, 0);
+#else
 	init_timer (& example_timer);
 	example_timer.function = example_timer_function;
 	example_timer.data = (unsigned long) (& example_timer);
-#else
-	timer_setup (& example_timer, example_timer_function, 0);
 #endif
 	example_timer.expires = jiffies + HZ;
 	add_timer(& example_timer);
@@ -70,4 +70,3 @@ static void __exit example_exit (void)
 	MODULE_DESCRIPTION("Periodic message (current time).");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
-
