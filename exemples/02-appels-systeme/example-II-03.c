@@ -44,18 +44,18 @@ static void __exit example_exit (void)
 
 static ssize_t example_read(struct file * filp, char __user * u_buffer, size_t max, loff_t * offset)
 {
-	char buffer[128];
+	char k_buffer[128];
 	int  nb;
 
-	snprintf(buffer, 128, "PID=%u, PPID=%u, Name=%s\n",
-	         current->pid, 
+	snprintf(k_buffer, 128, "PID=%u, PPID=%u, Name=%s\n",
+	         current->pid,
 	         current->real_parent->pid,
 	         current->comm);
 
-	nb = strlen(buffer);
+	nb = strlen(k_buffer);
 	if (nb > max)
 		return -ENOMEM;
-	if (copy_to_user(u_buffer, buffer, nb) != 0)
+	if (copy_to_user(u_buffer, k_buffer, nb) != 0)
 		return -EFAULT;
 	return nb;
 }

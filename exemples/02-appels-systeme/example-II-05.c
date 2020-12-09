@@ -45,21 +45,21 @@ static void __exit example_exit (void)
 
 static ssize_t example_read(struct file * filp, char __user * u_buffer, size_t max, loff_t * offset)
 {
-	char buffer[128];
+	char k_buffer[128];
 	int  nb;
 
-	snprintf(buffer, 128, "PID=%u, PPID=%u, Name=%s, Value=%d\n",
-	         current->pid, 
+	snprintf(k_buffer, 128, "PID=%u, PPID=%u, Name=%s, Value=%d\n",
+	         current->pid,
 	         current->real_parent->pid,
 	         current->comm,
 	         example_value);
 
-	nb = strlen(buffer) - (*offset);
+	nb = strlen(k_buffer) - (*offset);
 	if (nb <= 0)
 		return 0;
 	if (nb > max)
 		nb = max;
-	if (copy_to_user(u_buffer, & (buffer[*offset]), nb) != 0)
+	if (copy_to_user(u_buffer, &(k_buffer[*offset]), nb) != 0)
 		return -EFAULT;
 	(*offset) += nb;
 
@@ -69,13 +69,13 @@ static ssize_t example_read(struct file * filp, char __user * u_buffer, size_t m
 
 static ssize_t example_write(struct file * filp, const char __user * u_buffer, size_t nb, loff_t * unused)
 {
-	char buffer[128];
+	char k_buffer[128];
 
 	if (nb >= 128)
 		return -ENOMEM;
-	if (copy_from_user(buffer, u_buffer, nb) != 0)
+	if (copy_from_user(k_buffer, u_buffer, nb) != 0)
 		return -EFAULT;
-	if (sscanf(buffer, "%d", &example_value) != 1)
+	if (sscanf(k_buffer, "%d", &example_value) != 1)
 		return -EINVAL;
 
 	return nb;
@@ -88,4 +88,3 @@ static ssize_t example_write(struct file * filp, const char __user * u_buffer, s
 	MODULE_DESCRIPTION("/proc write callback.");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 	MODULE_LICENSE("GPL");
-

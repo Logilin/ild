@@ -32,7 +32,7 @@ static int __init example_init (void)
 	if (entry == NULL)
 		return -EBUSY;
 
-	return 0; 
+	return 0;
 }
 
 
@@ -44,17 +44,17 @@ static void __exit example_exit (void)
 
 static ssize_t example_read (struct file * filp, char __user * u_buffer, size_t max, loff_t * offset)
 {
-	char buffer[128];
+	char k_buffer[128];
 	int  nb;
 
 	printk(KERN_INFO "%s - %s(%pK, %p, %u, %lld)", THIS_MODULE->name, __FUNCTION__, filp, u_buffer, (unsigned int) max, *offset);
 
-	snprintf(buffer, 128, "PID=%u, PPID=%u, Name=%s\n",
-	         current->pid, 
+	snprintf(k_buffer, 128, "PID=%u, PPID=%u, Name=%s\n",
+	         current->pid,
 	         current->real_parent->pid,
 	         current->comm);
 
-	nb = strlen(buffer) - (*offset);
+	nb = strlen(k_buffer) - (*offset);
 	if (nb <= 0) {
 		printk(KERN_CONT " -> 0\n");
 		return 0;
@@ -63,7 +63,7 @@ static ssize_t example_read (struct file * filp, char __user * u_buffer, size_t 
 	if (nb > max)
 		nb = max;
 
-	if (copy_to_user(u_buffer, & (buffer[*offset]), nb) != 0) {
+	if (copy_to_user(u_buffer, &(k_buffer[*offset]), nb) != 0) {
 		printk(KERN_CONT " -> error\n");
 		return -EFAULT;
 	}
