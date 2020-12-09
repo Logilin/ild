@@ -30,7 +30,7 @@ static int __init example_init (void)
 
 	if (err < 0)
 		return err;
-	return 0; 
+	return 0;
 }
 
 

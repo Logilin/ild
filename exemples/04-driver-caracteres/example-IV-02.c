@@ -52,7 +52,7 @@ static int __init example_init (void)
 		return err;
 	}
 
-	return 0; 
+	return 0;
 }
 
 

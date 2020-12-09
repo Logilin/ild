@@ -19,8 +19,8 @@
 	#include <linux/uaccess.h>
 
 
-	static ssize_t example_read  (struct file * filp, char * buffer,
-	                              size_t length, loff_t * offset);
+	static ssize_t example_read  (struct file *filp, char *buffer,
+	                              size_t length, loff_t *offset);
 
 
 	static struct file_operations fops_example = {
@@ -32,34 +32,34 @@
 	static struct miscdevice example_misc_driver = {
 		    .minor          = MISC_DYNAMIC_MINOR,
 		    .name           = THIS_MODULE->name,
-		    .fops           = & fops_example,
+		    .fops           = &fops_example,
 		    .mode           = S_IRUGO,
 	};
 
 
 static int __init example_init (void)
 {
-	return misc_register(& example_misc_driver);
+	return misc_register(&example_misc_driver);
 }
 
 
 static void __exit example_exit (void)
 {
-	misc_deregister(& example_misc_driver);
+	misc_deregister(&example_misc_driver);
 }
 
 
-static ssize_t example_read(struct file * filp, char * buffer,
-                            size_t length, loff_t * offset)
+static ssize_t example_read(struct file *filp, char *u_buffer,
+                            size_t length, loff_t *offset)
 {
-	char chaine[128];
+	char k_buffer[128];
 	int lg;
 
-	snprintf(chaine, 128, "PID=%u, PPID=%u\n",
+	snprintf(k_buffer, 128, "PID=%u, PPID=%u\n",
 	                current->pid,
 	                current->real_parent->pid);
 
-	lg = strlen(chaine) - (*offset);
+	lg = strlen(k_buffer) - (*offset);
 
 	if (lg <= 0)
 		return 0;
@@ -67,7 +67,7 @@ static ssize_t example_read(struct file * filp, char * buffer,
 	if (length < lg)
 		lg = length;
 
-	if (copy_to_user(buffer, & chaine[* offset], lg) != 0)
+	if (copy_to_user(u_buffer, &k_buffer[*offset], lg) != 0)
 		return -EFAULT;
 
 	*offset += lg;

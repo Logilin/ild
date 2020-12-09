@@ -21,10 +21,10 @@
 	#include "example-IV-06.h"
 
 
-	static ssize_t example_read  (struct file * filp, char * buffer,
-	                              size_t length, loff_t * offset);
+	static ssize_t example_read  (struct file *filp, char *buffer,
+	                              size_t length, loff_t *offset);
 
-	static long    example_ioctl (struct file * filp,
+	static long    example_ioctl (struct file *filp,
 	                              unsigned int cmd, unsigned long arg);
 
 	static struct file_operations fops_example = {
@@ -36,7 +36,7 @@
 	static struct miscdevice example_misc_driver = {
 		    .minor          = MISC_DYNAMIC_MINOR,
 		    .name           = THIS_MODULE->name,
-		    .fops           = & fops_example,
+		    .fops           = &fops_example,
 		    .mode           = S_IRUGO,
 	};
 
@@ -45,37 +45,37 @@
 
 static int __init example_init (void)
 {
-	return misc_register(& example_misc_driver);
+	return misc_register(&example_misc_driver);
 }
 
 
 static void __exit example_exit (void)
 {
-	misc_deregister(& example_misc_driver);
+	misc_deregister(&example_misc_driver);
 }
 
 
-static ssize_t example_read(struct file * filp, char * buffer,
-                            size_t length, loff_t * offset)
+static ssize_t example_read(struct file *filp, char *u_buffer,
+                            size_t length, loff_t *offset)
 {
-	char chaine[128];
+	char k_buffer[128];
 	int l;
 
-	if (example_ppid_flag) 
-		snprintf(chaine, 128, "PID= %u, PPID= %u\n",
+	if (example_ppid_flag)
+		snprintf(k_buffer, 128, "PID= %u, PPID= %u\n",
 		                current->pid,
 	                        current->real_parent->pid);
 	else
-		snprintf(chaine, 128, "PID= %u\n", current->pid);
+		snprintf(k_buffer, 128, "PID= %u\n", current->pid);
 
-	l = strlen(chaine) - (*offset);
+	l = strlen(k_buffer) - (*offset);
 	if (l <= 0)
 		return 0;
 
 	if (length < l)
 		l = length;
 
-	if (copy_to_user(buffer, & chaine[* offset], l) != 0)
+	if (copy_to_user(u_buffer, &k_buffer[*offset], l) != 0)
 		return -EFAULT;
 
 	*offset += l;
@@ -84,7 +84,7 @@ static ssize_t example_read(struct file * filp, char * buffer,
 }
 
 
-static long example_ioctl (struct file * filp,
+static long example_ioctl (struct file *filp,
                            unsigned int cmd,
                            unsigned long arg)
 {
@@ -93,15 +93,15 @@ static long example_ioctl (struct file * filp,
 
 	switch(_IOC_NR(cmd)) {
 		case EXAMPLE_GET_PPID_FLAG :
-			if (copy_to_user((void *) arg, & example_ppid_flag, sizeof(example_ppid_flag)) != 0)
+			if (copy_to_user((void *) arg, &example_ppid_flag, sizeof(example_ppid_flag)) != 0)
 				return -EFAULT;
 			break;
 		case EXAMPLE_SET_PPID_FLAG :
-			if (copy_from_user(& example_ppid_flag, (void *) arg, sizeof(example_ppid_flag)) != 0)
+			if (copy_from_user(&example_ppid_flag, (void *) arg, sizeof(example_ppid_flag)) != 0)
 				return -EFAULT;
 			break;
 		default :
-			return -ENOTTY; 
+			return -ENOTTY;
 	}
 	return 0;
 }

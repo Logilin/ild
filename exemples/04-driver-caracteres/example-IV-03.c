@@ -64,7 +64,7 @@ static int __init example_init (void)
 		unregister_chrdev_region(example_dev, 1);
 		return err;
 	}
-	return 0; 
+	return 0;
 }
 
 

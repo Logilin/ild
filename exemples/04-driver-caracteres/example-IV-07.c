@@ -21,8 +21,8 @@
 	#include <asm/uaccess.h>
 
 
-	static ssize_t example_read  (struct file * filp, char * buffer,
-	                              size_t length, loff_t * offset);
+	static ssize_t example_read  (struct file *filp, char *buffer,
+	                              size_t length, loff_t *offset);
 
 	static struct file_operations fops_example = {
 		.owner   =  THIS_MODULE,
@@ -38,8 +38,8 @@
 
 	static volatile int current_pid;
 
-static ssize_t example_read(struct file * filp, char * buffer,
-                            size_t length, loff_t * offset)
+static ssize_t example_read(struct file *filp, char *u_buffer,
+                            size_t length, loff_t *offset)
 {
 	char k_buffer[2];
 	unsigned long delay;
@@ -58,7 +58,7 @@ static ssize_t example_read(struct file * filp, char * buffer,
 
 	if (length < 2)
 		return -ENOMEM;
-	if (copy_to_user(buffer, k_buffer, 2) != 0)
+	if (copy_to_user(u_buffer, k_buffer, 2) != 0)
 		return -EFAULT;
 	return 1;
 }

@@ -34,7 +34,7 @@ int main(int argc, char * argv[])
 	}
 
 	if (argc > 2)
-		if (sscanf(argv[2], "%d", & ppid_flag) == 1)
+		if (sscanf(argv[2], "%d", &ppid_flag) == 1)
 			if (ioctl(fd, EXIOCSPPIDF, &ppid_flag) != 0)
 				perror("ioctl(EXIOCSPPIDF)");
 
