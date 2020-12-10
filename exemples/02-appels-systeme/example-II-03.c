@@ -23,13 +23,12 @@
 		.read   = example_read,
 	};
 
+	static struct proc_dir_entry * example_entry;
 
 static int __init example_init (void)
 {
-	struct proc_dir_entry * entry;
-
-	entry = proc_create(THIS_MODULE->name, S_IFREG | 0644, NULL, & example_fops);
-	if (entry == NULL)
+	example_entry = proc_create(THIS_MODULE->name, S_IFREG | 0644, NULL, & example_fops);
+	if (example_entry == NULL)
 		return -EBUSY;
 
 	return 0;
@@ -38,7 +37,7 @@ static int __init example_init (void)
 
 static void __exit example_exit (void)
 {
-	remove_proc_entry(THIS_MODULE->name, NULL);
+	proc_remove(example_entry);
 }
 
 

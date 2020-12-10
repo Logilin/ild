@@ -27,10 +27,12 @@
 		.write  = example_write,
 	};
 
+	static struct proc_dir_entry * example_entry;
 
 static int __init example_init (void)
 {
-	if (proc_create(THIS_MODULE->name, S_IFREG | 0644, NULL, & example_proc_fops) == NULL)
+	example_entry = proc_create(THIS_MODULE->name, S_IFREG | 0644, NULL, & example_proc_fops);
+	if (example_entry == NULL)
 		return -EBUSY;
 
 	return 0;
@@ -39,7 +41,7 @@ static int __init example_init (void)
 
 static void __exit example_exit (void)
 {
-	remove_proc_entry(THIS_MODULE->name, NULL);
+	proc_remove(example_entry);
 }
 
 
