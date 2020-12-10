@@ -40,7 +40,7 @@ user: ${USER_PROGS}
 
 .PHONY: clean,
 clean:
-	rm -f *.o *.ko *.mod.c .*.o .*.ko .*.mod.c .*.cmd *~ *.ko.unsigned
+	rm -f *.o *.ko *.mod.c .*.o .*.ko .*.mod.c .*.cmd *~ *.ko.unsigned *.mod
 	rm -f Module.symvers Module.markers modules.order
 	rm -rf .tmp_versions .cache.mk
 	rm -f ${USER_PROGS}
