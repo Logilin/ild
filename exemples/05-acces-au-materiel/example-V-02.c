@@ -20,37 +20,37 @@
 	static int example_stop = 0;
 
 
-int example_thread(void * arg)
+int example_thread(void *arg)
 {
-	complete(& example_started);
+	complete(&example_started);
 
 	while (! example_stop) {
 		printk(KERN_INFO "%s - %s(): Thread running, jiffies = %lu\n",
 		                 THIS_MODULE->name, __FUNCTION__, jiffies);
 		ssleep(1);
 	}
-	complete_and_exit(& example_stopped, 0);
+	complete_and_exit(&example_stopped, 0);
 }
 
 
 static int __init example_init (void)
 {
-	struct task_struct * thread;
+	struct task_struct *thread;
 
 	thread = kthread_run(example_thread, NULL, THIS_MODULE->name);
 	if (IS_ERR(thread))
               return -ENOMEM;
-        wait_for_completion(& example_started);
+        wait_for_completion(&example_started);
 	printk(KERN_INFO "%s - %s(): Thread started\n", THIS_MODULE->name, __FUNCTION__);
 
-	return 0; 
+	return 0;
 }
 
 
 static void __exit example_exit (void)
 {
 	example_stop = 1;
-	wait_for_completion(& example_stopped);
+	wait_for_completion(&example_stopped);
 
 	printk(KERN_INFO "%s - %s(): Thread terminated\n", THIS_MODULE->name, __FUNCTION__);
 }

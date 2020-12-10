@@ -28,10 +28,10 @@
 	static DECLARE_WAIT_QUEUE_HEAD(example_buffer_wq);
 
 
-	static irqreturn_t example_handler(int irq, void * ident);
+	static irqreturn_t example_handler(int irq, void *ident);
 
-	static ssize_t example_read  (struct file * filp, char * buffer,
-	                              size_t length, loff_t * offset);
+	static ssize_t example_read  (struct file *filp, char *buffer,
+	                              size_t length, loff_t *offset);
 
 	static struct file_operations example_fops = {
 		.owner   =  THIS_MODULE,
@@ -41,7 +41,7 @@
 	static struct miscdevice example_misc_driver = {
 		    .minor          = MISC_DYNAMIC_MINOR,
 		    .name           = THIS_MODULE->name,
-		    .fops           = & example_fops,
+		    .fops           = &example_fops,
 	};
 
 
@@ -57,7 +57,7 @@ static int __init example_init (void)
 		return err;
 	}
 
-	spin_lock_init(& example_buffer_spl);
+	spin_lock_init(&example_buffer_spl);
 
 	if ((err = request_irq(gpio_to_irq(EXAMPLE_GPIO_IN), example_handler,
 	                       IRQF_SHARED | IRQF_TRIGGER_RISING,
@@ -66,7 +66,7 @@ static int __init example_init (void)
 		return err;
 	}
 
-	if ((err = misc_register(& example_misc_driver)) != 0) {
+	if ((err = misc_register(&example_misc_driver)) != 0) {
 		free_irq(gpio_to_irq(EXAMPLE_GPIO_IN), THIS_MODULE->name);
 		gpio_free(EXAMPLE_GPIO_IN);
 		return err;
@@ -78,57 +78,57 @@ static int __init example_init (void)
 
 static void __exit example_exit (void)
 {
-	misc_deregister(& example_misc_driver);
+	misc_deregister(&example_misc_driver);
 	free_irq(gpio_to_irq(EXAMPLE_GPIO_IN), THIS_MODULE->name);
 	gpio_free(EXAMPLE_GPIO_IN);
 }
 
 
-static ssize_t example_read(struct file * filp, char * buffer,
-                            size_t length, loff_t * offset)
+static ssize_t example_read(struct file *filp, char *u_buffer,
+                            size_t length, loff_t *offset)
 {
 	char k_buffer[80];
 	unsigned long irqs;
 
-	spin_lock_irqsave(& example_buffer_spl, irqs);
+	spin_lock_irqsave(&example_buffer_spl, irqs);
 
 	while (example_buffer_end == 0) {
-		spin_unlock_irqrestore(& example_buffer_spl, irqs);
+		spin_unlock_irqrestore(&example_buffer_spl, irqs);
 		if (wait_event_interruptible(example_buffer_wq,
 		                    (example_buffer_end != 0)) != 0)
 			return -ERESTARTSYS;
-		spin_lock_irqsave(& example_buffer_spl, irqs);
+		spin_lock_irqsave(&example_buffer_spl, irqs);
 	}
 
 	snprintf(k_buffer, 80, "%ld\n", example_buffer[0]);
 	if (length < (strlen(k_buffer)+1)) {
-		spin_unlock_irqrestore(& example_buffer_spl, irqs);
+		spin_unlock_irqrestore(&example_buffer_spl, irqs);
 		return -ENOMEM;
 	}
 
 	example_buffer_end --;
 	if (example_buffer_end > 0)
-		memmove(example_buffer, & (example_buffer[1]), example_buffer_end * sizeof(long int));
+		memmove(example_buffer, &(example_buffer[1]), example_buffer_end * sizeof(long int));
 
-	spin_unlock_irqrestore(& example_buffer_spl, irqs);
+	spin_unlock_irqrestore(&example_buffer_spl, irqs);
 
-	if (copy_to_user(buffer, k_buffer, strlen(k_buffer)+1) != 0)
+	if (copy_to_user(u_buffer, k_buffer, strlen(k_buffer)+1) != 0)
 		return -EFAULT;
 
 	return strlen(k_buffer)+1;
 }
 
 
-static irqreturn_t example_handler(int irq, void * ident)
+static irqreturn_t example_handler(int irq, void *ident)
 {
-	spin_lock(& example_buffer_spl);
+	spin_lock(&example_buffer_spl);
 
 	if (example_buffer_end < EXAMPLE_BUFFER_SIZE) {
 		example_buffer[example_buffer_end] = jiffies;
 		example_buffer_end ++;
 	}
-	spin_unlock(& example_buffer_spl);
-	wake_up_interruptible(& example_buffer_wq);
+	spin_unlock(&example_buffer_spl);
+	wake_up_interruptible(&example_buffer_wq);
 
 	return IRQ_HANDLED;
 }

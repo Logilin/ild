@@ -16,8 +16,8 @@
 	#include "gpio-examples.h"
 
 
-	static irqreturn_t example_top_half    (int irq, void * ident);
-	static irqreturn_t example_bottom_half (int irq, void * ident);
+	static irqreturn_t example_top_half    (int irq, void *ident);
+	static irqreturn_t example_bottom_half (int irq, void *ident);
 
 
 static int __init example_init (void)
@@ -62,13 +62,13 @@ static void __exit example_exit (void)
 }
 
 
-static irqreturn_t example_top_half(int irq, void * ident)
+static irqreturn_t example_top_half(int irq, void *ident)
 {
 	return IRQ_WAKE_THREAD;
 }
 
 
-static irqreturn_t example_bottom_half(int irq, void * ident)
+static irqreturn_t example_bottom_half(int irq, void *ident)
 {
 	static int value = 1;
 	gpio_set_value(EXAMPLE_GPIO_OUT, value);

@@ -20,11 +20,11 @@
 	#include "gpio-examples.h"
 
 
-	static ssize_t example_read  (struct file * filp, char * buffer,
-	                              size_t length, loff_t * offset);
+	static ssize_t example_read  (struct file* filp, char *buffer,
+	                              size_t length, loff_t *offset);
 
-	static ssize_t example_write (struct file * filp, const char * buffer,
-	                              size_t length, loff_t * offset);
+	static ssize_t example_write (struct file *filp, const char *buffer,
+	                              size_t length, loff_t *offset);
 
 	static struct file_operations fops_example = {
 		.owner   =  THIS_MODULE,
@@ -35,7 +35,7 @@
 	static struct miscdevice example_misc_driver = {
 		    .minor          = MISC_DYNAMIC_MINOR,
 		    .name           = THIS_MODULE->name,
-		    .fops           = & fops_example,
+		    .fops           = &fops_example,
 	};
 
 
@@ -58,7 +58,7 @@ static int __init example_init (void)
 		return err;
 	}
 
-	if ((err = misc_register(& example_misc_driver)) != 0) {
+	if ((err = misc_register(&example_misc_driver)) != 0) {
 		gpio_free(EXAMPLE_GPIO_OUT);
 		gpio_free(EXAMPLE_GPIO_IN);
 		return err;
@@ -70,29 +70,29 @@ static int __init example_init (void)
 
 static void __exit example_exit (void)
 {
-	misc_deregister(& example_misc_driver);
+	misc_deregister(&example_misc_driver);
 	gpio_free(EXAMPLE_GPIO_OUT);
 	gpio_free(EXAMPLE_GPIO_IN);
 }
 
 
-static ssize_t example_read(struct file * filp, char * buffer,
-                            size_t length, loff_t * offset)
+static ssize_t example_read(struct file *filp, char *u_buffer,
+                            size_t length, loff_t *offset)
 {
-	char k_buffer [8];
+	char k_buffer[8];
 
 	if (length < 2)
 		return 0;
 	sprintf(k_buffer, "%d\n", gpio_get_value(EXAMPLE_GPIO_IN));
-	if (copy_to_user(buffer, k_buffer, 2) != 0)
+	if (copy_to_user(u_buffer, k_buffer, 2) != 0)
 		return -EFAULT;
 
 	return 2;
 }
 
 
-static ssize_t example_write(struct file * filp, const char * buffer,
-                             size_t length, loff_t * offset)
+static ssize_t example_write(struct file *filp, const char *buffer,
+                             size_t length, loff_t *offset)
 {
 	char k_buffer[80];
 	int val;
@@ -101,7 +101,7 @@ static ssize_t example_write(struct file * filp, const char * buffer,
 		return -EINVAL;
 	if (copy_from_user(k_buffer, buffer, length) != 0)
 		return -EFAULT;
-	if (sscanf(k_buffer, "%d", & val) != 1)
+	if (sscanf(k_buffer, "%d", &val) != 1)
 		return -EINVAL;
 
 	gpio_set_value(EXAMPLE_GPIO_OUT, val & 0x01);

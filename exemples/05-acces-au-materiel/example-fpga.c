@@ -60,7 +60,7 @@ static char * module_names [] = {
 // Une structure specifique dans laquelle on stocke les donnees privées.
 struct example_fpga_s {
 
-	// Adresse de projection des modules 
+	// Adresse de projection des modules
 	unsigned char * module_mem;
 	unsigned char * module_leds;
 	unsigned char * module_switches;
@@ -165,7 +165,7 @@ static void example_fpga_release_char_device(struct example_fpga_s * example_fpg
 	int i;
 	mutex_lock(&example_fpga_class_mtx);
 	cdev_del (& (example_fpga->cdev));
-	for (i = 0; i < EXAMPLE_FPGA_NB_MINORS; i ++) 
+	for (i = 0; i < EXAMPLE_FPGA_NB_MINORS; i ++)
 		device_destroy(example_fpga_class, MKDEV(MAJOR(example_fpga->dev), MINOR(example_fpga->dev) + i));
 	mutex_unlock(&example_fpga_class_mtx);
 	unregister_chrdev_region(example_fpga->dev, EXAMPLE_FPGA_NB_MINORS);
@@ -528,7 +528,7 @@ static int example_fpga_initialize_pci_device (struct pci_dev * dev, struct exam
 			}
 		}
 
-		// Edge Capture 
+		// Edge Capture
 		iowrite32(0x00000003, example_fpga->module_switches + 0x0C);
 		// Enable PIO IRQ
 		iowrite32(0x00000003, example_fpga->module_switches + 0x08);
@@ -609,7 +609,7 @@ static irqreturn_t example_fpga_interrupt_handler(int num, void * arg)
 	iowrite32(0x00000000, example_fpga->module_switches + 0x08);
 	// Reset edge trigerring register
 	iowrite32(0x00000003, example_fpga->module_switches + 0x0C);
-	// Then re-enable all PIO interrupts 
+	// Then re-enable all PIO interrupts
 	iowrite32(0x00000003, example_fpga->module_switches + 0x08);
 
 	// Clear the interrupt bit in the Avalon-MM Status Register

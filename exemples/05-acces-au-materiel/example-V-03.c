@@ -15,7 +15,7 @@
 	#include "gpio-examples.h"
 
 
-	static irqreturn_t example_handler(int irq, void * ident);
+	static irqreturn_t example_handler(int irq, void *ident);
 
 
 static int __init example_init (void)
@@ -44,7 +44,7 @@ static int __init example_init (void)
 		gpio_free(EXAMPLE_GPIO_IN);
 		return err;
 	}
-	return 0; 
+	return 0;
 }
 
 

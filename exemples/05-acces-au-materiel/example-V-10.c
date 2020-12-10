@@ -23,7 +23,7 @@
 	#include <asm/io.h>
 
 
-	static int  example_mmap (struct file * filp, struct vm_area_struct * vm);
+	static int  example_mmap (struct file *filp, struct vm_area_struct *vm);
 
 	static struct file_operations example_fops = {
 		.owner   =  THIS_MODULE,
@@ -33,21 +33,21 @@
 	static struct miscdevice example_misc_driver = {
 		    .minor          = MISC_DYNAMIC_MINOR,
 		    .name           = THIS_MODULE->name,
-		    .fops           = & example_fops,
+		    .fops           = &example_fops,
 	};
 
 	struct timer_list example_timer;
 
-	static char * example_buffer = NULL;
+	static char *example_buffer = NULL;
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
-static void example_timer_function(unsigned long unused)
-#else
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,15,0)
 static void example_timer_function(struct timer_list *unused)
+#else
+static void example_timer_function(unsigned long unused)
 #endif
 {
 	sprintf(example_buffer, "\r%s - %s(): %lu", THIS_MODULE->name, __FUNCTION__, jiffies);
-	mod_timer(& example_timer, jiffies + HZ);
+	mod_timer(&example_timer, jiffies + HZ);
 }
 
 
@@ -55,7 +55,7 @@ static void example_timer_function(struct timer_list *unused)
 static int __init example_init (void)
 {
 	int err;
-	struct page * pg = NULL;
+	struct page *pg = NULL;
 
 	example_buffer = kzalloc(PAGE_SIZE, GFP_KERNEL);
 	if (example_buffer == NULL)
@@ -66,7 +66,7 @@ static int __init example_init (void)
 	pg = virt_to_page(example_buffer);
 	SetPageReserved(pg);
 
-	err =  misc_register(& example_misc_driver);
+	err =  misc_register(&example_misc_driver);
 	if (err != 0) {
 		ClearPageReserved(pg);
 		kzfree(example_buffer);
@@ -74,14 +74,14 @@ static int __init example_init (void)
 		return err;
 	}
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
-	init_timer (& example_timer);
-	example_timer.function = example_timer_function;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,15,0)
+	timer_setup (&example_timer, example_timer_function, 0);
 #else
-	timer_setup (& example_timer, example_timer_function, 0);
+	init_timer (&example_timer);
+	example_timer.function = example_timer_function;
 #endif
 	example_timer.expires = jiffies + HZ;
-	add_timer(& example_timer);
+	add_timer(&example_timer);
 
 	return 0;
 }
@@ -89,20 +89,20 @@ static int __init example_init (void)
 
 static void __exit example_exit (void)
 {
-	struct page * pg;
+	struct page *pg;
 
-	del_timer(& example_timer);
+	del_timer(&example_timer);
 
 	pg = virt_to_page(example_buffer);
 	ClearPageReserved(pg);
 	kzfree(example_buffer);
 	example_buffer = NULL;
 
-	misc_deregister(& example_misc_driver);
+	misc_deregister(&example_misc_driver);
 }
 
 
-static int example_mmap (struct file * filp, struct vm_area_struct * vma)
+static int example_mmap (struct file *filp, struct vm_area_struct *vma)
 {
 	int err;
 

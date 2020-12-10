@@ -15,9 +15,9 @@
 
 	#include "gpio-examples.h"
 
-	static irqreturn_t example_top_half(int irq, void * ident);
+	static irqreturn_t example_top_half(int irq, void *ident);
 
-	static void example_bottom_half(struct work_struct * inutilise);
+	static void example_bottom_half(struct work_struct *unused);
 	static DECLARE_WORK(example_workqueue, example_bottom_half);
 
 
@@ -47,7 +47,7 @@ static int __init example_init (void)
 		gpio_free(EXAMPLE_GPIO_IN);
 		return err;
 	}
-	return 0; 
+	return 0;
 }
 
 
@@ -60,14 +60,14 @@ static void __exit example_exit (void)
 }
 
 
-static irqreturn_t example_top_half(int irq, void * ident)
+static irqreturn_t example_top_half(int irq, void *ident)
 {
-	schedule_work(& example_workqueue);
+	schedule_work(&example_workqueue);
 	return IRQ_HANDLED;
 }
 
 
-static void example_bottom_half(struct work_struct * inutilise)
+static void example_bottom_half(struct work_struct *unused)
 {
 	static int value = 1;
 

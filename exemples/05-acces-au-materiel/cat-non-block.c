@@ -8,7 +8,7 @@
 
 \************************************************************************/
 
-// A small non-blocking cat implementation 
+// A small non-blocking cat implementation
 
 	#include <stdio.h>
 	#include <stdlib.h>
@@ -20,7 +20,7 @@ void nonblocking_cat(int fd)
 {
 	char buffer[4096];
 	int n;
-	char * prompt = "|/-\\";
+	char *prompt = "|/-\\";
 	int i = 0;
 
 	fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) | O_NONBLOCK);
@@ -31,7 +31,7 @@ void nonblocking_cat(int fd)
 			continue;
 		}
 
-		write(STDOUT_FILENO, & (prompt[i]), 1);
+		write(STDOUT_FILENO, &(prompt[i]), 1);
 		write(STDOUT_FILENO, "\b", 1);
 		i ++;
 		if (i == 4)
@@ -41,7 +41,7 @@ void nonblocking_cat(int fd)
 }
 
 
-int main(int argc, char * argv[])
+int main(int argc, char *argv[])
 {
 	int i;
 	int fd;

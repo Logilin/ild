@@ -20,10 +20,10 @@
 	#include "gpio-examples.h"
 
 
-	static irqreturn_t example_handler(int irq, void * ident);
+	static irqreturn_t example_handler(int irq, void *ident);
 
-	static ssize_t example_read  (struct file * filp, char * buffer,
-	                              size_t length, loff_t * offset);
+	static ssize_t example_read(struct file *filp, char *buffer,
+	                            size_t length, loff_t *offset);
 
 
 	static struct file_operations example_fops = {
@@ -56,7 +56,7 @@ static int __init example_init (void)
 		return err;
 	}
 
-	spin_lock_init(& example_buffer_spl);
+	spin_lock_init(&example_buffer_spl);
 
 	if ((err = request_irq(gpio_to_irq(EXAMPLE_GPIO_IN), example_handler,
 	                       IRQF_SHARED | IRQF_TRIGGER_RISING,
@@ -77,22 +77,22 @@ static int __init example_init (void)
 
 static void __exit example_exit (void)
 {
-	misc_deregister(& example_misc_driver);
+	misc_deregister(&example_misc_driver);
 	free_irq(gpio_to_irq(EXAMPLE_GPIO_IN), THIS_MODULE->name);
 	gpio_free(EXAMPLE_GPIO_IN);
 }
 
 
-static ssize_t example_read(struct file * filp, char * buffer,
-                            size_t length, loff_t * offset)
+static ssize_t example_read(struct file *filp, char *u_buffer,
+                            size_t length, loff_t *offset)
 {
 	unsigned long irqs;
 	char k_buffer[80];
 
-	spin_lock_irqsave(& example_buffer_spl, irqs);
+	spin_lock_irqsave(&example_buffer_spl, irqs);
 
 	if (example_buffer_end == 0) {
-		spin_unlock_irqrestore(& example_buffer_spl, irqs);
+		spin_unlock_irqrestore(&example_buffer_spl, irqs);
 		return 0;
 	}
 
@@ -100,14 +100,14 @@ static ssize_t example_read(struct file * filp, char * buffer,
 
 	example_buffer_end --;
 	if (example_buffer_end > 0)
-		memmove(example_buffer, & (example_buffer[1]), example_buffer_end * sizeof(unsigned long));
+		memmove(example_buffer, &(example_buffer[1]), example_buffer_end * sizeof(unsigned long));
 
-	spin_unlock_irqrestore(& example_buffer_spl, irqs);
+	spin_unlock_irqrestore(&example_buffer_spl, irqs);
 
 	if (length < (strlen(k_buffer) + 1))
 		return -ENOMEM;
 
-	if (copy_to_user(buffer, k_buffer, strlen(k_buffer) + 1) != 0)
+	if (copy_to_user(u_buffer, k_buffer, strlen(k_buffer) + 1) != 0)
 		return -EFAULT;
 
 	return strlen(k_buffer) + 1;
@@ -116,14 +116,14 @@ static ssize_t example_read(struct file * filp, char * buffer,
 
 static irqreturn_t example_handler(int irq, void * ident)
 {
-	spin_lock(& example_buffer_spl);
+	spin_lock(&example_buffer_spl);
 
 	if (example_buffer_end < EXAMPLE_BUFFER_SIZE) {
 		example_buffer[example_buffer_end] = jiffies;
 		example_buffer_end ++;
 	}
 
-	spin_unlock(& example_buffer_spl);
+	spin_unlock(&example_buffer_spl);
 
 	return IRQ_HANDLED;
 }

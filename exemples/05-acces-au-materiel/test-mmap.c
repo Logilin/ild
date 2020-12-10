@@ -15,10 +15,10 @@
 #include <sys/mman.h>
 
 
-int main(int argc, char * argv[])
+int main(int argc, char *argv[])
 {
 	int fd;
-	char * ptr;
+	char *ptr;
 
 	if ((argc != 2)
 	 || ((fd = open(argv[1], O_RDWR, 0)) < 0)) {
