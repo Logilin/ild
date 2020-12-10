@@ -22,23 +22,23 @@
 	#include <linux/skbuff.h>
 
 
-	struct net_device * net_dev_ex_0 = NULL;
-	struct net_device * net_dev_ex_1 = NULL;
+	struct net_device *net_dev_ex_0 = NULL;
+	struct net_device *net_dev_ex_1 = NULL;
 
 	struct example_net_dev_priv {
 
-		struct sk_buff * sk_b; // Packet to send
+		struct sk_buff *sk_b; // Packet to send
 
 		unsigned char data[ETH_DATA_LEN]; // Data received
 		int data_len;
 	};
 
 
-	static irqreturn_t example_irq_tx_handler(int irq, void * irq_id, struct pt_regs * regs);
-	static irqreturn_t example_irq_rx_handler(int irq, void * irq_id, struct pt_regs * regs);
+	static irqreturn_t example_irq_tx_handler(int irq, void *irq_id, struct pt_regs *regs);
+	static irqreturn_t example_irq_rx_handler(int irq, void *irq_id, struct pt_regs *regs);
 
 
-static int example_open (struct net_device * net_dev)
+static int example_open (struct net_device *net_dev)
 {
 	printk(KERN_INFO "%s - %s(%pK):\n",
 	       THIS_MODULE->name, __FUNCTION__, net_dev);
@@ -60,7 +60,7 @@ static int example_open (struct net_device * net_dev)
 }
 
 
-static int example_stop (struct net_device * net_dev)
+static int example_stop (struct net_device *net_dev)
 {
 	printk(KERN_INFO "%s - %s(%pK):\n",
 	       THIS_MODULE->name, __FUNCTION__, net_dev);
@@ -71,18 +71,18 @@ static int example_stop (struct net_device * net_dev)
 }
 
 
-static int example_start_xmit(struct sk_buff * sk_b, struct net_device * src)
+static int example_start_xmit(struct sk_buff *sk_b, struct net_device *src)
 {
-	struct example_net_dev_priv * dst_priv;
-	struct example_net_dev_priv * src_priv;
+	struct example_net_dev_priv *dst_priv;
+	struct example_net_dev_priv *src_priv;
 
-	struct net_device * dst;
-	struct iphdr * ip_header;
+	struct net_device *dst;
+	struct iphdr *ip_header;
 
-	unsigned char * ptr_src;
-	unsigned char * ptr_dst;
+	unsigned char *ptr_src;
+	unsigned char *ptr_dst;
 
-	char * data;
+	char  *data;
 	int    len;
 	char   short_packet[ETH_ZLEN];
 
@@ -119,9 +119,9 @@ static int example_start_xmit(struct sk_buff * sk_b, struct net_device * src)
 	ptr_dst = (unsigned char *) &(ip_header -> daddr);
 
 	ptr_src += 2;
-	* ptr_src = 255 - *ptr_src;
+	*ptr_src = 255 - *ptr_src;
 	ptr_dst += 2;
-	* ptr_dst = 255 - *ptr_dst;
+	*ptr_dst = 255 - *ptr_dst;
 
 	ip_header->check = 0;
 	ip_header->check = ip_fast_csum((unsigned char *)ip_header, ip_header->ihl);
@@ -138,12 +138,12 @@ static int example_start_xmit(struct sk_buff * sk_b, struct net_device * src)
 }
 
 
-static irqreturn_t example_irq_rx_handler(int irq, void * irq_id, struct pt_regs * regs)
+static irqreturn_t example_irq_rx_handler(int irq, void *irq_id, struct pt_regs *regs)
 {
-	unsigned char * data;
-	struct sk_buff * sk_b;
-	struct net_device * net_dev;
-	struct example_net_dev_priv * priv;
+	unsigned char *data;
+	struct sk_buff *sk_b;
+	struct net_device *net_dev;
+	struct example_net_dev_priv *priv;
 
 	printk(KERN_INFO "%s -%s(%d, %pK)\n",
 	       THIS_MODULE->name, __FUNCTION__, irq, irq_id);
@@ -171,8 +171,8 @@ static irqreturn_t example_irq_rx_handler(int irq, void * irq_id, struct pt_regs
 
 static irqreturn_t example_irq_tx_handler(int irq, void * irq_id, struct pt_regs * regs)
 {
-	struct net_device * net_dev;
-	struct example_net_dev_priv * priv;
+	struct net_device *net_dev;
+	struct example_net_dev_priv *priv;
 
 	printk(KERN_INFO "%s -%s(%d, %pK)\n",
 	       THIS_MODULE->name, __FUNCTION__, irq, irq_id);
@@ -187,11 +187,11 @@ static irqreturn_t example_irq_tx_handler(int irq, void * irq_id, struct pt_regs
 }
 
 
-static int example_hard_header(struct sk_buff * sk_b, struct net_device * net_dev,
-                        unsigned short type, const void * dst_addr, const void * src_addr,
+static int example_hard_header(struct sk_buff *sk_b, struct net_device *net_dev,
+                        unsigned short type, const void *dst_addr, const void *src_addr,
                         unsigned int len)
 {
-	struct ethhdr * eth_hdr = NULL;
+	struct ethhdr *eth_hdr = NULL;
 
 	eth_hdr = (struct ethhdr *) skb_push(sk_b, ETH_HLEN);
 	eth_hdr->h_proto = htons(type);
@@ -225,17 +225,17 @@ struct net_device_ops example_netdev_ops = {
 };
 
 
-static void example_setup (struct net_device * net_dev)
+static void example_setup (struct net_device *net_dev)
 {
-	struct example_net_dev_priv * private = NULL;
+	struct example_net_dev_priv *private = NULL;
 
 	printk(KERN_INFO "%s - %s(%pK)\n",
 	       THIS_MODULE->name, __FUNCTION__, net_dev);
 
 	ether_setup(net_dev);
 
-	net_dev->netdev_ops = & example_netdev_ops;
-	net_dev->header_ops = & example_header_ops;
+	net_dev->netdev_ops = &example_netdev_ops;
+	net_dev->header_ops = &example_header_ops;
 
 	net_dev->flags    |= IFF_NOARP;
 
@@ -252,10 +252,10 @@ static int __init example_init(void)
 
 	printk(KERN_INFO "%s - %s()\n", THIS_MODULE->name, __FUNCTION__);
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,17,0)
-	net_dev_ex_0 = alloc_netdev(sizeof(struct example_net_dev_priv), "ex%d", example_setup);
-#else
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0)
 	net_dev_ex_0 = alloc_netdev(sizeof(struct example_net_dev_priv), "ex%d", NET_NAME_UNKNOWN, example_setup);
+#else
+	net_dev_ex_0 = alloc_netdev(sizeof(struct example_net_dev_priv), "ex%d", example_setup);
 #endif
 	if (net_dev_ex_0 == NULL)
 		return -ENOMEM;
@@ -265,10 +265,10 @@ static int __init example_init(void)
 		return -ENODEV;
 	}
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,17,0)
-	net_dev_ex_1 = alloc_netdev(sizeof(struct example_net_dev_priv), "ex%d", example_setup);
-#else
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0)
 	net_dev_ex_1 = alloc_netdev(sizeof(struct example_net_dev_priv), "ex%d", NET_NAME_UNKNOWN, example_setup);
+#else
+	net_dev_ex_1 = alloc_netdev(sizeof(struct example_net_dev_priv), "ex%d", example_setup);
 #endif
 	if (net_dev_ex_1 == NULL) {
 		example_exit();

@@ -16,10 +16,10 @@
 	#include <linux/etherdevice.h>
 
 
-	struct net_device * net_dev_ex = NULL;
+	struct net_device *net_dev_ex = NULL;
 
 
-static int example_open (struct net_device * net_dev)
+static int example_open (struct net_device *net_dev)
 {
 	printk(KERN_INFO "%s - %s(%pK):\n",
 	       THIS_MODULE->name, __FUNCTION__, net_dev);
@@ -37,7 +37,7 @@ static int example_open (struct net_device * net_dev)
 }
 
 
-static int example_stop (struct net_device * net_dev)
+static int example_stop (struct net_device *net_dev)
 {
 	printk(KERN_INFO "%s - %s(%pK)\n",
 	       THIS_MODULE->name, __FUNCTION__, net_dev);
@@ -48,7 +48,7 @@ static int example_stop (struct net_device * net_dev)
 }
 
 
-static int example_start_xmit(struct sk_buff * sk_b, struct net_device * src)
+static int example_start_xmit(struct sk_buff *sk_b, struct net_device *src)
 {
 	printk(KERN_INFO "%s - %s(%pK, %pK)\n",
 	       THIS_MODULE->name, __FUNCTION__, sk_b, src);
@@ -65,14 +65,14 @@ struct net_device_ops example_netdev_ops = {
 };
 
 
-static void example_setup (struct net_device * net_dev)
+static void example_setup (struct net_device *net_dev)
 {
 	printk(KERN_INFO "%s - %s(%pK)\n",
 	       THIS_MODULE->name, __FUNCTION__, net_dev);
 
 	ether_setup(net_dev);
 
-	net_dev->netdev_ops = & example_netdev_ops;
+	net_dev->netdev_ops = &example_netdev_ops;
 }
 
 
@@ -81,10 +81,10 @@ static int __init example_init(void)
 
 	printk(KERN_INFO "%s: %s()\n", THIS_MODULE->name, __FUNCTION__);
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,17,0)
-	net_dev_ex = alloc_netdev(0, "ex%d", example_setup);
-#else
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0)
 	net_dev_ex = alloc_netdev(0, "ex%d", NET_NAME_UNKNOWN, example_setup);
+#else
+	net_dev_ex = alloc_netdev(0, "ex%d", example_setup);
 #endif
 	if (net_dev_ex == NULL)
 		return -ENOMEM;
