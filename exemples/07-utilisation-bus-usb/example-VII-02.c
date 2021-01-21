@@ -23,9 +23,9 @@
 	};
 	MODULE_DEVICE_TABLE(usb, id_table_example);
 
-	static int  probe_example      (struct usb_interface * intf,
-	                                const struct usb_device_id * dev_id);
-	static void disconnect_example (struct usb_interface * intf);
+	static int  probe_example      (struct usb_interface *intf,
+	                                const struct usb_device_id *dev_id);
+	static void disconnect_example (struct usb_interface *intf);
 
 
 	static struct usb_driver usb_driver_example = {
@@ -36,17 +36,17 @@
 	};
 
 
-static int probe_example(struct usb_interface * intf,
-                  const struct usb_device_id  * dev_id)
+static int probe_example(struct usb_interface *intf,
+                  const struct usb_device_id  *dev_id)
 {
 	int i;
-	struct usb_host_interface * host_intf;
-	struct usb_endpoint_descriptor * endpoint_desc;
+	struct usb_host_interface *host_intf;
+	struct usb_endpoint_descriptor *endpoint_desc;
 
 	host_intf = intf->cur_altsetting;
-	
+
 	for (i = 0; i < host_intf->desc.bNumEndpoints; i++) {
-		endpoint_desc = & (host_intf->endpoint[i].desc);
+		endpoint_desc = &(host_intf->endpoint[i].desc);
 		if (endpoint_desc->bEndpointAddress & USB_DIR_IN) {
 			switch (endpoint_desc->bmAttributes & USB_ENDPOINT_XFERTYPE_MASK) {
 				case USB_ENDPOINT_XFER_BULK:
@@ -91,7 +91,7 @@ static int probe_example(struct usb_interface * intf,
 }
 
 
-static void disconnect_example(struct usb_interface * interface)
+static void disconnect_example(struct usb_interface *interface)
 {
 }
 
@@ -100,7 +100,7 @@ static int __init example_init(void)
 {
 	int err;
 
-	err = usb_register(& usb_driver_example);
+	err = usb_register(&usb_driver_example);
 	if (err) {
 		printk(KERN_ERR "%s: usb_register(): error %d\n",
 		       THIS_MODULE->name, err);
@@ -115,7 +115,7 @@ static int __init example_init(void)
 
 static void __exit example_exit(void)
 {
-	usb_deregister(& usb_driver_example);
+	usb_deregister(&usb_driver_example);
 }
 
 

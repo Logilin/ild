@@ -25,9 +25,9 @@
 	MODULE_DEVICE_TABLE(usb, id_table_example);
 
 	/* Fonctions de detection et deconnexion du peripherique */
-	static int  probe_example      (struct usb_interface * intf,
-	                                const struct usb_device_id * dev_id);
-	static void disconnect_example (struct usb_interface * intf);
+	static int  probe_example      (struct usb_interface *intf,
+	                                const struct usb_device_id *dev_id);
+	static void disconnect_example (struct usb_interface *intf);
 
 	/* Representation du pilote de peripherique */
 	static struct usb_driver usb_driver_example = {
@@ -38,8 +38,8 @@
 	};
 
 
-static int probe_example(struct usb_interface * intf,
-                  const struct usb_device_id  * dev_id)
+static int probe_example(struct usb_interface *intf,
+                  const struct usb_device_id  *dev_id)
 {
 	printk(KERN_INFO "%s: probe_example()\n",
 	       THIS_MODULE->name);
@@ -47,7 +47,7 @@ static int probe_example(struct usb_interface * intf,
 }
 
 
-static void disconnect_example(struct usb_interface * intf)
+static void disconnect_example(struct usb_interface *intf)
 {
 	printk(KERN_INFO "%s: disconnect_example()\n",
 	       THIS_MODULE->name);
@@ -59,7 +59,7 @@ static int __init example_init(void)
 {
 	int err;
 
-	err = usb_register(& usb_driver_example);
+	err = usb_register(&usb_driver_example);
 	if (err) {
 		printk(KERN_ERR "%s: usb_register(): error %d\n",
 		       THIS_MODULE->name, err);
@@ -75,12 +75,12 @@ static int __init example_init(void)
 
 static void __exit example_exit(void)
 {
-	usb_deregister(& usb_driver_example);
+	usb_deregister(&usb_driver_example);
 }
 
 
-	module_init (example_init);
-	module_exit (example_exit);
+	module_init(example_init);
+	module_exit(example_exit);
 
 	MODULE_DESCRIPTION("probe() and disconnect() callbacks invocation.");
 	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
