@@ -13,15 +13,20 @@
 	#include <linux/version.h>
 
 
-	static const struct file_operations example_fops = {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,6,0)
+	static const struct proc_ops example_ops = {
 	};
+#else
+	static const struct file_operations example_ops = {
+	};
+#endif
 
 	static struct proc_dir_entry * example_entry;
 
 
 static int __init example_init (void)
 {
-	example_entry = proc_create(THIS_MODULE->name, S_IFREG | 0644, NULL, & example_fops);
+	example_entry = proc_create(THIS_MODULE->name, S_IFREG | 0644, NULL, &example_ops);
 	if (example_entry == NULL)
 		return -EBUSY;
 
