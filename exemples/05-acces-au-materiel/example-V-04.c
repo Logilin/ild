@@ -11,14 +11,21 @@
 	#include <linux/gpio.h>
 	#include <linux/interrupt.h>
 	#include <linux/module.h>
+	#include <linux/version.h>
 
 	#include "gpio-examples.h"
 
 
 	static irqreturn_t example_top_half(int irq, void *ident);
 
-	static void example_bottom_half(unsigned long unused);
-	static DECLARE_TASKLET(example_tasklet, example_bottom_half, 0);
+	static void example_bottom_half(struct tasklet_struct *unused);
+
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,9,0)
+	static DECLARE_TASKLET(example_tasklet, example_bottom_half);
+#else
+	static DECLARE_TASKLET(example_tasklet, (void (*)(unsigned long))example_bottom_half, 0);
+#endif
 
 
 static int __init example_init (void)
@@ -68,7 +75,7 @@ static irqreturn_t example_top_half(int irq, void *ident)
 }
 
 
-static void example_bottom_half(unsigned long inutilise)
+static void example_bottom_half(struct tasklet_struct *unused)
 {
 	static int value = 1;
 
