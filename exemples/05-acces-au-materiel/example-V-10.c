@@ -69,7 +69,11 @@ static int __init example_init (void)
 	err =  misc_register(&example_misc_driver);
 	if (err != 0) {
 		ClearPageReserved(pg);
-		kzfree(example_buffer);
+		#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,9,0)
+			kfree_sensitive(example_buffer);
+		#else
+			kzfree(example_buffer);
+		#endif
 		example_buffer = NULL;
 		return err;
 	}
@@ -95,7 +99,11 @@ static void __exit example_exit (void)
 
 	pg = virt_to_page(example_buffer);
 	ClearPageReserved(pg);
-	kzfree(example_buffer);
+	#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,9,0)
+		kfree_sensitive(example_buffer);
+	#else
+		kzfree(example_buffer);
+	#endif
 	example_buffer = NULL;
 
 	misc_deregister(&example_misc_driver);
