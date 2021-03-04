@@ -1,23 +1,24 @@
-/************************************************************************\
-  Exemples de la formation
-    "Ecriture de drivers et programmation noyau Linux"
-  Chapitre "Driver en mode caracteres"
+// SPDX-License-Identifier: GPL-2.0
+//
+// Exemples de la formation
+//  "Ecriture de drivers et programmation noyau Linux"
+// Chapitre "Driver en mode caracteres"
+//
+// (c) 2001-2021 Christophe Blaess
+//
+//    https://www.logilin.fr/
+//
 
-  (c) 2005-2019 Christophe Blaess
-  http://www.blaess.fr/christophe/
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
 
-\************************************************************************/
-
-	#include <stdio.h>
-	#include <stdlib.h>
-	#include <unistd.h>
-	#include <fcntl.h>
-	#include <sys/ioctl.h>
-
-	#include "example-IV-06.h"
+#include "example-IV-06.h"
 
 
-int main(int argc, char * argv[])
+int main(int argc, char *argv[])
 {
 	int fd;
 	int ppid_flag;

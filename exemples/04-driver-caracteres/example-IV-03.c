@@ -1,44 +1,46 @@
-/************************************************************************\
-  Exemples de la formation
-    "Ecriture de drivers et programmation noyau Linux"
-  Chapitre "Driver en mode caracteres"
+// SPDX-License-Identifier: GPL-2.0
+//
+// Exemples de la formation
+//  "Ecriture de drivers et programmation noyau Linux"
+// Chapitre "Driver en mode caracteres"
+//
+// (c) 2001-2021 Christophe Blaess
+//
+//    https://www.logilin.fr/
+//
 
-  (c) 2005-2019 Christophe Blaess
-  http://www.blaess.fr/christophe/
-
-\************************************************************************/
-
-	#include <linux/cdev.h>
-	#include <linux/device.h>
-	#include <linux/fs.h>
-	#include <linux/module.h>
+#include <linux/cdev.h>
+#include <linux/device.h>
+#include <linux/fs.h>
+#include <linux/module.h>
 
 
 	static dev_t example_dev = MKDEV(0, 0);
 
-	static int example_major = 0;
+	static int example_major;
+
 	module_param_named(major, example_major, int, 0644);
 
 	static struct cdev example_cdev;
 
-	static int example_open    (struct inode * ind, struct file * filp);
-	static int example_release (struct inode * ind, struct file * filp);
+	static int example_open(struct inode *ind, struct file *filp);
+	static int example_release(struct inode *ind, struct file *filp);
 
-	static struct file_operations fops_example = {
+	static const struct file_operations fops_example = {
 		.owner   =  THIS_MODULE,
 		.open    =  example_open,
 		.release =  example_release,
 	};
 
-	static struct class * example_class = NULL;
+	static struct class *example_class;
 
 
-static int __init example_init (void)
+static int __init example_init(void)
 {
 	int err;
 
 	if (example_major == 0) {
-		err = alloc_chrdev_region(& example_dev, 0, 1, THIS_MODULE->name);
+		err = alloc_chrdev_region(&example_dev, 0, 1, THIS_MODULE->name);
 	} else {
 		example_dev = MKDEV(example_major, 0);
 		err = register_chrdev_region(example_dev, 1, THIS_MODULE->name);
@@ -53,48 +55,49 @@ static int __init example_init (void)
 		return -EINVAL;
 	}
 
-	device_create(example_class, NULL, example_dev,NULL,THIS_MODULE->name);
+	device_create(example_class, NULL, example_dev, NULL, THIS_MODULE->name);
 
-	cdev_init(& example_cdev, & fops_example);
+	cdev_init(&example_cdev, &fops_example);
 
-	err = cdev_add(& example_cdev, example_dev, 1);
+	err = cdev_add(&example_cdev, example_dev, 1);
 	if (err != 0) {
 		device_destroy(example_class, example_dev);
 		class_destroy(example_class);
 		unregister_chrdev_region(example_dev, 1);
 		return err;
 	}
+
 	return 0;
 }
 
 
-static void __exit example_exit (void)
+static void __exit example_exit(void)
 {
 	device_destroy(example_class, example_dev);
 	class_destroy(example_class);
-	cdev_del(& example_cdev);
+	cdev_del(&example_cdev);
 	unregister_chrdev_region(example_dev, 1);
 }
 
 
-static int example_open(struct inode * ind, struct file * filp)
+static int example_open(struct inode *ind, struct file *filp)
 {
-	printk(KERN_INFO "%s - %s()\n", THIS_MODULE->name, __FUNCTION__);
+	pr_info("%s - %s()\n", THIS_MODULE->name, __func__);
 	return 0;
 }
 
 
-static int example_release(struct inode * ind, struct file * filp)
+static int example_release(struct inode *ind, struct file *filp)
 {
-	printk(KERN_INFO "%s - %s()\n", THIS_MODULE->name, __FUNCTION__);
+	pr_info("%s - %s()\n", THIS_MODULE->name, __func__);
 	return 0;
 }
 
 
-	module_init(example_init);
-	module_exit(example_exit);
+module_init(example_init);
+module_exit(example_exit);
 
-	MODULE_DESCRIPTION("Device class creation.");
-	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
-	MODULE_LICENSE("GPL");
+MODULE_DESCRIPTION("Device class creation.");
+MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
+MODULE_LICENSE("GPL");
 
