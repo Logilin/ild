@@ -1,28 +1,26 @@
-/************************************************************************\
-  Exemples de la formation
-    "Ecriture de drivers et programmation noyau Linux"
-  Chapitre "Driver reseau"
+// SPDX-License-Identifier: GPL-2.0
+//
+// Exemples de la formation
+//  "Ecriture de drivers et programmation noyau Linux"
+// Chapitre "Driver reseau"
+//
+// (c) 2001-2021 Christophe Blaess
+//
+//    https://www.logilin.fr/
+//
 
-  (c) 2005-2019 Christophe Blaess
-  http://www.blaess.fr/christophe/
+#include <linux/module.h>
+#include <linux/version.h>
 
-\************************************************************************/
+#include <linux/netdevice.h>
+#include <linux/etherdevice.h>
 
-
-	#include <linux/module.h>
-	#include <linux/version.h>
-
-	#include <linux/netdevice.h>
-	#include <linux/etherdevice.h>
+struct net_device *net_dev_ex;
 
 
-	struct net_device *net_dev_ex = NULL;
-
-
-static int example_open (struct net_device *net_dev)
+static int example_open(struct net_device *net_dev)
 {
-	printk(KERN_INFO "%s - %s(%pK):\n",
-	       THIS_MODULE->name, __FUNCTION__, net_dev);
+	pr_info("%s - %s(%pK):\n", THIS_MODULE->name, __func__, net_dev);
 
 	net_dev->dev_addr[0] = 0x00;
 	net_dev->dev_addr[1] = 0x12;
@@ -37,10 +35,9 @@ static int example_open (struct net_device *net_dev)
 }
 
 
-static int example_stop (struct net_device *net_dev)
+static int example_stop(struct net_device *net_dev)
 {
-	printk(KERN_INFO "%s - %s(%pK)\n",
-	       THIS_MODULE->name, __FUNCTION__, net_dev);
+	pr_info("%s - %s(%pK):\n", THIS_MODULE->name, __func__, net_dev);
 
 	netif_stop_queue(net_dev);
 
@@ -50,25 +47,24 @@ static int example_stop (struct net_device *net_dev)
 
 static int example_start_xmit(struct sk_buff *sk_b, struct net_device *src)
 {
-	printk(KERN_INFO "%s - %s(%pK, %pK)\n",
-	       THIS_MODULE->name, __FUNCTION__, sk_b, src);
+	pr_info("%s -%s(%pK, %pK)\n", THIS_MODULE->name, __func__, sk_b, src);
 
 	dev_kfree_skb(sk_b);
+
 	return NETDEV_TX_OK;
 }
 
 
-struct net_device_ops example_netdev_ops = {
+static const struct net_device_ops example_netdev_ops = {
 	.ndo_open       = example_open,
 	.ndo_stop       = example_stop,
 	.ndo_start_xmit = example_start_xmit,
 };
 
 
-static void example_setup (struct net_device *net_dev)
+static void example_setup(struct net_device *net_dev)
 {
-	printk(KERN_INFO "%s - %s(%pK)\n",
-	       THIS_MODULE->name, __FUNCTION__, net_dev);
+	pr_info("%s - %s(%pK)\n", THIS_MODULE->name, __func__, net_dev);
 
 	ether_setup(net_dev);
 
@@ -79,9 +75,9 @@ static void example_setup (struct net_device *net_dev)
 static int __init example_init(void)
 {
 
-	printk(KERN_INFO "%s: %s()\n", THIS_MODULE->name, __FUNCTION__);
+	pr_info("%s - %s()\n", THIS_MODULE->name, __func__);
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 17, 0)
 	net_dev_ex = alloc_netdev(0, "ex%d", NET_NAME_UNKNOWN, example_setup);
 #else
 	net_dev_ex = alloc_netdev(0, "ex%d", example_setup);
@@ -100,7 +96,7 @@ static int __init example_init(void)
 
 static void example_exit(void)
 {
-	printk(KERN_INFO "%s: %s()\n", THIS_MODULE->name, __FUNCTION__);
+	pr_info("%s - %s()\n", THIS_MODULE->name, __func__);
 
 	if (net_dev_ex != NULL) {
 		unregister_netdev(net_dev_ex);
@@ -109,10 +105,10 @@ static void example_exit(void)
 }
 
 
-	module_init(example_init)
-	module_exit(example_exit)
+module_init(example_init)
+module_exit(example_exit)
 
-	MODULE_DESCRIPTION("False device implementation.");
-	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
-	MODULE_LICENSE("GPL");
+MODULE_DESCRIPTION("False device implementation.");
+MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
+MODULE_LICENSE("GPL v2");
 

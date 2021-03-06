@@ -1,20 +1,21 @@
-/************************************************************************\
-  Exemples de la formation
-    "Ecriture de drivers et programmation noyau Linux"
-  Chapitre "Driver reseau"
+// SPDX-License-Identifier: GPL-2.0
+//
+// Exemples de la formation
+//  "Ecriture de drivers et programmation noyau Linux"
+// Chapitre "Driver reseau"
+//
+// (c) 2001-2021 Christophe Blaess
+//
+//    https://www.logilin.fr/
+//
 
-  (c) 2005-2019 Christophe Blaess
-  http://www.blaess.fr/christophe/
-
-\************************************************************************/
-
-	#include <linux/module.h>
-	#include <linux/interrupt.h>
-	#include <linux/version.h>
-	#include <linux/netdevice.h>
-	#include <linux/etherdevice.h>
-	#include <linux/ip.h>
-	#include <linux/skbuff.h>
+#include <linux/module.h>
+#include <linux/interrupt.h>
+#include <linux/version.h>
+#include <linux/netdevice.h>
+#include <linux/etherdevice.h>
+#include <linux/ip.h>
+#include <linux/skbuff.h>
 
 
 	struct net_device *net_dev_ex_0 = NULL;
@@ -34,10 +35,9 @@
 	static irqreturn_t example_irq_rx_handler(int irq, void *irq_id, struct pt_regs *regs);
 
 
-static int example_open (struct net_device *net_dev)
+static int example_open(struct net_device *net_dev)
 {
-	printk(KERN_INFO "%s - %s(%pK):\n",
-	       THIS_MODULE->name, __FUNCTION__, net_dev);
+	pr_info("%s - %s(%pK):\n", THIS_MODULE->name, __func__, net_dev);
 
 	net_dev->dev_addr[0] = 0x00;
 	net_dev->dev_addr[1] = 0x12;
@@ -56,10 +56,9 @@ static int example_open (struct net_device *net_dev)
 }
 
 
-static int example_stop (struct net_device *net_dev)
+static int example_stop(struct net_device *net_dev)
 {
-	printk(KERN_INFO "%s - %s(%pK):\n",
-	       THIS_MODULE->name, __FUNCTION__, net_dev);
+	pr_info("%s - %s(%pK):\n", THIS_MODULE->name, __func__, net_dev);
 
 	netif_stop_queue(net_dev);
 
@@ -82,8 +81,7 @@ static int example_start_xmit(struct sk_buff *sk_b, struct net_device *src)
 	int    len;
 	char   short_packet[ETH_ZLEN];
 
-	printk(KERN_INFO "%s -%s(%pK, %pK)\n",
-	       THIS_MODULE->name, __FUNCTION__, sk_b, src);
+	pr_info("%s -%s(%pK, %pK)\n", THIS_MODULE->name, __func__, sk_b, src);
 
 	if (src == net_dev_ex_0)
 		dst = net_dev_ex_1;
@@ -108,11 +106,10 @@ static int example_start_xmit(struct sk_buff *sk_b, struct net_device *src)
 
 	src_priv->sk_b = sk_b;
 
+	ip_header = (struct iphdr *)(data + sizeof(struct ethhdr));
 
-	ip_header = (struct iphdr *) (data + sizeof(struct ethhdr));
-
-	ptr_src = (unsigned char *) &(ip_header -> saddr);
-	ptr_dst = (unsigned char *) &(ip_header -> daddr);
+	ptr_src = (unsigned char *)&(ip_header->saddr);
+	ptr_dst = (unsigned char *)&(ip_header->daddr);
 
 	ptr_src += 2;
 	*ptr_src = 255 - *ptr_src;
@@ -125,8 +122,8 @@ static int example_start_xmit(struct sk_buff *sk_b, struct net_device *src)
 	memcpy(dst_priv->data, data, len);
 	dst_priv->data_len = len;
 
-	example_irq_rx_handler (0, (void *) dst, NULL);
-	src_priv->net_dev_stats.tx_packets ++;
+	example_irq_rx_handler (0, (void *)dst, NULL);
+	src_priv->net_dev_stats.tx_packets++;
 	src_priv->net_dev_stats.tx_bytes += len;
 	example_irq_tx_handler (0, (void *) src, NULL);
 
@@ -141,19 +138,18 @@ static irqreturn_t example_irq_rx_handler(int irq, void *irq_id, struct pt_regs 
 	struct net_device *net_dev;
 	struct example_net_dev_priv *priv;
 
-	printk(KERN_INFO "%s -%s(%d, %pK)\n",
-	       THIS_MODULE->name, __FUNCTION__, irq, irq_id);
+	pr_info("%s -%s(%d, %pK)\n", THIS_MODULE->name, __func__, irq, irq_id);
 
-	net_dev = (struct net_device *) irq_id;
+	net_dev = (struct net_device *)irq_id;
 	priv = netdev_priv(net_dev);
 	if (priv == NULL)
 		return IRQ_NONE;
 	sk_b = dev_alloc_skb(priv->data_len);
-	if (! sk_b)
+	if (!sk_b)
 		return IRQ_HANDLED;
 	data = skb_put(sk_b, priv->data_len);
 	memcpy(data, priv->data, priv->data_len);
-	priv->net_dev_stats.rx_packets ++;
+	priv->net_dev_stats.rx_packets++;
 	priv->net_dev_stats.rx_bytes += priv->data_len;
 
 	sk_b->dev = net_dev;
@@ -170,10 +166,9 @@ static irqreturn_t example_irq_tx_handler(int irq, void *irq_id, struct pt_regs 
 	struct net_device *net_dev;
 	struct example_net_dev_priv *priv;
 
-	printk(KERN_INFO "%s -%s(%d, %pK)\n",
-	       THIS_MODULE->name, __FUNCTION__, irq, irq_id);
+	pr_info("%s -%s(%d, %pK)\n", THIS_MODULE->name, __func__, irq, irq_id);
 
-	net_dev = (struct net_device *) irq_id;
+	net_dev = (struct net_device *)irq_id;
 	priv = netdev_priv(net_dev);
 	if (priv == NULL)
 		return IRQ_NONE;
@@ -184,12 +179,11 @@ static irqreturn_t example_irq_tx_handler(int irq, void *irq_id, struct pt_regs 
 
 
 static int example_hard_header(struct sk_buff *sk_b, struct net_device *net_dev,
-                        unsigned short type, const void *dst_addr, const void *src_addr,
-                        unsigned int len)
+	unsigned short type, const void *dst_addr, const void *src_addr, unsigned int len)
 {
 	struct ethhdr *eth_hdr = NULL;
 
-	eth_hdr = (struct ethhdr *) skb_push(sk_b, ETH_HLEN);
+	eth_hdr = (struct ethhdr *)skb_push(sk_b, ETH_HLEN);
 	eth_hdr->h_proto = htons(type);
 
 	if (src_addr == NULL)
@@ -213,19 +207,18 @@ static struct net_device_stats *example_get_stats(struct net_device *net_dev)
 {
 	struct example_net_dev_priv *priv = netdev_priv(net_dev);
 
-	printk(KERN_INFO "%s - %s(%pK)\n",
-	       THIS_MODULE->name, __FUNCTION__, net_dev);
+	pr_info("%s - %s(%pK)\n", THIS_MODULE->name, __func__, net_dev);
 
 	return &(priv->net_dev_stats);
 }
 
 
 static const struct header_ops example_header_ops = {
-        .create = example_hard_header,
+	.create = example_hard_header,
 };
 
 
-struct net_device_ops example_netdev_ops = {
+static const struct net_device_ops example_netdev_ops = {
 	.ndo_open       = example_open,
 	.ndo_stop       = example_stop,
 	.ndo_start_xmit = example_start_xmit,
@@ -233,12 +226,11 @@ struct net_device_ops example_netdev_ops = {
 };
 
 
-static void example_setup (struct net_device *net_dev)
+static void example_setup(struct net_device *net_dev)
 {
 	struct example_net_dev_priv *private_data = NULL;
 
-	printk(KERN_INFO "%s - %s(%pK)\n",
-	       THIS_MODULE->name, __FUNCTION__, net_dev);
+	pr_info("%s - %s(%pK)\n", THIS_MODULE->name, __func__, net_dev);
 
 	ether_setup(net_dev);
 
@@ -258,9 +250,9 @@ static void example_exit(void);
 static int __init example_init(void)
 {
 
-	printk(KERN_INFO "%s - %s()\n", THIS_MODULE->name, __FUNCTION__);
+	pr_info("%s - %s()\n", THIS_MODULE->name, __func__);
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 17, 0)
 	net_dev_ex_0 = alloc_netdev(sizeof(struct example_net_dev_priv), "ex%d", NET_NAME_UNKNOWN, example_setup);
 #else
 	net_dev_ex_0 = alloc_netdev(sizeof(struct example_net_dev_priv), "ex%d", example_setup);
@@ -273,7 +265,7 @@ static int __init example_init(void)
 		return -ENODEV;
 	}
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 17, 0)
 	net_dev_ex_1 = alloc_netdev(sizeof(struct example_net_dev_priv), "ex%d", NET_NAME_UNKNOWN, example_setup);
 #else
 	net_dev_ex_1 = alloc_netdev(sizeof(struct example_net_dev_priv), "ex%d", example_setup);
@@ -294,7 +286,7 @@ static int __init example_init(void)
 
 static void example_exit(void)
 {
-	printk(KERN_INFO "%s - %s()\n", THIS_MODULE->name, __FUNCTION__);
+	pr_info("%s - %s()\n", THIS_MODULE->name, __func__);
 
 	if (net_dev_ex_1 != NULL) {
 		unregister_netdev(net_dev_ex_1);
@@ -309,10 +301,10 @@ static void example_exit(void)
 	}
 }
 
-	module_init(example_init)
-	module_exit(example_exit)
+module_init(example_init)
+module_exit(example_exit)
 
-	MODULE_DESCRIPTION("Netdevice statistic collections.");
-	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
-	MODULE_LICENSE("GPL");
+MODULE_DESCRIPTION("Netdevice statistic collections.");
+MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
+MODULE_LICENSE("GPL v2");
 
