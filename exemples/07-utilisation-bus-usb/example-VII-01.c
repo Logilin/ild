@@ -1,56 +1,50 @@
-/************************************************************************\
-  Exemples de la formation
-    "Ecriture de drivers et programmation noyau Linux"
-  Chapitre "Utilisation du bus USB"
-
-  (c) 2005-2019 Christophe Blaess
-  http://www.blaess.fr/christophe/
-
-\************************************************************************/
-
+// SPDX-License-Identifier: GPL-2.0
+//
+// Exemples de la formation
+//  "Ecriture de drivers et programmation noyau Linux"
+// Chapitre "Utilisation du bus USB"
+//
+// (c) 2001-2021 Christophe Blaess
+//
+//    https://www.logilin.fr/
+//
 
 	#include <linux/version.h>
 	#include <linux/module.h>
 	#include <linux/usb.h>
 
 
-	/* Identification du peripherique gere par notre driver */
-	#define ID_VENDEUR_EXAMPLE   0x0000  /* Velleman  */
-	#define ID_PRODUIT_EXAMPLE   0x0000  /* Kit K8055 */
+#define EXAMPLE_VENDOR_ID   0x0000  /* Velleman  */
+#define EXAMPLE_PRODUCT_ID  0x0000  /* Kit K8055 */
 
-	static struct usb_device_id   id_table_example [] = {
-		{ USB_DEVICE(ID_VENDEUR_EXAMPLE, ID_PRODUIT_EXAMPLE) },
-		{ } /* Par convention on termine par une entree vide */
+	static struct usb_device_id example_id_table[] = {
+		{ USB_DEVICE(EXAMPLE_VENDOR_ID, EXAMPLE_VENDOR_ID) },
+		{ }
 	};
-	MODULE_DEVICE_TABLE(usb, id_table_example);
+	MODULE_DEVICE_TABLE(usb, example_id_table);
 
-	/* Fonctions de detection et deconnexion du peripherique */
-	static int  probe_example      (struct usb_interface *intf,
-	                                const struct usb_device_id *dev_id);
-	static void disconnect_example (struct usb_interface *intf);
+	static int  example_probe(struct usb_interface *, const struct usb_device_id *);
+	static void example_disconnect(struct usb_interface *);
 
-	/* Representation du pilote de peripherique */
-	static struct usb_driver usb_driver_example = {
+
+	static struct usb_driver example_usb_driver = {
 		.name       = "Velleman K8055",
-		.id_table   = id_table_example,
-		.probe      = probe_example,
-		.disconnect = disconnect_example,
+		.id_table   = example_id_table,
+		.probe      = example_probe,
+		.disconnect = example_disconnect,
 	};
 
 
-static int probe_example(struct usb_interface *intf,
-                  const struct usb_device_id  *dev_id)
+static int example_probe(struct usb_interface *intf, const struct usb_device_id  *dev_id)
 {
-	printk(KERN_INFO "%s: probe_example()\n",
-	       THIS_MODULE->name);
+	pr_info("%s: probe_example()\n", THIS_MODULE->name);
 	return 0;
 }
 
 
-static void disconnect_example(struct usb_interface *intf)
+static void example_disconnect(struct usb_interface *intf)
 {
-	printk(KERN_INFO "%s: disconnect_example()\n",
-	       THIS_MODULE->name);
+	pr_info("%s: disconnect_example()\n", THIS_MODULE->name);
 }
 
 
@@ -59,15 +53,12 @@ static int __init example_init(void)
 {
 	int err;
 
-	err = usb_register(&usb_driver_example);
+	err = usb_register(&example_usb_driver);
 	if (err) {
-		printk(KERN_ERR "%s: usb_register(): error %d\n",
-		       THIS_MODULE->name, err);
+		pr_err("%s: usb_register(): error %d\n", THIS_MODULE->name, err);
 		return err;
-	} else {
-		printk(KERN_INFO "%s: usb_register(): Ok\n",
-		       THIS_MODULE->name);
 	}
+	pr_info("%s: usb_register(): Ok\n", THIS_MODULE->name);
 
 	return 0;
 }
@@ -75,14 +66,14 @@ static int __init example_init(void)
 
 static void __exit example_exit(void)
 {
-	usb_deregister(&usb_driver_example);
+	usb_deregister(&example_usb_driver);
 }
 
 
-	module_init(example_init);
-	module_exit(example_exit);
+module_init(example_init);
+module_exit(example_exit);
 
-	MODULE_DESCRIPTION("probe() and disconnect() callbacks invocation.");
-	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
-	MODULE_LICENSE("GPL");
+MODULE_DESCRIPTION("probe() and disconnect() callbacks invocation.");
+MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
+MODULE_LICENSE("GPL v2");
 
