@@ -19,7 +19,7 @@
 
 	static irqreturn_t example_top_half(int irq, void *ident);
 
-	static void example_bottom_half(struct tasklet_struct *unused);
+	static void example_bottom_half(struct work_struct *unused);
 
 	static DECLARE_WORK(example_workqueue, example_bottom_half);
 

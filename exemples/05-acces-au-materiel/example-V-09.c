@@ -62,7 +62,7 @@ static int __init example_init(void)
 
 	spin_lock_init(&example_buffer_spl);
 
-	err = request_irq(gpio_to_irq(EXAMPLE_GPIO_IN), example_top_half,
+	err = request_irq(gpio_to_irq(EXAMPLE_GPIO_IN), example_handler,
 		IRQF_SHARED | IRQF_TRIGGER_RISING,
 		THIS_MODULE->name, THIS_MODULE->name);
 	if (err != 0) {

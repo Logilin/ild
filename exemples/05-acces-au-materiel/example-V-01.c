@@ -109,7 +109,7 @@ static ssize_t example_write(struct file *filp, const char *buffer, size_t lengt
 	if (copy_from_user(k_buffer, buffer, length) != 0)
 		return -EFAULT;
 
-	if (kstrtoint(k_buffer, "%d", &val) != 0)
+	if (kstrtoint(k_buffer, 10, &val) != 0)
 		return -EINVAL;
 
 	gpio_set_value(EXAMPLE_GPIO_OUT, val & 0x01);
