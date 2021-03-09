@@ -27,7 +27,7 @@ static int __init example_init(void)
 	if (err != 0)
 		return err;
 
-	err = gpio_request(EXAMPLE_GPIO_OUT, THIS_MODULE->name)
+	err = gpio_request(EXAMPLE_GPIO_OUT, THIS_MODULE->name);
 	if (err != 0) {
 		gpio_free(EXAMPLE_GPIO_IN);
 		return err;
