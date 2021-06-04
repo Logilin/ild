@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-2.0
+#
+
 ifneq (${KERNELRELEASE},)
 
 	obj-m  = example-I-00.o
