@@ -6,24 +6,24 @@ SUBDIRS	= $(wildcard *)
 .PHONY:all
 all:
 	@set -e;                \
-	for i in $(SUBDIRS);    \
+	for dir in $(SUBDIRS);  \
 	do                      \
-		if [ -d $$i ]; then \
-		cd $$i;             \
-		make;               \
-		cd -;               \
-		fi;                 \
+		if [ -d $$dir ]; then \
+		cd $$dir;             \
+		make;                 \
+		cd -;                 \
+		fi;                   \
 	done
 
 .PHONY: clean
 clean:
 	@set -e;                \
-	for i in $(SUBDIRS);    \
+	for dir in $(SUBDIRS);  \
 	do                      \
-		if [ -d $$i ]; then \
-		cd $$i;             \
-		make clean;         \
-		cd -;               \
-		fi;                 \
+		if [ -d $$dir ]; then \
+		cd $$dir;             \
+		make clean;           \
+		cd -;                 \
+		fi;                   \
 	done
 
