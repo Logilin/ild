@@ -32,7 +32,7 @@ modules:
 .PHONY: clean
 
 clean:
-	rm -f *.o *.ko *.mod.c .*.o .*.ko .*.mod.c .*.cmd *~ *.ko.unsigned *.mod
+	rm -f *.o *.ko *.mod.c .*.o .*.o.d .*.ko .*.mod.c .*.cmd *~ *.ko.unsigned *.mod
 	rm -f Module.symvers Module.markers modules.order
 	rm -rf .tmp_versions .cache.mk
 	rm -f $(USERSPACE)
