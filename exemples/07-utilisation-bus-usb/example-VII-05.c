@@ -22,7 +22,7 @@
 
 
 	static struct usb_device_id example_id_table[] = {
-		{ USB_DEVICE(EXAMPLE_VENDOR_ID, EXAMPLE_VENDOR_ID) },
+		{ USB_DEVICE(EXAMPLE_VENDOR_ID, EXAMPLE_PRODUCT_ID) },
 		{ }
 	};
 	MODULE_DEVICE_TABLE(usb, example_id_table);
