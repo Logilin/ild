@@ -3,7 +3,7 @@
     "Ecriture de drivers et programmation noyau Linux"
   Chapitre "Acces au materiel"
 
-  (c) 2005-2019 Christophe Blaess
+  (c) 2005-2021 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
@@ -17,9 +17,10 @@
 
 
 // Uncomment one of the following lines depending on you plateform:
-  // #define EXAMPLE_GPIO_MODE  EXAMPLE_RASPBERRY_PI
-     #define EXAMPLE_GPIO_MODE        EXAMPLE_BEAGLEBONE_BLACK
-  // #define EXAMPLE_GPIO_MODE        EXAMPLE_TERASIC_DE1_SOC
+
+// #define EXAMPLE_GPIO_MODE   EXAMPLE_RASPBERRY_PI
+   #define EXAMPLE_GPIO_MODE   EXAMPLE_BEAGLEBONE_BLACK
+// #define EXAMPLE_GPIO_MODE   EXAMPLE_TERASIC_DE1_SOC
 
 
 #ifndef EXAMPLE_GPIO_MODE
@@ -42,7 +43,7 @@
 		// Output on the led.
 		#define EXAMPLE_GPIO_OUT 222
 	#else
-		#error "Unknown platform definition in gpioo_examples.h"
+		#error "Unknown platform definition in gpio_examples.h"
 	#endif
 #endif
 
