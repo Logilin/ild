@@ -33,9 +33,10 @@
 	};
 
 	static struct miscdevice example_misc_driver = {
-		    .minor  = MISC_DYNAMIC_MINOR,
-		    .name   = THIS_MODULE->name,
-		    .fops   = &example_fops,
+		.minor  = MISC_DYNAMIC_MINOR,
+		.name   = THIS_MODULE->name,
+		.fops   = &example_fops,
+		.mode   = 0666,
 	};
 
 	struct timer_list example_timer;

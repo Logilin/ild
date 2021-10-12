@@ -43,6 +43,7 @@
 		.minor   = MISC_DYNAMIC_MINOR,
 		.name    = THIS_MODULE->name,
 		.fops    = &example_fops,
+		.mode    = 0666,
 	};
 
 
