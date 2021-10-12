@@ -108,6 +108,7 @@ static ssize_t example_write(struct file *filp, const char *buffer, size_t lengt
 
 	if (copy_from_user(k_buffer, buffer, length) != 0)
 		return -EFAULT;
+	k_buffer[length - 1] = '\0';
 
 	if (kstrtoint(k_buffer, 10, &val) != 0)
 		return -EINVAL;

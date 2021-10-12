@@ -85,6 +85,8 @@ static ssize_t example_write(struct file * filp, const char __user * u_buffer, s
 		return -ENOMEM;
 	if (copy_from_user(k_buffer, u_buffer, nb) != 0)
 		return -EFAULT;
+	k_buffer[nb - 1] = '\0';
+
 	if (sscanf(k_buffer, "%d", &example_value) != 1)
 		return -EINVAL;
 
