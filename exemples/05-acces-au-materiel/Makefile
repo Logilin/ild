@@ -13,6 +13,7 @@ ifneq (${KERNELRELEASE},)
 	obj-m += example-V-08.o
 	obj-m += example-V-09.o
 	obj-m += example-V-10.o
+	obj-m += example-select.o
 
 else
 
@@ -27,6 +28,7 @@ else
 
 	USER_PROGS :=    cat-non-block        \
 	                 test-mmap            \
+	                 test-select          \
 
 .PHONY: all
 all: user modules
