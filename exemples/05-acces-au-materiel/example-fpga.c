@@ -451,7 +451,7 @@ static int example_fpga_initialize_pci_device (struct pci_dev * dev, struct exam
 
 	// Verifier si on supporte les interruptions MSI
 	if (pci_enable_msi(dev) == 0) {
-		printk (KERN_DEBUG "EXAMPLE-FPGA uses MSI\n");
+		pr_debug("EXAMPLE-FPGA uses MSI\n");
 		example_fpga->msi_enabled = 1;
 	} else {
 		example_fpga->msi_enabled = 0;
@@ -463,7 +463,7 @@ static int example_fpga_initialize_pci_device (struct pci_dev * dev, struct exam
 	// Acces a la memoire du port PCIe
 	err = pci_request_region(dev, 0, THIS_MODULE->name);
 	if (err) {
-		printk(KERN_ERR "Error on pci_request_region() -> %d\n", err);
+		pr_err("Error on pci_request_region() -> %d\n", err);
 		pci_disable_device(dev);
 		return err;
 	}
@@ -471,7 +471,7 @@ static int example_fpga_initialize_pci_device (struct pci_dev * dev, struct exam
 	// Projection en memoire du module RAM
 	example_fpga->module_mem = ioremap_nocache(example_fpga->iobase + EXAMPLE_FPGA_MODULE_MEM_START, EXAMPLE_FPGA_MODULE_MEM_LENGTH);
 	if (example_fpga->module_mem == NULL) {
-		printk(KERN_DEBUG "Error on ioremap for PIO MEM");
+		pr_debug("Error on ioremap for PIO MEM");
 		pci_release_region(dev, 0);
 		pci_disable_device(dev);
 		return EINVAL;
@@ -480,7 +480,7 @@ static int example_fpga_initialize_pci_device (struct pci_dev * dev, struct exam
 	// Projection en memoire du module LED
 	example_fpga->module_leds = ioremap_nocache(example_fpga->iobase + EXAMPLE_FPGA_MODULE_LEDS_START, EXAMPLE_FPGA_MODULE_LEDS_LENGTH);
 	if (example_fpga->module_leds == NULL) {
-		printk(KERN_DEBUG "Error on ioremap for PIO LED");
+		pr_debug("Error on ioremap for PIO LED");
 		iounmap(example_fpga->module_mem);
 		pci_release_region(dev, 0);
 		pci_disable_device(dev);
@@ -490,7 +490,7 @@ static int example_fpga_initialize_pci_device (struct pci_dev * dev, struct exam
 	// Projection en memoire du module Switch
 	example_fpga->module_switches = ioremap_nocache(example_fpga->iobase + EXAMPLE_FPGA_MODULE_SWITCHES_START, EXAMPLE_FPGA_MODULE_SWITCHES_LENGTH);
 	if (example_fpga->module_switches == NULL) {
-		printk(KERN_DEBUG "Error on ioremap for PIO SWITCH");
+		pr_debug("Error on ioremap for PIO SWITCH");
 		iounmap(example_fpga->module_leds);
 		iounmap(example_fpga->module_mem);
 		pci_release_region(dev, 0);
@@ -501,7 +501,7 @@ static int example_fpga_initialize_pci_device (struct pci_dev * dev, struct exam
 	// Projection en memoire du module Controls
 	example_fpga->module_controls = ioremap_nocache(example_fpga->iobase + EXAMPLE_FPGA_MODULE_CONTROLS_START, EXAMPLE_FPGA_MODULE_CONTROLS_LENGTH);
 	if (example_fpga->module_controls == NULL) {
-		printk(KERN_DEBUG "Error on ioremap for PIO CONTROL");
+		pr_debug("Error on ioremap for PIO CONTROL");
 		iounmap(example_fpga->module_switches);
 		iounmap(example_fpga->module_leds);
 		iounmap(example_fpga->module_mem);
@@ -517,7 +517,7 @@ static int example_fpga_initialize_pci_device (struct pci_dev * dev, struct exam
 		// Inscription du handler d'interruption
 		if (dev->irq != 0) {
 			if (request_irq(dev->irq, example_fpga_interrupt_handler, IRQF_SHARED, THIS_MODULE->name, example_fpga) != 0) {
-				printk(KERN_DEBUG "Error on request_irq");
+				pr_debug("Error on request_irq");
 				iounmap(example_fpga->module_controls);
 				iounmap(example_fpga->module_switches);
 				iounmap(example_fpga->module_leds);
@@ -585,7 +585,7 @@ static irqreturn_t example_fpga_interrupt_handler(int num, void * arg)
 	// Le PCIe a-t-il declenche une interruption ?
 	n = ioread32(example_fpga->module_controls + 0x40);
 
-	printk(KERN_DEBUG "controls+0x40=%d\n", n);
+	pr_debug("controls+0x40=%d\n", n);
 
 	// Sinon indiquer au kernel que l'interruption n'etait pas pour nous.
 	if (n == 0) {
@@ -748,7 +748,7 @@ static int __init example_fpga_init(void)
 	// L'enregistrement du driver provoque l'appel de la methode probe
 	// (si le materiel est present).
 	if ((err = pci_register_driver(& example_pci_driver)) != 0) {
-		printk(KERN_ERR "%s: Erreur dans pci_register(): %d\n",
+		pr_err("%s: Erreur dans pci_register(): %d\n",
 		       THIS_MODULE->name, err);
 		class_destroy(example_fpga_class);
 		example_fpga_class = NULL;
