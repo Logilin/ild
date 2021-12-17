@@ -399,13 +399,21 @@ static long example_fpga_ioctl (struct file * filp, unsigned int cmd, unsigned l
 	// Si la commande est une lecture depuis l'espace utilisateur
 	if (_IOC_DIR(cmd) & _IOC_READ)
 		// Verifier si nous pouvons acceder en ecriture sur le pointeur transmis
+		#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 0, 0)
+		if (access_ok((void __user *) arg, _IOC_SIZE(cmd)) == 0)
+		#else
 		if (access_ok(VERIFY_WRITE, (void __user *) arg, _IOC_SIZE(cmd)) == 0)
+		#endif
 			return -EFAULT;
 
 	// Si la commande est une ecriture depuis l'espace utilisateur
 	if (_IOC_DIR(cmd) & _IOC_WRITE)
 		// Verifier si nous pouvons acceder en lecture sur le pointeur transmis
+		#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 0, 0)
+		if (access_ok((void __user *) arg, _IOC_SIZE(cmd)) == 0)
+		#else
 		if (access_ok(VERIFY_READ, (void __user *) arg, _IOC_SIZE(cmd)) == 0)
+		#endif
 			return -EFAULT;
 
 	// Extraire le numero de commande
