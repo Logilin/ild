@@ -15,32 +15,12 @@
 #include <linux/version.h>
 
 
-static enum hrtimer_restart example_htimer_function(struct hrtimer *);
 static struct hrtimer example_htimer;
 
 static int period_us = 1000;
 module_param(period_us, int, 0644);
 
 static ktime_t example_period_kt;
-
-
-static int __init example_init(void)
-{
-	example_period_kt = ktime_set(0, 1000 * period_us);
-
-	hrtimer_init(&example_htimer, CLOCK_REALTIME, HRTIMER_MODE_REL);
-	example_htimer.function = example_htimer_function;
-
-	hrtimer_start(&example_htimer, example_period_kt, HRTIMER_MODE_REL);
-
-	return 0;
-}
-
-
-static void __exit example_exit(void)
-{
-	hrtimer_cancel(&example_htimer);
-}
 
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 17, 0)
@@ -110,10 +90,28 @@ static enum hrtimer_restart example_htimer_function(struct hrtimer *unused)
 #endif
 
 
+static int __init example_init(void)
+{
+	example_period_kt = ktime_set(0, 1000 * period_us);
+
+	hrtimer_init(&example_htimer, CLOCK_REALTIME, HRTIMER_MODE_REL);
+	example_htimer.function = example_htimer_function;
+
+	hrtimer_start(&example_htimer, example_period_kt, HRTIMER_MODE_REL);
+
+	return 0;
+}
+
+
+static void __exit example_exit(void)
+{
+	hrtimer_cancel(&example_htimer);
+}
+
+
 module_init(example_init);
 module_exit(example_exit);
 
 MODULE_DESCRIPTION("Jitter of a precise timer.");
 MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 MODULE_LICENSE("GPL v2");
-
