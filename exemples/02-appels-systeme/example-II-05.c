@@ -17,40 +17,8 @@
 #include <asm/uaccess.h>
 #include <linux/uaccess.h>
 
-static ssize_t example_read(struct file *, char __user *, size_t, loff_t *);
-static ssize_t example_write(struct file *, const char __user *, size_t, loff_t *);
 
 static int example_value = 0;
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
-	static const struct proc_ops example_ops = {
-		.proc_read  = example_read,
-		.proc_write = example_write,
-	};
-#else
-	static const struct file_operations example_ops = {
-		.read  = example_read,
-		.write = example_write,
-	};
-#endif
-
-
-static struct proc_dir_entry *example_entry;
-
-static int __init example_init(void)
-{
-	example_entry = proc_create(THIS_MODULE->name, S_IFREG | 0666, NULL, &example_ops);
-	if (example_entry == NULL)
-		return -EBUSY;
-
-	return 0;
-}
-
-
-static void __exit example_exit(void)
-{
-	proc_remove(example_entry);
-}
 
 
 static ssize_t example_read(struct file *filp, char __user *u_buffer, size_t max, loff_t *offset)
@@ -91,6 +59,37 @@ static ssize_t example_write(struct file * filp, const char __user * u_buffer, s
 		return -EINVAL;
 
 	return nb;
+}
+
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
+	static const struct proc_ops example_ops = {
+		.proc_read  = example_read,
+		.proc_write = example_write,
+	};
+#else
+	static const struct file_operations example_ops = {
+		.read  = example_read,
+		.write = example_write,
+	};
+#endif
+
+
+static struct proc_dir_entry *example_entry;
+
+static int __init example_init(void)
+{
+	example_entry = proc_create(THIS_MODULE->name, S_IFREG | 0666, NULL, &example_ops);
+	if (example_entry == NULL)
+		return -EBUSY;
+
+	return 0;
+}
+
+
+static void __exit example_exit(void)
+{
+	proc_remove(example_entry);
 }
 
 

@@ -17,7 +17,24 @@
 #include <asm/uaccess.h>
 #include <linux/uaccess.h>
 
-static ssize_t example_read(struct file *filp, char __user *u_buffer, size_t max, loff_t *offset);
+
+static ssize_t example_read(struct file *filp, char __user *u_buffer, size_t max, loff_t *offset)
+{
+	char k_buffer[128];
+	int  nb;
+
+	snprintf(k_buffer, 128, "PID=%u, PPID=%u, Name=%s\n",
+		current->pid,
+		current->real_parent->pid,
+		current->comm);
+
+	nb = strlen(k_buffer);
+	if (nb > max)
+		return -ENOMEM;
+	if (copy_to_user(u_buffer, k_buffer, nb) != 0)
+		return -EFAULT;
+	return nb;
+}
 
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
@@ -46,25 +63,6 @@ static int __init example_init(void)
 static void __exit example_exit(void)
 {
 	proc_remove(example_entry);
-}
-
-
-static ssize_t example_read(struct file *filp, char __user *u_buffer, size_t max, loff_t *offset)
-{
-	char k_buffer[128];
-	int  nb;
-
-	snprintf(k_buffer, 128, "PID=%u, PPID=%u, Name=%s\n",
-		current->pid,
-		current->real_parent->pid,
-		current->comm);
-
-	nb = strlen(k_buffer);
-	if (nb > max)
-		return -ENOMEM;
-	if (copy_to_user(u_buffer, k_buffer, nb) != 0)
-		return -EFAULT;
-	return nb;
 }
 
 
