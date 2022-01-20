@@ -15,38 +15,10 @@
 #include <linux/miscdevice.h>
 #include <linux/module.h>
 #include <linux/sched.h>
+#include <linux/uaccess.h>
+#include <linux/version.h>
 
 #include <asm/uaccess.h>
-#include <linux/uaccess.h>
-
-
-	static ssize_t example_read(struct file *filp, char *buffer, size_t length, loff_t *offset);
-
-
-	static const struct file_operations fops_example = {
-		.owner   =  THIS_MODULE,
-		.read    =  example_read,
-	};
-
-
-	static struct miscdevice example_misc_driver = {
-		.minor          = MISC_DYNAMIC_MINOR,
-		.name           = THIS_MODULE->name,
-		.fops           = &fops_example,
-		.mode           = 0666,
-	};
-
-
-static int __init example_init(void)
-{
-	return misc_register(&example_misc_driver);
-}
-
-
-static void __exit example_exit(void)
-{
-	misc_deregister(&example_misc_driver);
-}
 
 
 static ssize_t example_read(struct file *filp, char *u_buffer, size_t length, loff_t *offset)
@@ -75,10 +47,26 @@ static ssize_t example_read(struct file *filp, char *u_buffer, size_t length, lo
 }
 
 
-module_init(example_init);
-module_exit(example_exit);
+static const struct file_operations fops_example = {
+	.owner   =  THIS_MODULE,
+	.read    =  example_read,
+};
+
+
+static struct miscdevice example_misc_driver = {
+	.minor          = MISC_DYNAMIC_MINOR,
+	.name           = THIS_MODULE->name,
+	.fops           = &fops_example,
+	.mode           = 0666,
+};
+
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 9, 0)
+	module_misc_device(example_misc_driver);
+#else
+	module_driver(example_misc_driver, misc_register, misc_deregister)
+#endif
 
 MODULE_DESCRIPTION("read() system call implementation.");
 MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 MODULE_LICENSE("GPL v2");
-

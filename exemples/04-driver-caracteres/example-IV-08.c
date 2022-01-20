@@ -23,22 +23,9 @@
 #include <asm/uaccess.h>
 
 
-	static ssize_t example_read(struct file *filp, char *buffer, size_t length, loff_t *offset);
+static volatile int current_pid;
+DEFINE_MUTEX(mtx_current_pid);
 
-	static const struct file_operations fops_example = {
-		.owner   =  THIS_MODULE,
-		.read    =  example_read,
-	};
-
-	static struct miscdevice example_misc_driver = {
-		.minor          = MISC_DYNAMIC_MINOR,
-		.name           = THIS_MODULE->name,
-		.fops           = &fops_example,
-		.mode           = 0666,
-	};
-
-	static volatile int current_pid;
-	DEFINE_MUTEX(mtx_current_pid);
 
 static ssize_t example_read(struct file *filp, char *u_buffer, size_t length, loff_t *offset)
 {
@@ -70,6 +57,20 @@ static ssize_t example_read(struct file *filp, char *u_buffer, size_t length, lo
 }
 
 
+static const struct file_operations fops_example = {
+	.owner   =  THIS_MODULE,
+	.read    =  example_read,
+};
+
+
+static struct miscdevice example_misc_driver = {
+	.minor          = MISC_DYNAMIC_MINOR,
+	.name           = THIS_MODULE->name,
+	.fops           = &fops_example,
+	.mode           = 0666,
+};
+
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 9, 0)
 	module_misc_device(example_misc_driver);
 #else
@@ -79,4 +80,3 @@ static ssize_t example_read(struct file *filp, char *u_buffer, size_t length, lo
 MODULE_DESCRIPTION("Use of a mutex for shared variable protection.");
 MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 MODULE_LICENSE("GPL v2");
-

@@ -9,15 +9,14 @@
 //    https://www.logilin.fr/
 //
 
-
 #include <linux/fs.h>
 #include <linux/module.h>
 
-	static dev_t example_dev = MKDEV(0, 0);
 
-	static int example_major;
+static int example_major;
+module_param_named(major, example_major, int, 0644);
 
-	module_param_named(major, example_major, int, 0644);
+static dev_t example_dev = MKDEV(0, 0);
 
 
 static int __init example_init(void)
@@ -50,4 +49,3 @@ module_exit(example_exit);
 MODULE_DESCRIPTION("Major number and minor range reservation");
 MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 MODULE_LICENSE("GPL v2");
-

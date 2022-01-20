@@ -14,22 +14,33 @@
 #include <linux/module.h>
 
 
-	static dev_t example_dev = MKDEV(0, 0);
+static int example_major;
+module_param_named(major, example_major, int, 0644);
 
-	static int example_major;
+static dev_t example_dev = MKDEV(0, 0);
 
-	module_param_named(major, example_major, int, 0644);
+static struct cdev example_cdev;
 
-	static struct cdev example_cdev;
 
-	static int example_open(struct inode *ind, struct file *filp);
-	static int example_release(struct inode *ind, struct file *filp);
+static int example_open(struct inode *ind, struct file *filp)
+{
+	pr_info("%s - %s()\n", THIS_MODULE->name, __func__);
+	return 0;
+}
 
-	static const struct file_operations fops_example = {
-		.owner   =  THIS_MODULE,
-		.open    =  example_open,
-		.release =  example_release,
-	};
+
+static int example_release(struct inode *ind, struct file *filp)
+{
+	pr_info("%s - %s()\n", THIS_MODULE->name, __func__);
+	return 0;
+}
+
+
+static const struct file_operations fops_example = {
+	.owner   =  THIS_MODULE,
+	.open    =  example_open,
+	.release =  example_release,
+};
 
 
 static int __init example_init(void)
@@ -65,24 +76,9 @@ static void __exit example_exit(void)
 }
 
 
-static int example_open(struct inode *ind, struct file *filp)
-{
-	pr_info("%s - %s()\n", THIS_MODULE->name, __func__);
-	return 0;
-}
-
-
-static int example_release(struct inode *ind, struct file *filp)
-{
-	pr_info("%s - %s()\n", THIS_MODULE->name, __func__);
-	return 0;
-}
-
-
 module_init(example_init);
 module_exit(example_exit);
 
 MODULE_DESCRIPTION("open() and release() system calls implementations");
 MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 MODULE_LICENSE("GPL v2");
-
