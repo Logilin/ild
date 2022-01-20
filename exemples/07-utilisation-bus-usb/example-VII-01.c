@@ -9,30 +9,9 @@
 //    https://www.logilin.fr/
 //
 
-	#include <linux/version.h>
-	#include <linux/module.h>
-	#include <linux/usb.h>
-
-
-#define EXAMPLE_VENDOR_ID   0x0000  /* Velleman  */
-#define EXAMPLE_PRODUCT_ID  0x0000  /* Kit K8055 */
-
-	static struct usb_device_id example_id_table[] = {
-		{ USB_DEVICE(EXAMPLE_VENDOR_ID, EXAMPLE_PRODUCT_ID) },
-		{ }
-	};
-	MODULE_DEVICE_TABLE(usb, example_id_table);
-
-	static int  example_probe(struct usb_interface *, const struct usb_device_id *);
-	static void example_disconnect(struct usb_interface *);
-
-
-	static struct usb_driver example_usb_driver = {
-		.name       = "Velleman K8055",
-		.id_table   = example_id_table,
-		.probe      = example_probe,
-		.disconnect = example_disconnect,
-	};
+#include <linux/version.h>
+#include <linux/module.h>
+#include <linux/usb.h>
 
 
 static int example_probe(struct usb_interface *intf, const struct usb_device_id  *dev_id)
@@ -46,6 +25,24 @@ static void example_disconnect(struct usb_interface *intf)
 {
 	pr_info("%s: disconnect_example()\n", THIS_MODULE->name);
 }
+
+
+#define EXAMPLE_VENDOR_ID   0x0000  /* Velleman  */
+#define EXAMPLE_PRODUCT_ID  0x0000  /* Kit K8055 */
+
+static struct usb_device_id example_id_table[] = {
+	{ USB_DEVICE(EXAMPLE_VENDOR_ID, EXAMPLE_PRODUCT_ID) },
+	{ }
+};
+MODULE_DEVICE_TABLE(usb, example_id_table);
+
+
+static struct usb_driver example_usb_driver = {
+	.name       = "Velleman K8055",
+	.id_table   = example_id_table,
+	.probe      = example_probe,
+	.disconnect = example_disconnect,
+};
 
 
 static int __init example_init(void)

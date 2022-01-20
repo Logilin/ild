@@ -17,46 +17,6 @@
 #include <linux/uaccess.h>
 
 
-#define EXAMPLE_VENDOR_ID   0x10CF   /* Velleman  */
-#define EXAMPLE_PRODUCT_ID   0x5500  /* Kit K8055 */
-
-	static struct usb_device_id example_id_table[] = {
-		{ USB_DEVICE(EXAMPLE_VENDOR_ID, EXAMPLE_PRODUCT_ID) },
-		{ }
-	};
-	MODULE_DEVICE_TABLE(usb, example_id_table);
-
-
-	static int  example_probe(struct usb_interface *, const struct usb_device_id *);
-	static void example_disconnect(struct usb_interface *);
-
-
-	static struct usb_driver example_usb_driver = {
-		.name       = "Velleman K8055",
-		.id_table   = example_id_table,
-		.probe      = example_probe,
-		.disconnect = example_disconnect,
-	};
-
-	static int example_open(struct inode *, struct file *);
-	static int example_release(struct inode *, struct file *);
-	static ssize_t example_write(struct file *, const char __user *, size_t, loff_t *);
-	static void example_write_callback(struct urb *);
-
-
-	static const struct file_operations example_file_operations = {
-		.owner   = THIS_MODULE,
-		.open    = example_open,
-		.release = example_release,
-		.write   = example_write,
-	};
-
-	static struct usb_class_driver example_usb_class_driver = {
-		.name = "usb/velleman%d",
-		.fops = &example_file_operations,
-		.minor_base = 0,
-	};
-
 	static int example_open_count;
 	static DEFINE_MUTEX(example_mtx);
 
@@ -68,84 +28,6 @@
 	static DEFINE_MUTEX(example_out_mtx);
 	static DECLARE_WAIT_QUEUE_HEAD(example_out_wq);
 	#define EXAMPLE_OUT_BUFFER_SIZE  8
-
-
-static int example_probe(struct usb_interface *intf, const struct usb_device_id *dev_id)
-{
-	int i;
-	int err;
-	struct usb_host_interface *host_intf;
-	struct usb_endpoint_descriptor *endpoint_desc;
-
-	example_usb_device = usb_get_dev(interface_to_usbdev(intf));
-
-	host_intf = intf->cur_altsetting;
-
-	for (i = 0; i < host_intf->desc.bNumEndpoints; i++) {
-		endpoint_desc = &(host_intf->endpoint[i].desc);
-		if ((endpoint_desc->bEndpointAddress & USB_DIR_IN) == 0) {
-			if ((endpoint_desc->bmAttributes & USB_ENDPOINT_XFERTYPE_MASK) == USB_ENDPOINT_XFER_INT)
-				example_out_endpoint = endpoint_desc;
-		}
-	}
-
-	err = -ENODEV;
-	if (example_out_endpoint == NULL) {
-		pr_info("%s: no output interrupt endpoint in probe()\n", THIS_MODULE->name);
-		goto exit_null;
-	}
-
-	err = -EINVAL;
-	if (example_out_endpoint->wMaxPacketSize < EXAMPLE_OUT_BUFFER_SIZE) {
-		pr_info("%s: output interrupt max packet size too small\n", THIS_MODULE->name);
-		goto exit_null;
-	}
-
-	err = -ENOMEM;
-	example_out_urb = usb_alloc_urb(0, GFP_KERNEL);
-	if (example_out_urb == NULL)
-		goto exit_null;
-
-	example_out_buffer = kmalloc(EXAMPLE_OUT_BUFFER_SIZE, GFP_KERNEL);
-	if (example_out_buffer == NULL)
-		goto exit_free_out_urb;
-
-	err = usb_register_dev(intf, &example_usb_class_driver);
-	if (err != 0)
-		goto exit_free_out_buf;
-
-	example_out_busy = 0;
-
-	pr_info("%s: minor=%d\n", THIS_MODULE->name, intf->minor);
-
-	return 0;
-
-exit_free_out_buf:
-		kfree(example_out_buffer);
-		example_out_buffer = NULL;
-exit_free_out_urb:
-		usb_free_urb(example_out_urb);
-		example_out_urb = NULL;
-exit_null:
-		example_out_endpoint = NULL;
-		example_usb_device = NULL;
-		return err;
-}
-
-
-static void example_disconnect(struct usb_interface *intf)
-{
-	usb_deregister_dev(intf, &example_usb_class_driver);
-	example_usb_device = NULL;
-
-	mutex_lock(&example_out_mtx);
-	kfree(example_out_buffer);
-	usb_free_urb(example_out_urb);
-	example_out_urb = NULL;
-	example_out_buffer = NULL;
-	example_out_endpoint = NULL;
-	mutex_unlock(&example_out_mtx);
-}
 
 
 static int example_open(struct inode *inode, struct file *filp)
@@ -177,6 +59,13 @@ static int example_release(struct inode *inode, struct file *filp)
 	mutex_unlock(&example_mtx);
 
 	return 0;
+}
+
+
+static void example_write_callback(struct urb *urb)
+{
+	example_out_busy = 0;
+	wake_up_interruptible(&example_out_wq);
 }
 
 
@@ -259,11 +148,115 @@ static ssize_t example_write(struct file *file, const char __user *data,
 }
 
 
-static void example_write_callback(struct urb *urb)
+static const struct file_operations example_file_operations = {
+	.owner   = THIS_MODULE,
+	.open    = example_open,
+	.release = example_release,
+	.write   = example_write,
+};
+
+
+static struct usb_class_driver example_usb_class_driver = {
+	.name = "usb/velleman%d",
+	.fops = &example_file_operations,
+	.minor_base = 0,
+};
+
+
+static int example_probe(struct usb_interface *intf, const struct usb_device_id *dev_id)
 {
+	int i;
+	int err;
+	struct usb_host_interface *host_intf;
+	struct usb_endpoint_descriptor *endpoint_desc;
+
+	example_usb_device = usb_get_dev(interface_to_usbdev(intf));
+
+	host_intf = intf->cur_altsetting;
+
+	for (i = 0; i < host_intf->desc.bNumEndpoints; i++) {
+		endpoint_desc = &(host_intf->endpoint[i].desc);
+		if ((endpoint_desc->bEndpointAddress & USB_DIR_IN) == 0) {
+			if ((endpoint_desc->bmAttributes & USB_ENDPOINT_XFERTYPE_MASK) == USB_ENDPOINT_XFER_INT)
+				example_out_endpoint = endpoint_desc;
+		}
+	}
+
+	err = -ENODEV;
+	if (example_out_endpoint == NULL) {
+		pr_info("%s: no output interrupt endpoint in probe()\n", THIS_MODULE->name);
+		goto exit_null;
+	}
+
+	err = -EINVAL;
+	if (example_out_endpoint->wMaxPacketSize < EXAMPLE_OUT_BUFFER_SIZE) {
+		pr_info("%s: output interrupt max packet size too small\n", THIS_MODULE->name);
+		goto exit_null;
+	}
+
+	err = -ENOMEM;
+	example_out_urb = usb_alloc_urb(0, GFP_KERNEL);
+	if (example_out_urb == NULL)
+		goto exit_null;
+
+	example_out_buffer = kmalloc(EXAMPLE_OUT_BUFFER_SIZE, GFP_KERNEL);
+	if (example_out_buffer == NULL)
+		goto exit_free_out_urb;
+
+	err = usb_register_dev(intf, &example_usb_class_driver);
+	if (err != 0)
+		goto exit_free_out_buf;
+
 	example_out_busy = 0;
-	wake_up_interruptible(&example_out_wq);
+
+	pr_info("%s: minor=%d\n", THIS_MODULE->name, intf->minor);
+
+	return 0;
+
+exit_free_out_buf:
+		kfree(example_out_buffer);
+		example_out_buffer = NULL;
+exit_free_out_urb:
+		usb_free_urb(example_out_urb);
+		example_out_urb = NULL;
+exit_null:
+		example_out_endpoint = NULL;
+		example_usb_device = NULL;
+		return err;
 }
+
+
+static void example_disconnect(struct usb_interface *intf)
+{
+	usb_deregister_dev(intf, &example_usb_class_driver);
+	example_usb_device = NULL;
+
+	mutex_lock(&example_out_mtx);
+	kfree(example_out_buffer);
+	usb_free_urb(example_out_urb);
+	example_out_urb = NULL;
+	example_out_buffer = NULL;
+	example_out_endpoint = NULL;
+	mutex_unlock(&example_out_mtx);
+}
+
+
+#define EXAMPLE_VENDOR_ID   0x10CF   /* Velleman  */
+#define EXAMPLE_PRODUCT_ID   0x5500  /* Kit K8055 */
+
+static struct usb_device_id example_id_table[] = {
+	{ USB_DEVICE(EXAMPLE_VENDOR_ID, EXAMPLE_PRODUCT_ID) },
+	{ }
+};
+MODULE_DEVICE_TABLE(usb, example_id_table);
+
+
+static struct usb_driver example_usb_driver = {
+	.name       = "Velleman K8055",
+	.id_table   = example_id_table,
+	.probe      = example_probe,
+	.disconnect = example_disconnect,
+};
 
 
 static int __init example_init(void)

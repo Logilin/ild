@@ -17,72 +17,246 @@
 #include <linux/uaccess.h>
 
 
-#define EXAMPLE_VENDOR_ID   0x10CF   /* Velleman  */
-#define EXAMPLE_PRODUCT_ID   0x5500  /* Kit K8055 */
+static int example_open_count;
+static DEFINE_MUTEX(example_mtx);
+
+static struct usb_device *example_usb_device;
+static struct usb_endpoint_descriptor *example_out_endpoint;
+static struct urb *example_out_urb;
+static char *example_out_buffer;
+static int example_out_busy;
+static DEFINE_MUTEX(example_out_mtx);
+static DECLARE_WAIT_QUEUE_HEAD(example_out_wq);
+#define EXAMPLE_OUT_BUFFER_SIZE  8
 
 
-	static struct usb_device_id example_id_table[] = {
-		{ USB_DEVICE(EXAMPLE_VENDOR_ID, EXAMPLE_PRODUCT_ID) },
-		{ }
-	};
-	MODULE_DEVICE_TABLE(usb, example_id_table);
+static struct usb_endpoint_descriptor *example_in_endpoint;
+static struct urb *example_in_urb;
+static char *example_in_buffer;
+static int example_in_busy;
+static DEFINE_MUTEX(example_in_mtx);
+static DECLARE_WAIT_QUEUE_HEAD(example_in_wq);
+#define EXAMPLE_IN_BUFFER_SIZE  8
 
 
-	static int  example_probe(struct usb_interface *, const struct usb_device_id *);
-	static void example_disconnect(struct usb_interface *);
+static int example_open(struct inode *inode, struct file *filp)
+{
+	if (mutex_lock_interruptible(&example_mtx))
+		return -ERESTARTSYS;
+	if (example_open_count > 0) {
+		mutex_unlock(&example_mtx);
+		return -EBUSY;
+	}
+	if (example_usb_device == NULL) {
+		mutex_unlock(&example_mtx);
+		return -ENODEV;
+	}
+
+	example_open_count++;
+	mutex_unlock(&example_mtx);
+	return 0;
+}
 
 
-	static struct usb_driver example_usb_driver = {
-		.name       = "Velleman K8055",
-		.id_table   = example_id_table,
-		.probe      = example_probe,
-		.disconnect = example_disconnect,
-	};
+static int example_release(struct inode *inode, struct file *filp)
+{
+	if (mutex_lock_interruptible(&example_mtx))
+		return -ERESTARTSYS;
 
-	static int example_open(struct inode *, struct file *);
-	static int example_release(struct inode *, struct file *);
-	static ssize_t example_write(struct file *, const char __user *, size_t, loff_t *);
-	static ssize_t example_read(struct file *, char __user *, size_t, loff_t *);
-	static void example_write_callback(struct urb *);
-	static void example_read_callback(struct urb *);
+	example_open_count--;
+	mutex_unlock(&example_mtx);
+
+	return 0;
+}
 
 
-	static const struct file_operations example_file_operations = {
-		.owner   = THIS_MODULE,
-		.open    = example_open,
-		.release = example_release,
-		.write   = example_write,
-		.read    = example_read,
-	};
-
-	static struct usb_class_driver example_usb_class_driver = {
-		.name = "usb/velleman%d",
-		.fops = &example_file_operations,
-		.minor_base = 0,
-	};
+static void example_write_callback(struct urb *urb)
+{
+	example_out_busy = 0;
+	wake_up_interruptible(&example_out_wq);
+}
 
 
+static ssize_t example_write(struct file *file, const char __user *data, size_t length, loff_t *offset)
+{
+	int o0, o1, o2, o3, o4, o5, o6, o7;
+	char *buffer;
+	int err;
 
-	static int example_open_count;
-	static DEFINE_MUTEX(example_mtx);
+	buffer = kmalloc(length, GFP_KERNEL);
+	if (buffer == NULL)
+		return -ENOMEM;
 
-	static struct usb_device *example_usb_device;
-	static struct usb_endpoint_descriptor *example_out_endpoint;
-	static struct urb *example_out_urb;
-	static char *example_out_buffer;
-	static int example_out_busy;
-	static DEFINE_MUTEX(example_out_mtx);
-	static DECLARE_WAIT_QUEUE_HEAD(example_out_wq);
-	#define EXAMPLE_OUT_BUFFER_SIZE  8
+	if (copy_from_user(buffer, data, length)) {
+		kfree(buffer);
+		return -EFAULT;
+	}
+	buffer[length] = '\0';
+	err = (sscanf(buffer, "%d %d %d %d %d %d %d %d", &o0, &o1, &o2, &o3, &o4, &o5, &o6, &o7) != 8);
+	kfree(buffer);
+	if (err)
+		return -EINVAL;
+
+	if (mutex_lock_interruptible(&example_out_mtx) != 0)
+		return -ERESTARTSYS;
+
+	if (example_usb_device == NULL) {
+		mutex_unlock(&example_out_mtx);
+		return -ENODEV;
+	}
+
+	while (example_out_busy) {
+		err = wait_event_interruptible_timeout(example_out_wq, !example_out_busy, HZ);
+		if (err < 0) {
+			mutex_unlock(&example_out_mtx);
+			return err;
+		}
+	}
+
+	example_out_busy = 1;
+	example_out_buffer[0] = o0 & 0xFF;
+	example_out_buffer[1] = o1 & 0xFF;
+	example_out_buffer[2] = o2 & 0xFF;
+	example_out_buffer[3] = o3 & 0xFF;
+	example_out_buffer[4] = o4 & 0xFF;
+	example_out_buffer[5] = o5 & 0xFF;
+	example_out_buffer[6] = o6 & 0xFF;
+	example_out_buffer[7] = o7 & 0xFF;
+
+	usb_fill_int_urb(example_out_urb, example_usb_device,
+		usb_sndintpipe(example_usb_device, example_out_endpoint->bEndpointAddress),
+		example_out_buffer, EXAMPLE_OUT_BUFFER_SIZE, example_write_callback,
+		NULL, example_out_endpoint->bInterval);
+
+	err = usb_submit_urb(example_out_urb, GFP_KERNEL);
+	if (err != 0) {
+		example_out_busy = 0;
+		mutex_unlock(&example_out_mtx);
+		return err;
+	}
+
+	while (example_out_busy) {
+		err = wait_event_interruptible_timeout(example_out_wq, !example_out_busy, HZ);
+		if (err < 0) {
+			example_out_busy = 0;
+			mutex_unlock(&example_out_mtx);
+			return err;
+		}
+	}
+
+	if (example_out_urb->status != 0) {
+		example_out_busy = 0;
+		mutex_unlock(&example_out_mtx);
+		return -EIO;
+	}
+
+	mutex_unlock(&example_out_mtx);
+	return length;
+}
 
 
-	static struct usb_endpoint_descriptor *example_in_endpoint;
-	static struct urb *example_in_urb;
-	static char *example_in_buffer;
-	static int example_in_busy;
-	static DEFINE_MUTEX(example_in_mtx);
-	static DECLARE_WAIT_QUEUE_HEAD(example_in_wq);
-	#define EXAMPLE_IN_BUFFER_SIZE  8
+static void example_read_callback(struct urb *urb)
+{
+	example_in_busy = 0;
+	wake_up_interruptible(&example_in_wq);
+}
+
+
+static ssize_t example_read(struct file *file, char __user *data, size_t length, loff_t *offset)
+{
+	int err;
+	size_t lg;
+	static char k_buffer[64];
+
+	if ((*offset) == 0) {
+
+		if (mutex_lock_interruptible(&example_in_mtx) != 0)
+			return -ERESTARTSYS;
+
+		if (example_usb_device == NULL) {
+			mutex_unlock(&example_in_mtx);
+			return -ENODEV;
+		}
+
+		while (example_in_busy) {
+			err = wait_event_interruptible_timeout(example_in_wq, !example_in_busy, HZ);
+			if (err < 0) {
+				mutex_unlock(&example_in_mtx);
+				return err;
+			}
+		}
+
+		example_in_busy = 1;
+
+		usb_fill_int_urb(example_in_urb, example_usb_device,
+			usb_rcvintpipe(example_usb_device, example_in_endpoint->bEndpointAddress),
+			example_in_buffer, example_in_endpoint->wMaxPacketSize,
+			example_read_callback, NULL, example_in_endpoint->bInterval);
+
+		err = usb_submit_urb(example_in_urb, GFP_KERNEL);
+		if (err != 0) {
+			example_in_busy = 0;
+			mutex_unlock(&example_in_mtx);
+			return err;
+		}
+
+		while (example_in_busy) {
+			err = wait_event_interruptible_timeout(example_in_wq, !example_in_busy, HZ);
+			if (err < 0) {
+				example_in_busy = 0;
+				mutex_unlock(&example_in_mtx);
+				return err;
+			}
+		}
+		if (example_in_urb->status != 0) {
+			example_in_busy = 0;
+			mutex_unlock(&example_in_mtx);
+			return 0;
+		}
+
+		snprintf(k_buffer, 64, "%d %d %d %d %d %d %d %d\n",
+			0xFF & example_in_buffer[0],
+			0xFF & example_in_buffer[1],
+			0xFF & example_in_buffer[2],
+			0xFF & example_in_buffer[3],
+			0xFF & example_in_buffer[4],
+			0xFF & example_in_buffer[5],
+			0xFF & example_in_buffer[6],
+			0xFF & example_in_buffer[7]);
+
+		mutex_unlock(&example_in_mtx);
+
+	}
+
+	lg = strlen(k_buffer) + 1 - (*offset);
+	if (lg <= 0)
+		return 0;
+
+	if (lg > length)
+		lg = length;
+
+	if (copy_to_user(data, &(k_buffer[*offset]), lg) != 0)
+		return -EFAULT;
+	*offset += lg;
+
+	return lg;
+}
+
+
+static const struct file_operations example_file_operations = {
+	.owner   = THIS_MODULE,
+	.open    = example_open,
+	.release = example_release,
+	.write   = example_write,
+	.read    = example_read,
+};
+
+
+static struct usb_class_driver example_usb_class_driver = {
+	.name = "usb/velleman%d",
+	.fops = &example_file_operations,
+	.minor_base = 0,
+};
 
 
 static int example_probe(struct usb_interface *intf, const struct usb_device_id *dev_id)
@@ -201,208 +375,22 @@ static void example_disconnect(struct usb_interface *intf)
 }
 
 
-static int example_open(struct inode *inode, struct file *filp)
-{
-	if (mutex_lock_interruptible(&example_mtx))
-		return -ERESTARTSYS;
-	if (example_open_count > 0) {
-		mutex_unlock(&example_mtx);
-		return -EBUSY;
-	}
-	if (example_usb_device == NULL) {
-		mutex_unlock(&example_mtx);
-		return -ENODEV;
-	}
+#define EXAMPLE_VENDOR_ID   0x10CF   /* Velleman  */
+#define EXAMPLE_PRODUCT_ID   0x5500  /* Kit K8055 */
 
-	example_open_count++;
-	mutex_unlock(&example_mtx);
-	return 0;
-}
+static struct usb_device_id example_id_table[] = {
+	{ USB_DEVICE(EXAMPLE_VENDOR_ID, EXAMPLE_PRODUCT_ID) },
+	{ }
+};
+MODULE_DEVICE_TABLE(usb, example_id_table);
 
 
-static int example_release(struct inode *inode, struct file *filp)
-{
-	if (mutex_lock_interruptible(&example_mtx))
-		return -ERESTARTSYS;
-
-	example_open_count--;
-	mutex_unlock(&example_mtx);
-
-	return 0;
-}
-
-
-static ssize_t example_write(struct file *file, const char __user *data, size_t length, loff_t *offset)
-{
-	int o0, o1, o2, o3, o4, o5, o6, o7;
-	char *buffer;
-	int err;
-
-	buffer = kmalloc(length, GFP_KERNEL);
-	if (buffer == NULL)
-		return -ENOMEM;
-
-	if (copy_from_user(buffer, data, length)) {
-		kfree(buffer);
-		return -EFAULT;
-	}
-	buffer[length] = '\0';
-	err = (sscanf(buffer, "%d %d %d %d %d %d %d %d", &o0, &o1, &o2, &o3, &o4, &o5, &o6, &o7) != 8);
-	kfree(buffer);
-	if (err)
-		return -EINVAL;
-
-	if (mutex_lock_interruptible(&example_out_mtx) != 0)
-		return -ERESTARTSYS;
-
-	if (example_usb_device == NULL) {
-		mutex_unlock(&example_out_mtx);
-		return -ENODEV;
-	}
-
-	while (example_out_busy) {
-		err = wait_event_interruptible_timeout(example_out_wq, !example_out_busy, HZ);
-		if (err < 0) {
-			mutex_unlock(&example_out_mtx);
-			return err;
-		}
-	}
-
-	example_out_busy = 1;
-	example_out_buffer[0] = o0 & 0xFF;
-	example_out_buffer[1] = o1 & 0xFF;
-	example_out_buffer[2] = o2 & 0xFF;
-	example_out_buffer[3] = o3 & 0xFF;
-	example_out_buffer[4] = o4 & 0xFF;
-	example_out_buffer[5] = o5 & 0xFF;
-	example_out_buffer[6] = o6 & 0xFF;
-	example_out_buffer[7] = o7 & 0xFF;
-
-	usb_fill_int_urb(example_out_urb, example_usb_device,
-		usb_sndintpipe(example_usb_device, example_out_endpoint->bEndpointAddress),
-		example_out_buffer, EXAMPLE_OUT_BUFFER_SIZE, example_write_callback,
-		NULL, example_out_endpoint->bInterval);
-
-	err = usb_submit_urb(example_out_urb, GFP_KERNEL);
-	if (err != 0) {
-		example_out_busy = 0;
-		mutex_unlock(&example_out_mtx);
-		return err;
-	}
-
-	while (example_out_busy) {
-		err = wait_event_interruptible_timeout(example_out_wq, !example_out_busy, HZ);
-		if (err < 0) {
-			example_out_busy = 0;
-			mutex_unlock(&example_out_mtx);
-			return err;
-		}
-	}
-
-	if (example_out_urb->status != 0) {
-		example_out_busy = 0;
-		mutex_unlock(&example_out_mtx);
-		return -EIO;
-	}
-
-	mutex_unlock(&example_out_mtx);
-	return length;
-}
-
-
-static void example_write_callback(struct urb *urb)
-{
-	example_out_busy = 0;
-	wake_up_interruptible(&example_out_wq);
-}
-
-
-static ssize_t example_read(struct file *file, char __user *data, size_t length, loff_t *offset)
-{
-	int err;
-	size_t lg;
-	static char k_buffer[64];
-
-	if ((*offset) == 0) {
-
-		if (mutex_lock_interruptible(&example_in_mtx) != 0)
-			return -ERESTARTSYS;
-
-		if (example_usb_device == NULL) {
-			mutex_unlock(&example_in_mtx);
-			return -ENODEV;
-		}
-
-		while (example_in_busy) {
-			err = wait_event_interruptible_timeout(example_in_wq, !example_in_busy, HZ);
-			if (err < 0) {
-				mutex_unlock(&example_in_mtx);
-				return err;
-			}
-		}
-
-		example_in_busy = 1;
-
-		usb_fill_int_urb(example_in_urb, example_usb_device,
-			usb_rcvintpipe(example_usb_device, example_in_endpoint->bEndpointAddress),
-			example_in_buffer, example_in_endpoint->wMaxPacketSize,
-			example_read_callback, NULL, example_in_endpoint->bInterval);
-
-		err = usb_submit_urb(example_in_urb, GFP_KERNEL);
-		if (err != 0) {
-			example_in_busy = 0;
-			mutex_unlock(&example_in_mtx);
-			return err;
-		}
-
-		while (example_in_busy) {
-			err = wait_event_interruptible_timeout(example_in_wq, !example_in_busy, HZ);
-			if (err < 0) {
-				example_in_busy = 0;
-				mutex_unlock(&example_in_mtx);
-				return err;
-			}
-		}
-		if (example_in_urb->status != 0) {
-			example_in_busy = 0;
-			mutex_unlock(&example_in_mtx);
-			return 0;
-		}
-
-		snprintf(k_buffer, 64, "%d %d %d %d %d %d %d %d\n",
-			0xFF & example_in_buffer[0],
-			0xFF & example_in_buffer[1],
-			0xFF & example_in_buffer[2],
-			0xFF & example_in_buffer[3],
-			0xFF & example_in_buffer[4],
-			0xFF & example_in_buffer[5],
-			0xFF & example_in_buffer[6],
-			0xFF & example_in_buffer[7]);
-
-		mutex_unlock(&example_in_mtx);
-
-	}
-
-	lg = strlen(k_buffer) + 1 - (*offset);
-	if (lg <= 0)
-		return 0;
-
-	if (lg > length)
-		lg = length;
-
-	if (copy_to_user(data, &(k_buffer[*offset]), lg) != 0)
-		return -EFAULT;
-	*offset += lg;
-
-	return lg;
-}
-
-
-static void example_read_callback(struct urb *urb)
-{
-	example_in_busy = 0;
-	wake_up_interruptible(&example_in_wq);
-}
+static struct usb_driver example_usb_driver = {
+	.name       = "Velleman K8055",
+	.id_table   = example_id_table,
+	.probe      = example_probe,
+	.disconnect = example_disconnect,
+};
 
 
 static int __init example_init(void)
