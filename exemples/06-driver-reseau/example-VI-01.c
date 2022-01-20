@@ -11,9 +11,9 @@
 
 #include <linux/module.h>
 #include <linux/version.h>
-
 #include <linux/netdevice.h>
 #include <linux/etherdevice.h>
+
 
 struct net_device *net_dev_ex;
 
@@ -111,4 +111,3 @@ module_exit(example_exit)
 MODULE_DESCRIPTION("False device implementation.");
 MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 MODULE_LICENSE("GPL v2");
-

@@ -18,21 +18,65 @@
 #include <linux/skbuff.h>
 
 
-	struct net_device *net_dev_ex_0 = NULL;
-	struct net_device *net_dev_ex_1 = NULL;
+struct net_device *net_dev_ex_0 = NULL;
+struct net_device *net_dev_ex_1 = NULL;
 
-	struct example_net_dev_priv {
+struct example_net_dev_priv {
 
-		struct sk_buff *sk_b;
+	struct sk_buff *sk_b;
 
-		unsigned char data[ETH_DATA_LEN];
-		int data_len;
+	unsigned char data[ETH_DATA_LEN];
+	int data_len;
 
-		struct net_device_stats net_dev_stats;
-	};
+	struct net_device_stats net_dev_stats;
+};
 
-	static irqreturn_t example_irq_tx_handler(int irq, void *irq_id, struct pt_regs *regs);
-	static irqreturn_t example_irq_rx_handler(int irq, void *irq_id, struct pt_regs *regs);
+
+static irqreturn_t example_irq_rx_handler(int irq, void *irq_id, struct pt_regs *regs)
+{
+	unsigned char *data;
+	struct sk_buff *sk_b;
+	struct net_device *net_dev;
+	struct example_net_dev_priv *priv;
+
+	pr_info("%s -%s(%d, %pK)\n", THIS_MODULE->name, __func__, irq, irq_id);
+
+	net_dev = (struct net_device *)irq_id;
+	priv = netdev_priv(net_dev);
+	if (priv == NULL)
+		return IRQ_NONE;
+	sk_b = dev_alloc_skb(priv->data_len);
+	if (!sk_b)
+		return IRQ_HANDLED;
+	data = skb_put(sk_b, priv->data_len);
+	memcpy(data, priv->data, priv->data_len);
+	priv->net_dev_stats.rx_packets++;
+	priv->net_dev_stats.rx_bytes += priv->data_len;
+
+	sk_b->dev = net_dev;
+	sk_b->protocol = eth_type_trans(sk_b, net_dev);
+	sk_b->ip_summed = CHECKSUM_UNNECESSARY;
+	netif_rx(sk_b);
+
+	return IRQ_HANDLED;
+}
+
+
+static irqreturn_t example_irq_tx_handler(int irq, void *irq_id, struct pt_regs *regs)
+{
+	struct net_device *net_dev;
+	struct example_net_dev_priv *priv;
+
+	pr_info("%s -%s(%d, %pK)\n", THIS_MODULE->name, __func__, irq, irq_id);
+
+	net_dev = (struct net_device *)irq_id;
+	priv = netdev_priv(net_dev);
+	if (priv == NULL)
+		return IRQ_NONE;
+
+	dev_kfree_skb(priv->sk_b);
+	return IRQ_HANDLED;
+}
 
 
 static int example_open(struct net_device *net_dev)
@@ -131,53 +175,6 @@ static int example_start_xmit(struct sk_buff *sk_b, struct net_device *src)
 }
 
 
-static irqreturn_t example_irq_rx_handler(int irq, void *irq_id, struct pt_regs *regs)
-{
-	unsigned char *data;
-	struct sk_buff *sk_b;
-	struct net_device *net_dev;
-	struct example_net_dev_priv *priv;
-
-	pr_info("%s -%s(%d, %pK)\n", THIS_MODULE->name, __func__, irq, irq_id);
-
-	net_dev = (struct net_device *)irq_id;
-	priv = netdev_priv(net_dev);
-	if (priv == NULL)
-		return IRQ_NONE;
-	sk_b = dev_alloc_skb(priv->data_len);
-	if (!sk_b)
-		return IRQ_HANDLED;
-	data = skb_put(sk_b, priv->data_len);
-	memcpy(data, priv->data, priv->data_len);
-	priv->net_dev_stats.rx_packets++;
-	priv->net_dev_stats.rx_bytes += priv->data_len;
-
-	sk_b->dev = net_dev;
-	sk_b->protocol = eth_type_trans(sk_b, net_dev);
-	sk_b->ip_summed = CHECKSUM_UNNECESSARY;
-	netif_rx(sk_b);
-
-	return IRQ_HANDLED;
-}
-
-
-static irqreturn_t example_irq_tx_handler(int irq, void *irq_id, struct pt_regs *regs)
-{
-	struct net_device *net_dev;
-	struct example_net_dev_priv *priv;
-
-	pr_info("%s -%s(%d, %pK)\n", THIS_MODULE->name, __func__, irq, irq_id);
-
-	net_dev = (struct net_device *)irq_id;
-	priv = netdev_priv(net_dev);
-	if (priv == NULL)
-		return IRQ_NONE;
-
-	dev_kfree_skb(priv->sk_b);
-	return IRQ_HANDLED;
-}
-
-
 static int example_hard_header(struct sk_buff *sk_b, struct net_device *net_dev,
 	unsigned short type, const void *dst_addr, const void *src_addr, unsigned int len)
 {
@@ -244,9 +241,6 @@ static void example_setup(struct net_device *net_dev)
 }
 
 
-static void example_exit(void);
-
-
 static int __init example_init(void)
 {
 
@@ -261,7 +255,7 @@ static int __init example_init(void)
 		return -ENOMEM;
 
 	if (register_netdev(net_dev_ex_0) != 0) {
-		example_exit();
+		free_netdev(net_dev_ex_0);
 		return -ENODEV;
 	}
 
@@ -271,12 +265,15 @@ static int __init example_init(void)
 	net_dev_ex_1 = alloc_netdev(sizeof(struct example_net_dev_priv), "ex%d", example_setup);
 #endif
 	if (net_dev_ex_1 == NULL) {
-		example_exit();
+		unregister_netdev(net_dev_ex_0);
+		free_netdev(net_dev_ex_0);
 		return -ENOMEM;
 	}
 
 	if (register_netdev(net_dev_ex_1) != 0) {
-		example_exit();
+		free_netdev(net_dev_ex_1);
+		unregister_netdev(net_dev_ex_0);
+		free_netdev(net_dev_ex_0);
 		return -ENODEV;
 	}
 
@@ -301,10 +298,10 @@ static void example_exit(void)
 	}
 }
 
+
 module_init(example_init)
 module_exit(example_exit)
 
 MODULE_DESCRIPTION("Netdevice statistic collections.");
 MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 MODULE_LICENSE("GPL v2");
-
