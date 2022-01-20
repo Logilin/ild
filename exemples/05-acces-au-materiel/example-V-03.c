@@ -16,7 +16,15 @@
 #include "gpio-examples.h"
 
 
-	static irqreturn_t example_handler(int irq, void *ident);
+static irqreturn_t example_handler(int irq, void *ident)
+{
+	static int value = 1;
+
+	gpio_set_value(EXAMPLE_GPIO_OUT, value);
+
+	value = 1 - value;
+	return IRQ_HANDLED;
+}
 
 
 static int __init example_init(void)
@@ -68,21 +76,9 @@ static void __exit example_exit(void)
 }
 
 
-static irqreturn_t example_handler(int irq, void *ident)
-{
-	static int value = 1;
-
-	gpio_set_value(EXAMPLE_GPIO_OUT, value);
-
-	value = 1 - value;
-	return IRQ_HANDLED;
-}
-
-
 module_init(example_init);
 module_exit(example_exit);
 
 MODULE_DESCRIPTION("GPIO interrupt handler.");
 MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 MODULE_LICENSE("GPL v2");
-

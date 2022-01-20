@@ -15,6 +15,7 @@
 #include <linux/kthread.h>
 #include <linux/module.h>
 
+
 static DECLARE_COMPLETION(example_started);
 static DECLARE_COMPLETION(example_stopped);
 

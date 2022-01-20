@@ -17,9 +17,14 @@
 #include "gpio-examples.h"
 
 
-	static irqreturn_t example_top_half(int irq, void *ident);
+static void example_bottom_half(struct tasklet_struct *unused)
+{
+	static int value = 1;
+	(void) unused;
 
-	static void example_bottom_half(struct tasklet_struct *unused);
+	gpio_set_value(EXAMPLE_GPIO_OUT, value);
+	value = 1 - value;
+}
 
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
@@ -27,6 +32,16 @@
 #else
 	static DECLARE_TASKLET(example_tasklet, (void (*)(unsigned long))example_bottom_half, 0);
 #endif
+
+
+static irqreturn_t example_top_half(int irq, void *ident)
+{
+	(void) irq;
+	(void) ident;
+
+	tasklet_schedule(&example_tasklet);
+	return IRQ_HANDLED;
+}
 
 
 static int __init example_init(void)
@@ -76,26 +91,6 @@ static void __exit example_exit(void)
 	tasklet_kill(&example_tasklet);
 	gpio_free(EXAMPLE_GPIO_OUT);
 	gpio_free(EXAMPLE_GPIO_IN);
-}
-
-
-static irqreturn_t example_top_half(int irq, void *ident)
-{
-	(void) irq;
-	(void) ident;
-
-	tasklet_schedule(&example_tasklet);
-	return IRQ_HANDLED;
-}
-
-
-static void example_bottom_half(struct tasklet_struct *unused)
-{
-	static int value = 1;
-	(void) unused;
-
-	gpio_set_value(EXAMPLE_GPIO_OUT, value);
-	value = 1 - value;
 }
 
 

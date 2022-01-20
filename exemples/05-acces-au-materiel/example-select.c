@@ -23,71 +23,11 @@
 #include "gpio-examples.h"
 
 
-	#define EXAMPLE_BUFFER_SIZE 1024
-	static unsigned long example_buffer[EXAMPLE_BUFFER_SIZE];
-	static int           example_buffer_end = 0;
-	static spinlock_t    example_spinlock;
-	static DECLARE_WAIT_QUEUE_HEAD(example_waitqueue);
-
-
-	static irqreturn_t example_handler(int irq, void * ident);
-
-
-	static ssize_t example_read  (struct file * filp, char * buffer,
-	                              size_t length, loff_t * offset);
-
-	static unsigned int example_poll  (struct file * filp,
-	                                   poll_table * table);
-
-	static struct file_operations fops_example = {
-		.owner   =  THIS_MODULE,
-		.read    =  example_read,
-		.poll    =  example_poll,
-	};
-
-
-	static struct miscdevice example_misc_driver = {
-		    .minor          = MISC_DYNAMIC_MINOR,
-		    .name           = THIS_MODULE->name,
-		    .fops           = & fops_example,
-	};
-
-
-static int __init example_init (void)
-{
-	int err;
-
-	if ((err = gpio_request(EXAMPLE_GPIO_IN,THIS_MODULE->name)) != 0)
-		return err;
-
-	if ((err = gpio_direction_input(EXAMPLE_GPIO_IN)) != 0) {
-		gpio_free(EXAMPLE_GPIO_IN);
-		return err;
-	}
-
-	spin_lock_init(& example_spinlock);
-
-	if ((err = request_irq(gpio_to_irq(EXAMPLE_GPIO_IN), example_handler,
-	                       IRQF_SHARED | IRQF_TRIGGER_RISING,
-	                       THIS_MODULE->name, THIS_MODULE->name)) != 0) {
-		gpio_free(EXAMPLE_GPIO_IN);
-		return err;
-	}
-	if ((err = misc_register(& example_misc_driver)) != 0) {
-		free_irq(gpio_to_irq(EXAMPLE_GPIO_IN), THIS_MODULE->name);
-		gpio_free(EXAMPLE_GPIO_IN);
-		return err;
-	}
-	return 0;
-}
-
-
-static void __exit example_exit (void)
-{
-	misc_deregister(& example_misc_driver);
-	free_irq(gpio_to_irq(EXAMPLE_GPIO_IN), THIS_MODULE->name);
-	gpio_free(EXAMPLE_GPIO_IN);
-}
+#define EXAMPLE_BUFFER_SIZE 1024
+static unsigned long example_buffer[EXAMPLE_BUFFER_SIZE];
+static int           example_buffer_end = 0;
+static spinlock_t    example_spinlock;
+static DECLARE_WAIT_QUEUE_HEAD(example_waitqueue);
 
 
 static ssize_t example_read(struct file * filp, char * buffer,
@@ -153,6 +93,57 @@ static irqreturn_t example_handler(int irq, void * ident)
 	spin_unlock(& example_spinlock);
 	wake_up_interruptible(& example_waitqueue);
 	return IRQ_HANDLED;
+}
+
+
+static struct file_operations fops_example = {
+	.owner   =  THIS_MODULE,
+	.read    =  example_read,
+	.poll    =  example_poll,
+};
+
+
+static struct miscdevice example_misc_driver = {
+	    .minor          = MISC_DYNAMIC_MINOR,
+	    .name           = THIS_MODULE->name,
+	    .fops           = & fops_example,
+};
+
+
+static int __init example_init (void)
+{
+	int err;
+
+	if ((err = gpio_request(EXAMPLE_GPIO_IN,THIS_MODULE->name)) != 0)
+		return err;
+
+	if ((err = gpio_direction_input(EXAMPLE_GPIO_IN)) != 0) {
+		gpio_free(EXAMPLE_GPIO_IN);
+		return err;
+	}
+
+	spin_lock_init(& example_spinlock);
+
+	if ((err = request_irq(gpio_to_irq(EXAMPLE_GPIO_IN), example_handler,
+	                       IRQF_SHARED | IRQF_TRIGGER_RISING,
+	                       THIS_MODULE->name, THIS_MODULE->name)) != 0) {
+		gpio_free(EXAMPLE_GPIO_IN);
+		return err;
+	}
+	if ((err = misc_register(& example_misc_driver)) != 0) {
+		free_irq(gpio_to_irq(EXAMPLE_GPIO_IN), THIS_MODULE->name);
+		gpio_free(EXAMPLE_GPIO_IN);
+		return err;
+	}
+	return 0;
+}
+
+
+static void __exit example_exit (void)
+{
+	misc_deregister(& example_misc_driver);
+	free_irq(gpio_to_irq(EXAMPLE_GPIO_IN), THIS_MODULE->name);
+	gpio_free(EXAMPLE_GPIO_IN);
 }
 
 

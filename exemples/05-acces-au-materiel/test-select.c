@@ -18,8 +18,7 @@
 
 	#define LG_BUFFER 4096
 
-	int
-main (int argc, char * argv[])
+int main (int argc, char * argv[])
 {
 	int            i, n, ret;
 	fd_set         set;

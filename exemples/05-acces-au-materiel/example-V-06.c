@@ -17,8 +17,21 @@
 #include "gpio-examples.h"
 
 
-	static irqreturn_t example_top_half(int irq, void *ident);
-	static irqreturn_t example_bottom_half(int irq, void *ident);
+static irqreturn_t example_top_half(int irq, void *ident)
+{
+	return IRQ_WAKE_THREAD;
+}
+
+
+static irqreturn_t example_bottom_half(int irq, void *ident)
+{
+	static int value = 1;
+
+	gpio_set_value(EXAMPLE_GPIO_OUT, value);
+
+	value = 1 - value;
+	return IRQ_HANDLED;
+}
 
 
 static int __init example_init(void)
@@ -72,27 +85,9 @@ static void __exit example_exit(void)
 }
 
 
-static irqreturn_t example_top_half(int irq, void *ident)
-{
-	return IRQ_WAKE_THREAD;
-}
+module_init(example_init);
+module_exit(example_exit);
 
-
-static irqreturn_t example_bottom_half(int irq, void *ident)
-{
-	static int value = 1;
-
-	gpio_set_value(EXAMPLE_GPIO_OUT, value);
-
-	value = 1 - value;
-	return IRQ_HANDLED;
-}
-
-
-	module_init(example_init);
-	module_exit(example_exit);
-
-	MODULE_DESCRIPTION("Threaded interrupt handler.");
-	MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
-	MODULE_LICENSE("GPL");
-
+MODULE_DESCRIPTION("Threaded interrupt handler.");
+MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
+MODULE_LICENSE("GPL");

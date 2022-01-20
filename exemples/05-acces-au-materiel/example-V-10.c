@@ -25,23 +25,9 @@
 #include <asm/io.h>
 
 
-	static int  example_mmap(struct file *filp, struct vm_area_struct *vm);
+struct timer_list example_timer;
+static char *example_buffer;
 
-	static const struct file_operations example_fops = {
-		.owner   =  THIS_MODULE,
-		.mmap    =  example_mmap,
-	};
-
-	static struct miscdevice example_misc_driver = {
-		.minor  = MISC_DYNAMIC_MINOR,
-		.name   = THIS_MODULE->name,
-		.fops   = &example_fops,
-		.mode   = 0666,
-	};
-
-	struct timer_list example_timer;
-
-	static char *example_buffer;
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
 static void example_timer_function(struct timer_list *unused)
@@ -53,6 +39,38 @@ static void example_timer_function(unsigned long unused)
 	mod_timer(&example_timer, jiffies + HZ);
 }
 
+
+static int example_mmap(struct file *filp, struct vm_area_struct *vma)
+{
+	int err;
+
+	if ((unsigned long) (vma->vm_end - vma->vm_start) > PAGE_SIZE)
+		return -EINVAL;
+
+	err = remap_pfn_range(vma,
+		(unsigned long) (vma->vm_start),
+		virt_to_phys(example_buffer) >> PAGE_SHIFT,
+		vma->vm_end - vma->vm_start,
+		vma->vm_page_prot);
+	if (err != 0)
+		return -EAGAIN;
+
+	return 0;
+}
+
+
+static const struct file_operations example_fops = {
+	.owner   =  THIS_MODULE,
+	.mmap    =  example_mmap,
+};
+
+
+static struct miscdevice example_misc_driver = {
+	.minor  = MISC_DYNAMIC_MINOR,
+	.name   = THIS_MODULE->name,
+	.fops   = &example_fops,
+	.mode   = 0666,
+};
 
 
 static int __init example_init(void)
@@ -111,26 +129,6 @@ static void __exit example_exit(void)
 
 	misc_deregister(&example_misc_driver);
 }
-
-
-static int example_mmap(struct file *filp, struct vm_area_struct *vma)
-{
-	int err;
-
-	if ((unsigned long) (vma->vm_end - vma->vm_start) > PAGE_SIZE)
-		return -EINVAL;
-
-	err = remap_pfn_range(vma,
-		(unsigned long) (vma->vm_start),
-		virt_to_phys(example_buffer) >> PAGE_SHIFT,
-		vma->vm_end - vma->vm_start,
-		vma->vm_page_prot);
-	if (err != 0)
-		return -EAGAIN;
-
-	return 0;
-}
-
 
 
 module_init(example_init);

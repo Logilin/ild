@@ -21,21 +21,54 @@
 #include "gpio-examples.h"
 
 
-	static ssize_t example_read(struct file *filp, char *buffer, size_t length, loff_t *offset);
-	static ssize_t example_write(struct file *filp, const char *buffer, size_t length, loff_t *offset);
+static ssize_t example_read(struct file *filp, char *u_buffer, size_t length, loff_t *offset)
+{
+	char k_buffer[8];
 
-	static const struct file_operations fops_example = {
-		.owner   =  THIS_MODULE,
-		.read    =  example_read,
-		.write   =  example_write,
-	};
+	if (length < 2)
+		return 0;
+	sprintf(k_buffer, "%d\n", gpio_get_value(EXAMPLE_GPIO_IN));
+	if (copy_to_user(u_buffer, k_buffer, 2) != 0)
+		return -EFAULT;
 
-	static struct miscdevice example_misc_driver = {
-		.minor          = MISC_DYNAMIC_MINOR,
-		.name           = THIS_MODULE->name,
-		.fops           = &fops_example,
-		.mode           = 0666,
-	};
+	return 2;
+}
+
+
+static ssize_t example_write(struct file *filp, const char *buffer, size_t length, loff_t *offset)
+{
+	char k_buffer[80];
+	int val;
+
+	if (length > 79)
+		return -EINVAL;
+
+	if (copy_from_user(k_buffer, buffer, length) != 0)
+		return -EFAULT;
+	k_buffer[length] = '\0';
+
+	if (kstrtoint(k_buffer, 10, &val) != 0)
+		return -EINVAL;
+
+	gpio_set_value(EXAMPLE_GPIO_OUT, val & 0x01);
+
+	return length;
+}
+
+
+static const struct file_operations fops_example = {
+	.owner   =  THIS_MODULE,
+	.read    =  example_read,
+	.write   =  example_write,
+};
+
+
+static struct miscdevice example_misc_driver = {
+	.minor          = MISC_DYNAMIC_MINOR,
+	.name           = THIS_MODULE->name,
+	.fops           = &fops_example,
+	.mode           = 0666,
+};
 
 
 static int __init example_init(void)
@@ -85,45 +118,9 @@ static void __exit example_exit(void)
 }
 
 
-static ssize_t example_read(struct file *filp, char *u_buffer, size_t length, loff_t *offset)
-{
-	char k_buffer[8];
-
-	if (length < 2)
-		return 0;
-	sprintf(k_buffer, "%d\n", gpio_get_value(EXAMPLE_GPIO_IN));
-	if (copy_to_user(u_buffer, k_buffer, 2) != 0)
-		return -EFAULT;
-
-	return 2;
-}
-
-
-static ssize_t example_write(struct file *filp, const char *buffer, size_t length, loff_t *offset)
-{
-	char k_buffer[80];
-	int val;
-
-	if (length > 79)
-		return -EINVAL;
-
-	if (copy_from_user(k_buffer, buffer, length) != 0)
-		return -EFAULT;
-	k_buffer[length] = '\0';
-
-	if (kstrtoint(k_buffer, 10, &val) != 0)
-		return -EINVAL;
-
-	gpio_set_value(EXAMPLE_GPIO_OUT, val & 0x01);
-
-	return length;
-}
-
-
 module_init(example_init);
 module_exit(example_exit);
 
 MODULE_DESCRIPTION("Read and write system call on GPIO pins.");
 MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 MODULE_LICENSE("GPL v2");
-
