@@ -25,7 +25,7 @@ static ssize_t example_read(struct file *filp, char __user *u_buffer, size_t max
 
 	pr_info("%s - %s(%pK, %p, %u, %lld)", THIS_MODULE->name, __func__, filp, u_buffer, (unsigned int) max, *offset);
 
-	snprintf(k_buffer, 128, "PID=%u, PPID=%u, Name=%s\n",
+	snprintf(k_buffer, 128, "PID=%u, PPID=%u, Command=%s\n",
 		current->pid,
 		current->real_parent->pid,
 		current->comm);
