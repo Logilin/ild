@@ -39,7 +39,7 @@ static int example_release(struct inode *ind, struct file *filp)
 }
 
 
-static const struct file_operations fops_example = {
+static const struct file_operations example_fops = {
 	.owner   =  THIS_MODULE,
 	.open    =  example_open,
 	.release =  example_release,
@@ -68,7 +68,7 @@ static int __init example_init(void)
 
 	device_create(example_class, NULL, example_dev, NULL, THIS_MODULE->name);
 
-	cdev_init(&example_cdev, &fops_example);
+	cdev_init(&example_cdev, &example_fops);
 
 	err = cdev_add(&example_cdev, example_dev, 1);
 	if (err != 0) {

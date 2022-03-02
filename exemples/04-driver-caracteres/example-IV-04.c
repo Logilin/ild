@@ -30,7 +30,7 @@ static int example_release(struct inode *ind, struct file *filp)
 }
 
 
-static const struct file_operations fops_example = {
+static const struct file_operations example_fops = {
 	.owner   =  THIS_MODULE,
 	.open    =  example_open,
 	.release =  example_release,
@@ -40,7 +40,7 @@ static const struct file_operations fops_example = {
 static struct miscdevice example_misc_driver = {
 	.minor          = MISC_DYNAMIC_MINOR,
 	.name           = THIS_MODULE->name,
-	.fops           = &fops_example,
+	.fops           = &example_fops,
 	.mode           = 0666,
 };
 
