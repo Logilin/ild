@@ -56,7 +56,7 @@ static ssize_t example_write(struct file *filp, const char *buffer, size_t lengt
 }
 
 
-static const struct file_operations fops_example = {
+static const struct file_operations example_fops = {
 	.owner   =  THIS_MODULE,
 	.read    =  example_read,
 	.write   =  example_write,
@@ -66,7 +66,7 @@ static const struct file_operations fops_example = {
 static struct miscdevice example_misc_driver = {
 	.minor          = MISC_DYNAMIC_MINOR,
 	.name           = THIS_MODULE->name,
-	.fops           = &fops_example,
+	.fops           = &example_fops,
 	.mode           = 0666,
 };
 
