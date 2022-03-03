@@ -22,10 +22,10 @@
 
 
 
-#define EXAMPLE_BUFFER_SIZE 1024
-static unsigned long example_buffer[EXAMPLE_BUFFER_SIZE];
-static int           example_buffer_end;
-static spinlock_t    example_buffer_spl;
+#define EXAMPLE_ARRAY_SIZE 1024
+static unsigned long example_array[EXAMPLE_ARRAY_SIZE];
+static int           example_array_end;
+static spinlock_t    example_array_spl;
 
 
 static ssize_t example_read(struct file *filp, char *u_buffer, size_t length, loff_t *offset)
@@ -33,20 +33,20 @@ static ssize_t example_read(struct file *filp, char *u_buffer, size_t length, lo
 	unsigned long irqs;
 	char k_buffer[80];
 
-	spin_lock_irqsave(&example_buffer_spl, irqs);
+	spin_lock_irqsave(&example_array_spl, irqs);
 
-	if (example_buffer_end == 0) {
-		spin_unlock_irqrestore(&example_buffer_spl, irqs);
+	if (example_array_end == 0) {
+		spin_unlock_irqrestore(&example_array_spl, irqs);
 		return 0;
 	}
 
-	snprintf(k_buffer, 80, "%ld\n", example_buffer[0]);
+	snprintf(k_buffer, 80, "%ld\n", example_array[0]);
 
-	example_buffer_end--;
-	if (example_buffer_end > 0)
-		memmove(example_buffer, &(example_buffer[1]), example_buffer_end * sizeof(unsigned long));
+	example_array_end--;
+	if (example_array_end > 0)
+		memmove(example_array, &(example_array[1]), example_array_end * sizeof(unsigned long));
 
-	spin_unlock_irqrestore(&example_buffer_spl, irqs);
+	spin_unlock_irqrestore(&example_array_spl, irqs);
 
 	if (length < (strlen(k_buffer) + 1))
 		return -ENOMEM;
@@ -60,14 +60,14 @@ static ssize_t example_read(struct file *filp, char *u_buffer, size_t length, lo
 
 static irqreturn_t example_handler(int irq, void *ident)
 {
-	spin_lock(&example_buffer_spl);
+	spin_lock(&example_array_spl);
 
-	if (example_buffer_end < EXAMPLE_BUFFER_SIZE) {
-		example_buffer[example_buffer_end] = jiffies;
-		example_buffer_end++;
+	if (example_array_end < EXAMPLE_ARRAY_SIZE) {
+		example_array[example_array_end] = jiffies;
+		example_array_end++;
 	}
 
-	spin_unlock(&example_buffer_spl);
+	spin_unlock(&example_array_spl);
 
 	return IRQ_HANDLED;
 }
@@ -101,7 +101,7 @@ static int __init example_init(void)
 		return err;
 	}
 
-	spin_lock_init(&example_buffer_spl);
+	spin_lock_init(&example_array_spl);
 
 	err = request_irq(gpio_to_irq(EXAMPLE_GPIO_IN), example_handler,
 		IRQF_SHARED | IRQF_TRIGGER_RISING,

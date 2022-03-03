@@ -23,11 +23,11 @@
 #include "gpio-examples.h"
 
 
-#define EXAMPLE_BUFFER_SIZE 1024
-static unsigned long example_buffer[EXAMPLE_BUFFER_SIZE];
-static int           example_buffer_end;
-static spinlock_t    example_buffer_spl;
-static DECLARE_WAIT_QUEUE_HEAD(example_buffer_wq);
+#define EXAMPLE_ARRAY_SIZE 1024
+static unsigned long example_array[EXAMPLE_ARRAY_SIZE];
+static int           example_array_end;
+static spinlock_t    example_array_spl;
+static DECLARE_WAIT_QUEUE_HEAD(example_array_wq);
 
 
 static ssize_t example_read(struct file *filp, char *u_buffer, size_t length, loff_t *offset)
@@ -35,28 +35,28 @@ static ssize_t example_read(struct file *filp, char *u_buffer, size_t length, lo
 	unsigned long irqs;
 	char k_buffer[80];
 
-	spin_lock_irqsave(&example_buffer_spl, irqs);
+	spin_lock_irqsave(&example_array_spl, irqs);
 
-	while (example_buffer_end == 0) {
-		spin_unlock_irqrestore(&example_buffer_spl, irqs);
+	while (example_array_end == 0) {
+		spin_unlock_irqrestore(&example_array_spl, irqs);
 		if (filp->f_flags & O_NONBLOCK)
 			return -EAGAIN;
-		if (wait_event_interruptible(example_buffer_wq, (example_buffer_end != 0)) != 0)
+		if (wait_event_interruptible(example_array_wq, (example_array_end != 0)) != 0)
 			return -ERESTARTSYS;
-		spin_lock_irqsave(&example_buffer_spl, irqs);
+		spin_lock_irqsave(&example_array_spl, irqs);
 	}
 
-	snprintf(k_buffer, 80, "%ld\n", example_buffer[0]);
+	snprintf(k_buffer, 80, "%ld\n", example_array[0]);
 	if (length < (strlen(k_buffer)+1)) {
-		spin_unlock_irqrestore(&example_buffer_spl, irqs);
+		spin_unlock_irqrestore(&example_array_spl, irqs);
 		return -ENOMEM;
 	}
 
-	example_buffer_end--;
-	if (example_buffer_end > 0)
-		memmove(example_buffer, &(example_buffer[1]), example_buffer_end * sizeof(long));
+	example_array_end--;
+	if (example_array_end > 0)
+		memmove(example_array, &(example_array[1]), example_array_end * sizeof(long));
 
-	spin_unlock_irqrestore(&example_buffer_spl, irqs);
+	spin_unlock_irqrestore(&example_array_spl, irqs);
 
 	if (copy_to_user(u_buffer, k_buffer, strlen(k_buffer)+1) != 0)
 		return -EFAULT;
@@ -67,14 +67,14 @@ static ssize_t example_read(struct file *filp, char *u_buffer, size_t length, lo
 
 static irqreturn_t example_handler(int irq, void *ident)
 {
-	spin_lock(&example_buffer_spl);
+	spin_lock(&example_array_spl);
 
-	if (example_buffer_end < EXAMPLE_BUFFER_SIZE) {
-		example_buffer[example_buffer_end] = jiffies;
-		example_buffer_end++;
+	if (example_array_end < EXAMPLE_ARRAY_SIZE) {
+		example_array[example_array_end] = jiffies;
+		example_array_end++;
 	}
-	spin_unlock(&example_buffer_spl);
-	wake_up_interruptible(&example_buffer_wq);
+	spin_unlock(&example_array_spl);
+	wake_up_interruptible(&example_array_wq);
 
 	return IRQ_HANDLED;
 }
@@ -108,7 +108,7 @@ static int __init example_init(void)
 		return err;
 	}
 
-	spin_lock_init(&example_buffer_spl);
+	spin_lock_init(&example_array_spl);
 
 	err = request_irq(gpio_to_irq(EXAMPLE_GPIO_IN), example_handler,
 		IRQF_SHARED | IRQF_TRIGGER_RISING,

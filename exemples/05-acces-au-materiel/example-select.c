@@ -23,9 +23,9 @@
 #include "gpio-examples.h"
 
 
-#define EXAMPLE_BUFFER_SIZE 1024
-static unsigned long example_buffer[EXAMPLE_BUFFER_SIZE];
-static int           example_buffer_end = 0;
+#define EXAMPLE_ARRAY_SIZE 1024
+static unsigned long example_array[EXAMPLE_ARRAY_SIZE];
+static int           example_array_end = 0;
 static spinlock_t    example_spinlock;
 static DECLARE_WAIT_QUEUE_HEAD(example_waitqueue);
 
@@ -38,26 +38,26 @@ static ssize_t example_read(struct file * filp, char * buffer,
 
 	spin_lock_irqsave(& example_spinlock, irqs);
 
-	while (example_buffer_end == 0) {
+	while (example_array_end == 0) {
 		spin_unlock_irqrestore(& example_spinlock, irqs);
 		if (filp->f_flags & O_NONBLOCK)
 			return -EAGAIN;
 		if (wait_event_interruptible(example_waitqueue,
-		                    (example_buffer_end != 0)) != 0)
+		                    (example_array_end != 0)) != 0)
 			return -ERESTARTSYS;
 		spin_lock_irqsave(& example_spinlock, irqs);
 
 	}
 
-	snprintf(k_buffer, 80, "%ld\n", example_buffer[0]);
+	snprintf(k_buffer, 80, "%ld\n", example_array[0]);
 	if (length < (strlen(k_buffer)+1)) {
 		spin_unlock_irqrestore(& example_spinlock, irqs);
 		return -ENOMEM;
 	}
 
-	example_buffer_end --;
-	if (example_buffer_end > 0)
-		memmove(example_buffer, & (example_buffer[1]), example_buffer_end * sizeof(long int));
+	example_array_end --;
+	if (example_array_end > 0)
+		memmove(example_array, & (example_array[1]), example_array_end * sizeof(long int));
 
 	spin_unlock_irqrestore(& example_spinlock, irqs);
 
@@ -74,7 +74,7 @@ static unsigned int example_poll  (struct file * filp, poll_table * table)
 
 	poll_wait(filp, & example_waitqueue, table);
 	spin_lock_irqsave(& example_spinlock, irqs);
-	if (example_buffer_end > 0)
+	if (example_array_end > 0)
 		ret = POLLIN | POLLRDNORM;
 	spin_unlock_irqrestore(& example_spinlock, irqs);
 
@@ -86,9 +86,9 @@ static irqreturn_t example_handler(int irq, void * ident)
 {
 	spin_lock(& example_spinlock);
 
-	if (example_buffer_end < EXAMPLE_BUFFER_SIZE) {
-		example_buffer[example_buffer_end] = jiffies;
-		example_buffer_end ++;
+	if (example_array_end < EXAMPLE_ARRAY_SIZE) {
+		example_array[example_array_end] = jiffies;
+		example_array_end ++;
 	}
 	spin_unlock(& example_spinlock);
 	wake_up_interruptible(& example_waitqueue);
