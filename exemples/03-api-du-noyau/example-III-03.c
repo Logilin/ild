@@ -4,7 +4,7 @@
 //  "Ecriture de drivers et programmation noyau Linux"
 // Chapitre "A.P.I du noyau"
 //
-// (c) 2001-2021 Christophe Blaess
+// (c) 2001-2022 Christophe Blaess
 //
 //    https://www.logilin.fr/
 //

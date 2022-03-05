@@ -3,7 +3,7 @@
     "Ecriture de drivers et programmation noyau Linux"
   Chapitre "Acces au materiel"
 
-  (c) 2005-2021 Christophe Blaess
+  (c) 2005-2022 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
