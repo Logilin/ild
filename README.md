@@ -1,5 +1,5 @@
-ild v. 9.3
-==========
+ild 9.4
+=======
 (c) Christophe BLAESS 2005-2022
 
 Exemples de notre cours _"Écriture de drivers pour Linux"_
