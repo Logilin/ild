@@ -13,6 +13,7 @@ ifneq (${KERNELRELEASE},)
 	obj-m += example-V-08.o
 	obj-m += example-V-09.o
 	obj-m += example-V-10.o
+	obj-m += example-V-11.o
 	obj-m += example-select.o
 
 else

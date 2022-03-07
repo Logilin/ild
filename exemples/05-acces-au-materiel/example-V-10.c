@@ -10,130 +10,171 @@
 //
 
 
-#include <linux/cdev.h>
 #include <linux/device.h>
 #include <linux/fs.h>
 #include <linux/miscdevice.h>
-#include <linux/mm.h>
 #include <linux/module.h>
-#include <linux/mutex.h>
+#include <linux/gpio.h>
+#include <linux/interrupt.h>
 #include <linux/sched.h>
 #include <linux/slab.h>
-#include <linux/timer.h>
+#include <linux/uaccess.h>
 #include <linux/version.h>
+#include <linux/wait.h>
+#include <asm/uaccess.h>
 
-#include <asm/io.h>
-
-
-struct timer_list example_timer;
-static char *example_buffer;
+#include "gpio-examples.h"
 
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
-static void example_timer_function(struct timer_list *unused)
-#else
-static void example_timer_function(unsigned long unused)
-#endif
+#define EXAMPLE_ARRAY_SIZE 1024
+
+struct example_data {
+
+	unsigned long          array[EXAMPLE_ARRAY_SIZE];
+	int                    array_end;
+	spinlock_t             array_spl;
+	wait_queue_head_t      array_wq;
+
+};
+
+
+
+static irqreturn_t example_handler(int irq, void *ident)
 {
-	sprintf(example_buffer, "\r%s: %lu", THIS_MODULE->name, jiffies);
-	mod_timer(&example_timer, jiffies + HZ);
+	struct example_data *data = ident;
+
+	spin_lock(&data->array_spl);
+
+	if (data->array_end < EXAMPLE_ARRAY_SIZE) {
+		data->array[data->array_end] = jiffies;
+		data->array_end++;
+	}
+	spin_unlock(&data->array_spl);
+	wake_up_interruptible(&data->array_wq);
+
+	return IRQ_HANDLED;
 }
 
 
-static int example_mmap(struct file *filp, struct vm_area_struct *vma)
+
+static int example_open(struct inode *ind, struct file *filp)
 {
 	int err;
+	struct example_data *data;
 
-	if ((unsigned long) (vma->vm_end - vma->vm_start) > PAGE_SIZE)
-		return -EINVAL;
+	err = -ENOMEM;
 
-	err = remap_pfn_range(vma,
-		(unsigned long) (vma->vm_start),
-		virt_to_phys(example_buffer) >> PAGE_SHIFT,
-		vma->vm_end - vma->vm_start,
-		vma->vm_page_prot);
+	data = kmalloc(sizeof(struct example_data), GFP_KERNEL);
+	if (data == NULL)
+		goto out;
+
+	data->array_end = 0;
+	spin_lock_init(&data->array_spl);
+	init_waitqueue_head(&data->array_wq);
+
+	filp->private_data = data;
+
+	err = gpio_request(EXAMPLE_GPIO_IN, THIS_MODULE->name);
 	if (err != 0)
-		return -EAGAIN;
+		goto free_data;
+
+	err = gpio_direction_input(EXAMPLE_GPIO_IN);
+	if (err != 0)
+		goto free_gpio;
+
+	err = request_irq(gpio_to_irq(EXAMPLE_GPIO_IN), example_handler,
+		IRQF_SHARED | IRQF_TRIGGER_RISING,
+		THIS_MODULE->name, data);
+	if (err != 0)
+		goto free_gpio;
 
 	return 0;
+
+free_gpio:
+		gpio_free(EXAMPLE_GPIO_IN);
+
+free_data:
+	kfree(data);
+
+out:
+	return err;
+}
+
+
+
+static int example_release(struct inode *ind, struct file *filp)
+{
+	struct example_data *data = filp->private_data;
+
+	free_irq(gpio_to_irq(EXAMPLE_GPIO_IN), data);
+	gpio_free(EXAMPLE_GPIO_IN);
+	kfree(data);
+
+	return 0;
+}
+
+
+
+static ssize_t example_read(struct file *filp, char *u_buffer, size_t length, loff_t *offset)
+{
+	unsigned long irqs;
+	char k_buffer[80];
+	struct example_data *data = filp->private_data;
+
+	spin_lock_irqsave(&data->array_spl, irqs);
+
+	while (data->array_end == 0) {
+		spin_unlock_irqrestore(&data->array_spl, irqs);
+		if (filp->f_flags & O_NONBLOCK)
+			return -EAGAIN;
+		if (wait_event_interruptible(data->array_wq, (data->array_end != 0)) != 0)
+			return -ERESTARTSYS;
+		spin_lock_irqsave(&data->array_spl, irqs);
+	}
+
+	snprintf(k_buffer, 80, "%ld\n", data->array[0]);
+	if (length < (strlen(k_buffer)+1)) {
+		spin_unlock_irqrestore(&data->array_spl, irqs);
+		return -ENOMEM;
+	}
+
+	data->array_end--;
+	if (data->array_end > 0)
+		memmove(data->array, &(data->array[1]), data->array_end * sizeof(long));
+
+	spin_unlock_irqrestore(&data->array_spl, irqs);
+
+	if (copy_to_user(u_buffer, k_buffer, strlen(k_buffer)+1) != 0)
+		return -EFAULT;
+
+	return strlen(k_buffer)+1;
 }
 
 
 static const struct file_operations example_fops = {
 	.owner   =  THIS_MODULE,
-	.mmap    =  example_mmap,
+	.open    =  example_open,
+	.release =  example_release,
+	.read    =  example_read,
 };
 
 
 static struct miscdevice example_misc_driver = {
-	.minor  = MISC_DYNAMIC_MINOR,
-	.name   = THIS_MODULE->name,
-	.fops   = &example_fops,
-	.mode   = 0666,
+	.minor   = MISC_DYNAMIC_MINOR,
+	.name    = THIS_MODULE->name,
+	.fops    = &example_fops,
+	.mode    = 0666,
 };
 
 
-static int __init example_init(void)
-{
-	int err;
-	struct page *pg = NULL;
 
-	example_buffer = kzalloc(PAGE_SIZE, GFP_KERNEL);
-	if (example_buffer == NULL)
-		return -ENOMEM;
-
-	example_buffer[0] = '\0';
-
-	pg = virt_to_page(example_buffer);
-	SetPageReserved(pg);
-
-	err =  misc_register(&example_misc_driver);
-	if (err != 0) {
-		ClearPageReserved(pg);
-		#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
-			kfree_sensitive(example_buffer);
-		#else
-			kzfree(example_buffer);
-		#endif
-		example_buffer = NULL;
-		return err;
-	}
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
-	timer_setup(&example_timer, example_timer_function, 0);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 9, 0)
+	module_misc_device(example_misc_driver);
 #else
-	init_timer(&example_timer);
-	example_timer.function = example_timer_function;
+	module_driver(example_misc_driver, misc_register, misc_deregister)
 #endif
-	example_timer.expires = jiffies + HZ;
-	add_timer(&example_timer);
-
-	return 0;
-}
 
 
-static void __exit example_exit(void)
-{
-	struct page *pg;
-
-	del_timer(&example_timer);
-
-	pg = virt_to_page(example_buffer);
-	ClearPageReserved(pg);
-	#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
-		kfree_sensitive(example_buffer);
-	#else
-		kzfree(example_buffer);
-	#endif
-	example_buffer = NULL;
-
-	misc_deregister(&example_misc_driver);
-}
-
-
-module_init(example_init);
-module_exit(example_exit);
-
-MODULE_DESCRIPTION("mmap() system call installation");
+MODULE_DESCRIPTION("Blocking and non-blocking read() system call.");
 MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 MODULE_LICENSE("GPL v2");
