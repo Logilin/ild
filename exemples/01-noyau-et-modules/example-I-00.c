@@ -10,10 +10,7 @@
 //
 
 
-#include <linux/init.h>
 #include <linux/module.h>
-#include <linux/kernel.h>
-#include <linux/version.h>
 
 
 int __init example_00_init(void)
@@ -36,6 +33,6 @@ module_exit(example_00_exit);
 
 
 MODULE_DESCRIPTION("Empty module skeleton");
-MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
+MODULE_AUTHOR("");
 MODULE_LICENSE("GPL v2");
 
