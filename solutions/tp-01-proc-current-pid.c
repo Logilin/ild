@@ -17,7 +17,25 @@
 #include <asm/uaccess.h>
 
 
-	static ssize_t pid_read(struct file *, char __user *, size_t, loff_t *);
+
+static ssize_t pid_read(struct file *filp, char __user *u_buffer, size_t max, loff_t *offset)
+{
+	char string[32];
+	int  nb;
+
+	snprintf(string, 32, "%u\n", current->pid);
+	nb = strlen(string) - (*offset);
+	if (nb <= 0)
+		return 0;
+	if (nb > max)
+		nb = max;
+	if (copy_to_user(u_buffer, &(string[*offset]), nb) != 0)
+		return -EFAULT;
+	(*offset) += nb;
+
+	return nb;
+}
+
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
 	static const struct proc_ops pid_fops = {
@@ -54,25 +72,6 @@ static void __exit current_pid_exit(void)
 {
 	remove_proc_entry("pid", current_entry);
 	remove_proc_entry("current", NULL);
-}
-
-
-static ssize_t pid_read(struct file *filp, char __user *u_buffer, size_t max, loff_t *offset)
-{
-	char string[32];
-	int  nb;
-
-	snprintf(string, 32, "%u\n", current->pid);
-	nb = strlen(string) - (*offset);
-	if (nb <= 0)
-		return 0;
-	if (nb > max)
-		nb = max;
-	if (copy_to_user(u_buffer, &(string[*offset]), nb) != 0)
-		return -EFAULT;
-	(*offset) += nb;
-
-	return nb;
 }
 
 
