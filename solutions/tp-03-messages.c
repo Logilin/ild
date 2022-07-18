@@ -18,37 +18,11 @@
 #include <linux/uaccess.h>
 #include <asm/uaccess.h>
 
-	static ssize_t messages_read(struct file *, char *, size_t, loff_t *);
-	static ssize_t messages_write(struct file *, const char *, size_t, loff_t *);
 
-	static const struct file_operations messages_fops = {
-		.owner   =  THIS_MODULE,
-		.read    =  messages_read,
-		.write   =  messages_write,
-	};
-
-	static struct miscdevice messages_misc_driver = {
-		    .minor = MISC_DYNAMIC_MINOR,
-		    .name  = THIS_MODULE->name,
-		    .fops  = &messages_fops,
-		    .mode  = 0666,
-	};
-
-	#define MSG_NB_MAX 16
-	#define MSG_LG_MAX 32
-	char messages_array[MSG_NB_MAX][MSG_LG_MAX];
-	int messages_count = 0;
-
-static int __init messages_init(void)
-{
-	return misc_register(&messages_misc_driver);
-}
-
-
-static void __exit messages_exit(void)
-{
-	misc_deregister(&messages_misc_driver);
-}
+#define MSG_NB_MAX 16
+#define MSG_LG_MAX 32
+char messages_array[MSG_NB_MAX][MSG_LG_MAX];
+int messages_count = 0;
 
 
 static ssize_t messages_read(struct file *filp, char *u_buffer, size_t length, loff_t *offset)
@@ -86,6 +60,31 @@ static ssize_t messages_write(struct file *filp, const char *u_buffer, size_t le
 	messages_count++;
 
 	return length;
+}
+
+
+static const struct file_operations messages_fops = {
+	.owner   =  THIS_MODULE,
+	.read    =  messages_read,
+	.write   =  messages_write,
+};
+
+static struct miscdevice messages_misc_driver = {
+	    .minor = MISC_DYNAMIC_MINOR,
+	    .name  = THIS_MODULE->name,
+	    .fops  = &messages_fops,
+	    .mode  = 0666,
+};
+
+static int __init messages_init(void)
+{
+	return misc_register(&messages_misc_driver);
+}
+
+
+static void __exit messages_exit(void)
+{
+	misc_deregister(&messages_misc_driver);
 }
 
 
