@@ -20,43 +20,6 @@
 #include <asm/uaccess.h>
 
 
-	static ssize_t counter_read(struct file *filp, char *buffer, size_t length, loff_t *offset);
-	static ssize_t counter_write(struct file *filp, const char *buffer, size_t length, loff_t *offset);
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
-	static const struct proc_ops counter_fops = {
-		.owner   =  THIS_MODULE,
-		.proc_read    =  counter_read,
-		.proc_write   =  counter_write,
-	};
-#else
-	static const struct file_operations counter_fops = {
-		.owner   =  THIS_MODULE,
-		.read    =  counter_read,
-		.write   =  counter_write,
-	};
-#endif
-
-	static struct miscdevice counter_misc_driver = {
-		    .minor          = MISC_DYNAMIC_MINOR,
-		    .name           = "counter",
-		    .fops           = &counter_fops,
-		    .mode           = 0666,
-	};
-
-
-static int __init counter_init(void)
-{
-	return misc_register(&counter_misc_driver);
-}
-
-
-static void __exit counter_exit(void)
-{
-	misc_deregister(&counter_misc_driver);
-}
-
-
 static int counter;
 
 
@@ -98,6 +61,40 @@ static ssize_t counter_write(struct file *filp, const char *ubuffer, size_t lg, 
 		return -EINVAL;
 
 	return lg;
+}
+
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
+	static const struct proc_ops counter_fops = {
+		.owner   =  THIS_MODULE,
+		.proc_read    =  counter_read,
+		.proc_write   =  counter_write,
+	};
+#else
+	static const struct file_operations counter_fops = {
+		.owner   =  THIS_MODULE,
+		.read    =  counter_read,
+		.write   =  counter_write,
+	};
+#endif
+
+	static struct miscdevice counter_misc_driver = {
+		    .minor          = MISC_DYNAMIC_MINOR,
+		    .name           = "counter",
+		    .fops           = &counter_fops,
+		    .mode           = 0666,
+	};
+
+
+static int __init counter_init(void)
+{
+	return misc_register(&counter_misc_driver);
+}
+
+
+static void __exit counter_exit(void)
+{
+	misc_deregister(&counter_misc_driver);
 }
 
 
