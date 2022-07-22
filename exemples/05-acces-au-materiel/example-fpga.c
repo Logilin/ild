@@ -89,12 +89,6 @@ struct example_fpga_s {
 
 
 
-// Un parametre pour desactiver totalement les interruptions
-static int example_fpga_disable_irq = 0;
-	module_param_named(disable_irq, example_fpga_disable_irq, int, 0644);
-	MODULE_PARM_DESC(disable_irq, "disable all interrupt handling");
-
-
 // Une classe de peripherique specifique pour notre driver.
 static struct class * example_fpga_class = NULL;
 // Un mutex pour proteger l'acces a cette structure.
@@ -534,31 +528,26 @@ static int example_fpga_initialize_pci_device (struct pci_dev * dev, struct exam
 		return EINVAL;
 	}
 
-	// Le parametre example_fpga_disable_irq peut etre fourni sur la ligne
-	// de commande de insmod pour interdire tout traitement d'interruption.
-	if (! example_fpga_disable_irq) {
-
-		// Inscription du handler d'interruption
-		if (dev->irq != 0) {
-			if (request_irq(dev->irq, example_fpga_interrupt_handler, IRQF_SHARED, THIS_MODULE->name, example_fpga) != 0) {
-				pr_debug("Error on request_irq");
-				iounmap(example_fpga->module_controls);
-				iounmap(example_fpga->module_switches);
-				iounmap(example_fpga->module_leds);
-				iounmap(example_fpga->module_mem);
-				pci_release_region(dev, 0);
-				pci_disable_device(dev);
-				return EINVAL;
-			}
+	// Inscription du handler d'interruption
+	if (dev->irq != 0) {
+		if (request_irq(dev->irq, example_fpga_interrupt_handler, IRQF_SHARED, THIS_MODULE->name, example_fpga) != 0) {
+			pr_debug("Error on request_irq");
+			iounmap(example_fpga->module_controls);
+			iounmap(example_fpga->module_switches);
+			iounmap(example_fpga->module_leds);
+			iounmap(example_fpga->module_mem);
+			pci_release_region(dev, 0);
+			pci_disable_device(dev);
+			return EINVAL;
 		}
-
-		// Edge Capture
-		iowrite32(0x00000003, example_fpga->module_switches + 0x0C);
-		// Enable PIO IRQ
-		iowrite32(0x00000003, example_fpga->module_switches + 0x08);
-		// Enable PCIe IRQ
-		iowrite32(0x00000001, example_fpga->module_controls + 0x50);
 	}
+
+	// Edge Capture
+	iowrite32(0x00000003, example_fpga->module_switches + 0x0C);
+	// Enable PIO IRQ
+	iowrite32(0x00000003, example_fpga->module_switches + 0x08);
+	// Enable PCIe IRQ
+	iowrite32(0x00000001, example_fpga->module_controls + 0x50);
 
 	return 0;
 }
@@ -568,16 +557,13 @@ static int example_fpga_initialize_pci_device (struct pci_dev * dev, struct exam
 // Liberation de la partie basse du driver
 static void example_fpga_release_pci_device (struct pci_dev * dev, struct example_fpga_s * example_fpga)
 {
-	if (! example_fpga_disable_irq) {
+	// Arret des interruptions
+	iowrite32(0x00000000, example_fpga->module_controls + 0x50);
+	iowrite32(0x00000000, example_fpga->module_switches + 8);
 
-		// Arret des interruptions
-		iowrite32(0x00000000, example_fpga->module_controls + 0x50);
-		iowrite32(0x00000000, example_fpga->module_switches + 8);
-
-		// Supprimer le handler d'interruption
-		if (dev->irq) {
-			free_irq(dev->irq, example_fpga);
-		}
+	// Supprimer le handler d'interruption
+	if (dev->irq) {
+		free_irq(dev->irq, example_fpga);
 	}
 
 	// retirer la projection des PIO

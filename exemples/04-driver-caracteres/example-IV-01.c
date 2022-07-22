@@ -13,9 +13,6 @@
 #include <linux/module.h>
 
 
-static int example_major;
-module_param_named(major, example_major, int, 0644);
-
 static dev_t example_dev = MKDEV(0, 0);
 
 
@@ -23,13 +20,7 @@ static int __init example_init(void)
 {
 	int err;
 
-	if (example_major == 0) {
-		err = alloc_chrdev_region(&example_dev, 0, 1, THIS_MODULE->name);
-	} else {
-		example_dev = MKDEV(example_major, 0);
-		err = register_chrdev_region(example_dev, 1, THIS_MODULE->name);
-	}
-
+	err = alloc_chrdev_region(&example_dev, 0, 1, THIS_MODULE->name);
 	if (err < 0)
 		return err;
 

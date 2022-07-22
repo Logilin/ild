@@ -9,9 +9,9 @@
  *    https://www.logilin.fr/
  */
 
-#ifndef EXAMPLE_I_03_H
-#define EXAMPLE_I_03_H
+#ifndef EXAMPLE_I_02_H
+#define EXAMPLE_I_02_H
 
-	void example_03_hello(int number);
+	void example_02_hello(int number);
 
 #endif
