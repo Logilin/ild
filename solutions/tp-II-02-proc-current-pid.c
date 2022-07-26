@@ -2,7 +2,6 @@
 //
 // Exemples de la formation
 //  "Ecriture de drivers et programmation noyau Linux"
-// Chapitre "Utilisation du bus USB"
 //
 // (c) 2001-2022 Christophe Blaess
 //

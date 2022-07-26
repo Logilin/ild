@@ -1,16 +1,16 @@
 ifneq ($(KERNELRELEASE),)
 
 	# obj-m  = tp-I-05-messages.o
-	#obj-m += tp-II-02-proc-current-pid.o
-	#obj-m += tp-II-03-proc-sum.o
-	#obj-m += tp-02-counter.o
-	#obj-m += tp-03-messages.o
+	# obj-m += tp-II-02-proc-current-pid.o
+	obj-m += tp-II-03-proc-sum.o
+	# obj-m += tp-02-counter.o
+	# obj-m += tp-03-messages.o
 else
 
 	KERNEL_DIR ?= /lib/modules/$(shell uname -r)/build
 	MODULE_DIR := $(shell pwd)
 
-	EXE_FILES = tp-II-01-hello-world
+	# EXE_FILES = tp-II-01-hello-world
 
 
 .PHONY: all

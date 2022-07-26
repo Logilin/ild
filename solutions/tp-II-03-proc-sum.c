@@ -73,7 +73,7 @@ static ssize_t sum_write(struct file * filp, const char __user * u_buffer, size_
 
 
 
-static int __init current_pid_init(void)
+static int __init sum_init(void)
 {
 	if (proc_create("sum", 0666, NULL, &sum_fops) == NULL)
 		return -EBUSY;
@@ -82,14 +82,14 @@ static int __init current_pid_init(void)
 }
 
 
-static void __exit current_pid_exit(void)
+static void __exit sum_exit(void)
 {
 	remove_proc_entry("sum", NULL);
 }
 
 
-module_init(current_pid_init);
-module_exit(current_pid_exit);
+module_init(sum_init);
+module_exit(sum_exit);
 
 MODULE_DESCRIPTION("Exercise solution.");
 MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
