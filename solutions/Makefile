@@ -1,6 +1,7 @@
 ifneq (${KERNELRELEASE},)
 
-	#obj-m  = tp-01-proc-current-pid.o
+	#obj-m  = tp-II-02-proc-current-pid.c
+	#obj-m += tp-II-03-proc-sum.o
 	#obj-m += tp-02-counter.o
 	#obj-m += tp-03-messages.o
 else
