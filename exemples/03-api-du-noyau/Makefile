@@ -7,7 +7,6 @@ ifneq (${KERNELRELEASE},)
 	obj-m += example-III-02.o
 	obj-m += example-III-03.o
 	obj-m += example-III-04.o
-	obj-m += example-III-05.o
 
 else
 

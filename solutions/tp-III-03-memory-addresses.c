@@ -2,7 +2,6 @@
 //
 // Exemples de la formation
 //  "Ecriture de drivers et programmation noyau Linux"
-// Chapitre "A.P.I du noyau"
 //
 // (c) 2001-2022 Christophe Blaess
 //
@@ -17,7 +16,7 @@
 #include <asm/io.h>
 
 
-static int __init example_init(void)
+static int __init memory_addresses_init(void)
 {
 	char *buffer;
 	struct page *pg;
@@ -27,8 +26,8 @@ static int __init example_init(void)
 	if (buffer == NULL)
 		return -ENOMEM;
 
-	pr_info("%s: kmalloc()      -> %pK\n",
-		THIS_MODULE->name, buffer);
+	pr_info("%s: kmalloc()      -> %016llX\n",
+		THIS_MODULE->name, (unsigned long long)buffer);
 
 	pr_info("%s: virt-to-phys() -> %llx\n",
 		THIS_MODULE->name, (unsigned long long) virt_to_phys(buffer));
@@ -47,17 +46,16 @@ static int __init example_init(void)
 }
 
 
-static void __exit example_exit(void)
+static void __exit memory_addresses_exit(void)
 {
 }
 
 
-module_init(example_init);
-module_exit(example_exit);
+module_init(memory_addresses_init);
+module_exit(memory_addresses_exit);
 
 
 
 MODULE_DESCRIPTION("Virtual and physical addresses.");
 MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 MODULE_LICENSE("GPL v2");
-
