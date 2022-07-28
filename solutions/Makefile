@@ -5,6 +5,7 @@ ifneq ($(KERNELRELEASE),)
 	# obj-m += tp-II-03-proc-sum.o
 	# obj-m += tp-02-counter.o
 	# obj-m += tp-03-messages.o
+	# obj-m += tp-III-01-timing.o
 	# obj-m += tp-III-03-memory-addresses.o
 else
 
