@@ -32,7 +32,7 @@ module_init(example_00_init);
 module_exit(example_00_exit);
 
 
-MODULE_DESCRIPTION("Empty module skeleton");
+MODULE_DESCRIPTION("Exercise I-05 solution");
 MODULE_AUTHOR("My Name");
 MODULE_LICENSE("GPL v2");
 

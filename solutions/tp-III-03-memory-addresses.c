@@ -56,6 +56,6 @@ module_exit(memory_addresses_exit);
 
 
 
-MODULE_DESCRIPTION("Virtual and physical addresses.");
+MODULE_DESCRIPTION("Exercise III-03 solution.");
 MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 MODULE_LICENSE("GPL v2");

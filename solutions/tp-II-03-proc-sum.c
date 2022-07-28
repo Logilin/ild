@@ -91,6 +91,6 @@ static void __exit sum_exit(void)
 module_init(sum_init);
 module_exit(sum_exit);
 
-MODULE_DESCRIPTION("Exercise solution.");
+MODULE_DESCRIPTION("Exercise II-03 solution.");
 MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 MODULE_LICENSE("GPL v2");

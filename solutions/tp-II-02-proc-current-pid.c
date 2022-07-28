@@ -77,6 +77,6 @@ static void __exit current_pid_exit(void)
 module_init(current_pid_init);
 module_exit(current_pid_exit);
 
-MODULE_DESCRIPTION("Exercise solution.");
+MODULE_DESCRIPTION("Exercise II-02 solution.");
 MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");
 MODULE_LICENSE("GPL v2");
