@@ -9,7 +9,8 @@ ifneq ($(KERNELRELEASE),)
 	# obj-m += tp-IV-01-counter-read.o
 	# obj-m += tp-IV-02-counter-write.o
 	# obj-m += tp-IV-03-counter-ioctl.o
-	 obj-m += tp-V-01-message-read-write.o
+	# obj-m += tp-V-01-message-read-write.o
+	# obj-m += tp-V-02-message-mutex.o
 else
 
 	KERNEL_DIR ?= /lib/modules/$(shell uname -r)/build
