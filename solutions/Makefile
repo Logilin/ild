@@ -11,7 +11,8 @@ ifneq ($(KERNELRELEASE),)
 	# obj-m += tp-IV-03-counter-ioctl.o
 	# obj-m += tp-V-01-message-read-write.o
 	# obj-m += tp-V-02-message-mutex.o
-	obj-m += tp-V-03-blocking-read.o
+	# obj-m += tp-V-03-blocking-read.o
+	# obj-m += tp-V-04-blocking-write.o
 else
 
 	KERNEL_DIR ?= /lib/modules/$(shell uname -r)/build
