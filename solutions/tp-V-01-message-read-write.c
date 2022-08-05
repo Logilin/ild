@@ -2,7 +2,6 @@
 //
 // Exemples de la formation
 //  "Ecriture de drivers et programmation noyau Linux"
-// Chapitre "Utilisation du bus USB"
 //
 // (c) 2001-2022 Christophe Blaess
 //
@@ -27,20 +26,25 @@ int messages_count = 0;
 
 static ssize_t messages_read(struct file *filp, char *u_buffer, size_t length, loff_t *offset)
 {
-	int lg;
+	ssize_t lg;
 
 	if (messages_count == 0)
 		return 0;
-	lg = strlen(messages_array[0]);
-	if (length < lg)
-		return -ENOMEM;
 
-	if (copy_to_user(u_buffer, messages_array[0], lg) != 0)
+	lg = strlen(messages_array[0]) - (*offset);
+	if (lg <= 0) {
+		messages_count--;
+		if (messages_count > 0)
+			memmove(messages_array[0], messages_array[1], messages_count * MSG_LG_MAX);
+		return 0;
+	}
+	if (lg > length)
+		lg = length;
+
+	if (copy_to_user(u_buffer, messages_array[*offset], lg) != 0)
 		return -EFAULT;
 
-	messages_count--;
-	if (messages_count > 0)
-		memmove(messages_array[0], messages_array[1], messages_count * MSG_LG_MAX);
+	(*offset) += lg;
 
 	return lg;
 }
@@ -69,12 +73,14 @@ static const struct file_operations messages_fops = {
 	.write   =  messages_write,
 };
 
+
 static struct miscdevice messages_misc_driver = {
 	    .minor = MISC_DYNAMIC_MINOR,
-	    .name  = THIS_MODULE->name,
+	    .name  = "message-queue",
 	    .fops  = &messages_fops,
 	    .mode  = 0666,
 };
+
 
 static int __init messages_init(void)
 {

@@ -1,6 +1,6 @@
 ifneq ($(KERNELRELEASE),)
 
-	# obj-m  = tp-I-05-messages.o
+	# obj-m += tp-I-05-messages.o
 	# obj-m += tp-II-02-proc-current-pid.o
 	# obj-m += tp-II-03-proc-sum.o
 	# obj-m += tp-III-01-timing.o
@@ -9,7 +9,7 @@ ifneq ($(KERNELRELEASE),)
 	# obj-m += tp-IV-01-counter-read.o
 	# obj-m += tp-IV-02-counter-write.o
 	# obj-m += tp-IV-03-counter-ioctl.o
-
+	 obj-m += tp-V-01-message-read-write.o
 else
 
 	KERNEL_DIR ?= /lib/modules/$(shell uname -r)/build
