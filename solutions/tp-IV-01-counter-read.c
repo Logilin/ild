@@ -29,14 +29,15 @@ static ssize_t counter_read(struct file *filp, char *buffer, size_t max_lg, loff
 
 	snprintf(kbuffer, 128, "Counter = %d\n", counter);
 	lg = strlen(kbuffer) - (*offset);
-	if (lg <= 0)
+	if (lg <= 0) {
+		counter++;
 		return 0;
+	}
 	if (lg > max_lg)
 		lg = max_lg;
 
 	if (copy_to_user(buffer, &kbuffer[*offset], lg) != 0)
 		return -EFAULT;
-	counter++;
 	*offset += lg;
 	return lg;
 }
