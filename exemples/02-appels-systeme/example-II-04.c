@@ -66,7 +66,7 @@ static struct proc_dir_entry *example_entry;
 
 static int __init example_init(void)
 {
-	example_entry = proc_create(THIS_MODULE->name, S_IFREG | 0666, NULL, &example_ops);
+	example_entry = proc_create(THIS_MODULE->name, 0666, NULL, &example_ops);
 	if (example_entry == NULL)
 		return -EBUSY;
 
