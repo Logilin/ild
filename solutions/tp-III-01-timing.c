@@ -19,7 +19,7 @@ static int __init timing_init(void)
 	int i;
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 17, 0)
-	ktime_t  sample[NB_SAMPLES];
+	time64_t  sample[NB_SAMPLES];
 
 	for (i = 0; i < NB_SAMPLES; i++)
 		sample[i] = ktime_get_real_ns();

@@ -19,7 +19,7 @@
 
 struct s_timed_event {
 	int      data;
-	ktime_t  time;
+	time64_t time;
 };
 
 struct s_timed_event Events[NB_EVENT_MAX];
