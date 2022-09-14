@@ -26,11 +26,11 @@ static ktime_t example_period_kt;
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 17, 0)
 static enum hrtimer_restart example_htimer_function(struct hrtimer *unused)
 {
-	ktime_t now;
-	static ktime_t previous = -1;
-	ktime_t elapsed;
-	static ktime_t elapsed_min = -1;
-	static ktime_t elapsed_max = -1;
+	time64_t now;
+	static time64_t previous = -1;
+	time64_t elapsed;
+	static time64_t elapsed_min = -1;
+	static time64_t elapsed_max = -1;
 
 	hrtimer_forward_now(&example_htimer, example_period_kt);
 

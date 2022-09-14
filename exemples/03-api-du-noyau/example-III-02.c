@@ -19,10 +19,10 @@ static void display_time_values(void)
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 17, 0)
 
-	ktime_t   kgs =  ktime_get_seconds();
-	ktime_t   kgrs = ktime_get_real_seconds();
-	ktime_t   kgn =  ktime_get_ns();
-	ktime_t   kgrn = ktime_get_real_ns();
+	time64_t   kgs =  ktime_get_seconds();
+	time64_t   kgrs = ktime_get_real_seconds();
+	time64_t   kgn =  ktime_get_ns();
+	time64_t   kgrn = ktime_get_real_ns();
 
 	pr_info("[%s] %s\n", THIS_MODULE->name, __func__);
 	pr_info("ktime_get_seconds(): %lld\n", kgs);
