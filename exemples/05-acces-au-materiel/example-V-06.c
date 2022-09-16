@@ -2,7 +2,7 @@
 //
 // Exemples de la formation
 //  "Ecriture de drivers et programmation noyau Linux"
-// Chapitre "Drive ren mode caracteres"
+// Chapitre "Driver en mode caracteres"
 //
 // (c) 2001-2022 Christophe Blaess
 //
