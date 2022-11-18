@@ -32,7 +32,7 @@ struct example_net_dev_priv {
 };
 
 
-static irqreturn_t example_irq_rx_handler(int irq, void *irq_id, struct pt_regs *regs)
+static irqreturn_t example_irq_rx_handler(int irq, void *irq_id)
 {
 	unsigned char *data;
 	struct sk_buff *sk_b;
@@ -62,7 +62,7 @@ static irqreturn_t example_irq_rx_handler(int irq, void *irq_id, struct pt_regs 
 }
 
 
-static irqreturn_t example_irq_tx_handler(int irq, void *irq_id, struct pt_regs *regs)
+static irqreturn_t example_irq_tx_handler(int irq, void *irq_id)
 {
 	struct net_device *net_dev;
 	struct example_net_dev_priv *priv;
@@ -166,10 +166,10 @@ static int example_start_xmit(struct sk_buff *sk_b, struct net_device *src)
 	memcpy(dst_priv->data, data, len);
 	dst_priv->data_len = len;
 
-	example_irq_rx_handler (0, (void *)dst, NULL);
+	example_irq_rx_handler (0, (void *)dst);
 	src_priv->net_dev_stats.tx_packets++;
 	src_priv->net_dev_stats.tx_bytes += len;
-	example_irq_tx_handler (0, (void *) src, NULL);
+	example_irq_tx_handler (0, (void *) src);
 
 	return NETDEV_TX_OK;
 }
