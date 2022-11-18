@@ -157,7 +157,7 @@ static const struct file_operations example_file_operations = {
 
 
 static struct usb_class_driver example_usb_class_driver = {
-	.name = "usb/velleman%d",
+	.name = "velleman%d",
 	.fops = &example_file_operations,
 	.minor_base = 0,
 };
