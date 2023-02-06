@@ -5,7 +5,7 @@
 
   Exemples de la formation "Programmation Noyau sous Linux"
 
-  (c) 2005-2022 Christophe Blaess
+  (c) 2005-2023 Christophe Blaess
   http://www.blaess.fr/christophe/
 
 \************************************************************************/
