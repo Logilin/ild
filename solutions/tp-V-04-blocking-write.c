@@ -77,7 +77,7 @@ static ssize_t messages_write(struct file *filp, const char *u_buffer, size_t le
 
 	while (messages_count >= MSG_NB_MAX) {
 		mutex_unlock(&messages_mutex);
-		if (wait_event_interruptible(messages_write_wq, messages_count != 0) != 0)
+		if (wait_event_interruptible(messages_write_wq, messages_count < MS_NB_MAX) != 0)
                         return -ERESTARTSYS;
 		if (mutex_lock_interruptible(&messages_mutex) != 0)
 	                return -ERESTARTSYS;
