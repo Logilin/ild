@@ -104,7 +104,7 @@ static int example_stop(struct net_device *net_dev)
 {
 	pr_info("%s - %s(%pK):\n", THIS_MODULE->name, __func__, net_dev);
 
-	netif_stop_queue(net_dev);
+	netif_tx_disable(net_dev);
 
 	return 0;
 }
