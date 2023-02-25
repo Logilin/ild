@@ -18,21 +18,12 @@ static int __init timing_init(void)
 {
 	int i;
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 17, 0)
 	time64_t  sample[NB_SAMPLES];
 
 	for (i = 0; i < NB_SAMPLES; i++)
 		sample[i] = ktime_get_real_ns();
 	for (i = 0; i < NB_SAMPLES; i++)
 		pr_info("%02d: %lld\n", i, sample[i]);
-
-#else
-	struct timespec sample[NB_SAMPLES];
-	for (i = 0; i < NB_SAMPLES; i++)
-		getnstimeofday(&(sample[i]));
-	for (i = 0; i < NB_SAMPLES; i++)
-		pr_info("%02d: %ld%09ld\n", i, sample[i].tv_sec, sample[i].tv_nsec);
-#endif
 
 	return 0;
 }

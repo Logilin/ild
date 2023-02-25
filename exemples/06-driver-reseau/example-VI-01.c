@@ -77,11 +77,7 @@ static int __init example_init(void)
 
 	pr_info("%s - %s()\n", THIS_MODULE->name, __func__);
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 17, 0)
 	net_dev_ex = alloc_netdev(0, "ex%d", NET_NAME_UNKNOWN, example_setup);
-#else
-	net_dev_ex = alloc_netdev(0, "ex%d", example_setup);
-#endif
 	if (net_dev_ex == NULL)
 		return -ENOMEM;
 

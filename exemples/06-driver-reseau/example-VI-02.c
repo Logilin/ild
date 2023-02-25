@@ -229,11 +229,7 @@ static int __init example_init(void)
 
 	pr_info("%s - %s()\n", THIS_MODULE->name, __func__);
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 17, 0)
 	net_dev_ex_0 = alloc_netdev(sizeof(struct example_net_dev_priv), "ex%d", NET_NAME_UNKNOWN, example_setup);
-#else
-	net_dev_ex_0 = alloc_netdev(sizeof(struct example_net_dev_priv), "ex%d", example_setup);
-#endif
 	if (net_dev_ex_0 == NULL)
 		return -ENOMEM;
 
@@ -242,11 +238,7 @@ static int __init example_init(void)
 		return -ENODEV;
 	}
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 17, 0)
 	net_dev_ex_1 = alloc_netdev(sizeof(struct example_net_dev_priv), "ex%d", NET_NAME_UNKNOWN, example_setup);
-#else
-	net_dev_ex_1 = alloc_netdev(sizeof(struct example_net_dev_priv), "ex%d", example_setup);
-#endif
 	if (net_dev_ex_1 == NULL) {
 		unregister_netdev(net_dev_ex_0);
 		free_netdev(net_dev_ex_0);
