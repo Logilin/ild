@@ -81,18 +81,18 @@ static irqreturn_t example_irq_tx_handler(int irq, void *irq_id)
 
 static int example_open(struct net_device *net_dev)
 {
+	u8 hw_address[6] = { 0x00, 0x12, 0x34, 0x56, 0x78, 0x00 };
+
 	pr_info("%s - %s(%pK):\n", THIS_MODULE->name, __func__, net_dev);
 
-	net_dev->dev_addr[0] = 0x00;
-	net_dev->dev_addr[1] = 0x12;
-	net_dev->dev_addr[2] = 0x34;
-	net_dev->dev_addr[3] = 0x56;
-	net_dev->dev_addr[4] = 0x78;
+	if (net_dev == net_dev_ex_1)
+		hw_address[5] = 0x01;
 
-	if (net_dev == net_dev_ex_0)
-		net_dev->dev_addr[5] = 0x00;
-	else
-		net_dev->dev_addr[5] = 0x01;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0)
+	eth_hw_addr_set(net_dev, hw_address);
+#else
+	memcpy(net_dev->dev_addr, hw_address, 6);
+#endif
 
 	netif_start_queue(net_dev);
 
