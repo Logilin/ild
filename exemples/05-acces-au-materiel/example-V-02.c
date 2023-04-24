@@ -14,6 +14,7 @@
 #include <linux/fs.h>
 #include <linux/kthread.h>
 #include <linux/module.h>
+#include <linux/version.h>
 
 
 static DECLARE_COMPLETION(example_started);
@@ -33,7 +34,11 @@ int example_thread(void *arg)
 			THIS_MODULE->name, jiffies);
 		ssleep(1);
 	}
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 17, 0)
+	kthread_complete_and_exit(&example_stopped, 0);
+#else
 	complete_and_exit(&example_stopped, 0);
+#endif
 }
 
 
