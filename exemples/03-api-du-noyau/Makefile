@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0
 #
 
-ifneq (${KERNELRELEASE},)
+ifneq ($(KERNELRELEASE),)
 
 	obj-m += example-III-01.o
 	obj-m += example-III-02.o
@@ -20,7 +20,7 @@ all: modules
 .PHONY: modules
 
 modules:
-	${MAKE} -C ${KERNEL_DIR} M=${MODULE_DIR}  modules
+	$(MAKE) -C $(KERNEL_DIR) M=$(MODULE_DIR)  modules
 
 .PHONY: clean
 

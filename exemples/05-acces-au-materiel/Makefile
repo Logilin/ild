@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0
 #
 
-ifneq (${KERNELRELEASE},)
+ifneq ($(KERNELRELEASE),)
 
 	obj-m  = example-V-01.o
 	obj-m += example-V-02.o
@@ -36,20 +36,20 @@ all: user modules
 
 .PHONY: modules
 modules:
-	${MAKE} -C ${KERNEL_DIR} M=${MODULE_DIR}  modules
+	$(MAKE) -C $(KERNEL_DIR) M=$(MODULE_DIR)  modules
 
 .PHONY: user
-user: ${USER_PROGS}
+user: $(USER_PROGS)
 
 %:%.c
 	$(CROSS_COMPILE)$(CC) $(CFLAGS)  -o $@ $<
 
-.PHONY: clean,
+.PHONY: clean
 clean:
 	rm -f *.o *.ko *.mod.c .*.o .*.o.d .*.ko .*.mod.c .*.cmd *~ *.ko.unsigned *.mod
 	rm -f Module.symvers Module.markers modules.order
 	rm -rf .tmp_versions .cache.mk
-	rm -f ${USER_PROGS}
+	rm -f $(USER_PROGS)
 
 endif
 
