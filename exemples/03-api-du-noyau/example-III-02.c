@@ -17,8 +17,6 @@
 static void display_time_values(void)
 {
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 17, 0)
-
 	time64_t   kgs =  ktime_get_seconds();
 	time64_t   kgrs = ktime_get_real_seconds();
 	time64_t   kgn =  ktime_get_ns();
@@ -29,17 +27,6 @@ static void display_time_values(void)
 	pr_info("ktime_get_real_seconds(): %lld\n", kgrs);
 	pr_info("ktime_get_ns(): %lld\n", kgn);
 	pr_info("ktime_get_real_ns(): %lld\n", kgrn);
-#else
-	struct timespec gnst;
-	int gs = get_seconds();
-
-	getnstimeofday(&gnst);
-
-	pr_info("[%s] %s\n", THIS_MODULE->name, __func__);
-	pr_info("get_seconds(): %d\n", gs);
-	pr_info("getnstimeofday(): %ld.%09ld\n", gnst.tv_sec, gnst.tv_nsec);
-#endif
-
 }
 
 

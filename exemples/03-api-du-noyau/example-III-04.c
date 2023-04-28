@@ -23,7 +23,6 @@ module_param(period_us, int, 0644);
 static ktime_t example_period_kt;
 
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 17, 0)
 static enum hrtimer_restart example_htimer_function(struct hrtimer *unused)
 {
 	time64_t now;
@@ -53,41 +52,6 @@ static enum hrtimer_restart example_htimer_function(struct hrtimer *unused)
 
 	return HRTIMER_RESTART;
 }
-
-#else
-
-static enum hrtimer_restart example_htimer_function(struct hrtimer *unused)
-{
-	struct timespec now;
-	static struct timespec previous = { 0, 0 };
-	long long elapsed;
-	static long long  elapsed_min = -1;
-	static long long elapsed_max = -1;
-
-	hrtimer_forward_now(&example_htimer, example_period_kt);
-
-	getnstimeofday(&now);
-
-	if (previous.tv_sec > 0) {
-		elapsed  = now.tv_sec - previous.tv_sec;
-		elapsed *= 1000000000;
-		elapsed += now.tv_nsec - previous.tv_nsec;
-		if ((elapsed_min < 0) || (elapsed < elapsed_min)) {
-			elapsed_min = elapsed;
-			pr_info("%s: min=%lld  max=%lld\n",
-			       THIS_MODULE->name, elapsed_min, elapsed_max);
-		}
-		if ((elapsed_max < 0) || (elapsed > elapsed_max)) {
-			elapsed_max = elapsed;
-			pr_info("%s: min=%lld  max=%lld\n",
-			       THIS_MODULE->name, elapsed_min, elapsed_max);
-		}
-	}
-	previous = now;
-
-	return HRTIMER_RESTART;
-}
-#endif
 
 
 static int __init example_init(void)
