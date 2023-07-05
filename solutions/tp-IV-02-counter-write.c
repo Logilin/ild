@@ -52,8 +52,10 @@ static ssize_t counter_write(struct file *filp, const char *ubuffer, size_t lg, 
 	if (kbuffer == NULL)
 		return -ENOMEM;
 
-	if (copy_from_user(kbuffer, ubuffer, lg) != 0)
+	if (copy_from_user(kbuffer, ubuffer, lg) != 0) {
+		kfree(kbuffer);
 		return -EFAULT;
+	}
 	kbuffer[lg] = '\0';
 
 	nb = kstrtoint(kbuffer, 10, &counter);
