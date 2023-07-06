@@ -17,26 +17,21 @@
 #include <linux/ip.h>
 #include <linux/skbuff.h>
 
-#define NB_SLOTS   8
 
 struct net_device *net_dev_ex_0 = NULL;
 struct net_device *net_dev_ex_1 = NULL;
 
 struct example_net_dev_priv {
 
-	struct mutex *mtx;
+	struct sk_buff *sk_b;
 
-	int empty_slot[NB_SLOTS];
-	u8  slot_data[ETH_DATA_LEN][NB_SLOTS];
-	int slot_data_len[NB_SLOTS];
+	unsigned char data[ETH_DATA_LEN];
+	int data_len;
 };
 
 
 static int example_open(struct net_device *net_dev)
 {
-	int i;
-	struct example_net_dev_priv *priv;
-
 	u8 hw_address[6] = { 0x00, 0x12, 0x34, 0x56, 0x78, 0x00 };
 
 	pr_info("%s - %s(%pK):\n", THIS_MODULE->name, __func__, net_dev);
@@ -49,11 +44,6 @@ static int example_open(struct net_device *net_dev)
 #else
 	memcpy(net_dev->dev_addr, hw_address, 6);
 #endif
-
-	priv = netdev_priv(net_dev);
-	mutex_init(&(priv->mtx));
-	for (i = 0; i < NB_SLOTS; i ++)
-		priv->empty_slots = 1;
 
 	netif_start_queue(net_dev);
 
@@ -71,16 +61,16 @@ static int example_stop(struct net_device *net_dev)
 }
 
 
-static irqreturn_t example_irq_rx_handler(int irq, void *id)
+static irqreturn_t example_irq_rx_handler(int irq, void *irq_id)
 {
 	unsigned char *data;
 	struct sk_buff *sk_b;
 	struct net_device *net_dev;
 	struct example_net_dev_priv *priv;
 
-	pr_info("%s -%s(%d, %pK)\n", THIS_MODULE->name, __func__, irq, id);
+	pr_info("%s -%s(%d, %pK)\n", THIS_MODULE->name, __func__, irq, irq_id);
 
-	net_dev = (struct net_device *)id;
+	net_dev = (struct net_device *)irq_id;
 	priv = netdev_priv(net_dev);
 	if (priv == NULL)
 		return IRQ_NONE;
@@ -95,6 +85,23 @@ static irqreturn_t example_irq_rx_handler(int irq, void *id)
 	sk_b->ip_summed = CHECKSUM_UNNECESSARY;
 	netif_rx(sk_b);
 
+	return IRQ_HANDLED;
+}
+
+
+static irqreturn_t example_irq_tx_handler(int irq, void *irq_id)
+{
+	struct net_device *net_dev;
+	struct example_net_dev_priv *priv;
+
+	pr_info("%s -%s(%d, %pK)\n", THIS_MODULE->name, __func__, irq, irq_id);
+
+	net_dev = (struct net_device *)irq_id;
+	priv = netdev_priv(net_dev);
+	if (priv == NULL)
+		return IRQ_NONE;
+
+	dev_kfree_skb(priv->sk_b);
 	return IRQ_HANDLED;
 }
 
@@ -116,8 +123,6 @@ static int example_start_xmit(struct sk_buff *sk_b, struct net_device *src)
 
 	pr_info("%s -%s(%pK, %pK)\n", THIS_MODULE->name, __func__, sk_b, src);
 
-	netif_stop_queue(src);
-
 	if (src == net_dev_ex_0)
 		dst = net_dev_ex_1;
 	else
@@ -136,10 +141,8 @@ static int example_start_xmit(struct sk_buff *sk_b, struct net_device *src)
 		data = short_packet;
 	}
 
-	if (len > ETH_DATA_LEN) {
-		netif_wake_queue(src);
+	if (len > ETH_DATA_LEN)
 		return -ENOMEM;
-	}
 
 	src_priv->sk_b = sk_b;
 
@@ -160,9 +163,7 @@ static int example_start_xmit(struct sk_buff *sk_b, struct net_device *src)
 	dst_priv->data_len = len;
 
 	example_irq_rx_handler (0, (void *)dst);
-
-	netif_wake_queue(src);
-	dev_kfree_skb(priv->sk_b);
+	example_irq_tx_handler (0, (void *) src);
 
 	return NETDEV_TX_OK;
 }

@@ -28,7 +28,6 @@ all: modules $(USERSPACE)
 
 modules:
 	$(MAKE) -C $(KERNEL_DIR) M=$(MODULE_DIR)  modules
-	rm -f *.o *.mod*
 
 .PHONY: clean
 
