@@ -82,8 +82,6 @@ static int __init example_init(void)
 	if (example_buffer == NULL)
 		return -ENOMEM;
 
-	example_buffer[0] = '\0';
-
 	pg = virt_to_page(example_buffer);
 	SetPageReserved(pg);
 
