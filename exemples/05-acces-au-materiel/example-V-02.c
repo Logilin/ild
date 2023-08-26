@@ -9,7 +9,6 @@
 //    https://www.logilin.fr/
 //
 
-#include <linux/completion.h>
 #include <linux/delay.h>
 #include <linux/fs.h>
 #include <linux/kthread.h>
@@ -17,39 +16,29 @@
 #include <linux/version.h>
 
 
-static DECLARE_COMPLETION(example_started);
-static DECLARE_COMPLETION(example_stopped);
+struct task_struct *example_thread_id;
 
-static int example_stop;
-
-
-int example_thread(void *arg)
+int example_thread_function(void *arg)
 {
 	(void) arg;
 
-	complete(&example_started);
+	while (! kthread_should_stop()) {
 
-	while (!example_stop) {
 		pr_info("%s(): Thread running, jiffies = %lu\n",
 			THIS_MODULE->name, jiffies);
+
 		ssleep(1);
 	}
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 17, 0)
-	kthread_complete_and_exit(&example_stopped, 0);
-#else
-	complete_and_exit(&example_stopped, 0);
-#endif
+	do_exit(0);
 }
 
 
 static int __init example_init(void)
 {
-	struct task_struct *thread;
-
-	thread = kthread_run(example_thread, NULL, THIS_MODULE->name);
-	if (IS_ERR(thread))
+	example_thread_id = kthread_run(example_thread_function, NULL, THIS_MODULE->name);
+	if (IS_ERR(example_thread_id))
 		return -ENOMEM;
-	wait_for_completion(&example_started);
+
 	pr_info("%s: Thread started\n", THIS_MODULE->name);
 
 	return 0;
@@ -58,9 +47,7 @@ static int __init example_init(void)
 
 static void __exit example_exit(void)
 {
-	example_stop = 1;
-	wait_for_completion(&example_stopped);
-
+	kthread_stop(example_thread_id);
 	pr_info("%s: Thread terminated\n", THIS_MODULE->name);
 }
 
