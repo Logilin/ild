@@ -27,8 +27,6 @@ struct example_net_dev_priv {
 
 	unsigned char data[ETH_DATA_LEN];
 	int data_len;
-
-	struct net_device_stats net_dev_stats;
 };
 
 
@@ -50,8 +48,9 @@ static irqreturn_t example_irq_rx_handler(int irq, void *irq_id)
 		return IRQ_HANDLED;
 	data = skb_put(sk_b, priv->data_len);
 	memcpy(data, priv->data, priv->data_len);
-	priv->net_dev_stats.rx_packets++;
-	priv->net_dev_stats.rx_bytes += priv->data_len;
+
+	net_dev->stats.rx_packets++;
+	net_dev->stats.rx_bytes += priv->data_len;
 
 	sk_b->dev = net_dev;
 	sk_b->protocol = eth_type_trans(sk_b, net_dev);
@@ -167,8 +166,8 @@ static int example_start_xmit(struct sk_buff *sk_b, struct net_device *src)
 	dst_priv->data_len = len;
 
 	example_irq_rx_handler (0, (void *)dst);
-	src_priv->net_dev_stats.tx_packets++;
-	src_priv->net_dev_stats.tx_bytes += len;
+	src->stats.tx_packets++;
+	src->stats.tx_bytes += len;
 	example_irq_tx_handler (0, (void *) src);
 
 	return NETDEV_TX_OK;
@@ -202,11 +201,9 @@ static int example_hard_header(struct sk_buff *sk_b, struct net_device *net_dev,
 
 static struct net_device_stats *example_get_stats(struct net_device *net_dev)
 {
-	struct example_net_dev_priv *priv = netdev_priv(net_dev);
-
 	pr_info("%s - %s(%pK)\n", THIS_MODULE->name, __func__, net_dev);
 
-	return &(priv->net_dev_stats);
+	return &(net_dev->stats);
 }
 
 
