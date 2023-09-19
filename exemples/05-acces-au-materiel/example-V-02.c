@@ -29,7 +29,7 @@ int example_thread_function(void *arg)
 
 		ssleep(1);
 	}
-	do_exit(0);
+	return 0;
 }
 
 
