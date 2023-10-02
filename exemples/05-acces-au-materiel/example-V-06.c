@@ -65,7 +65,7 @@ static int __init example_init(void)
 	err = request_threaded_irq(gpio_to_irq(EXAMPLE_GPIO_IN),
 		example_top_half,
 		example_bottom_half,
-		IRQF_SHARED,
+		IRQF_SHARED | IRQF_TRIGGER_RISING,
 		THIS_MODULE->name,
 		THIS_MODULE->name);
 	if (err != 0) {
