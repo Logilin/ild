@@ -749,7 +749,11 @@ static int __init example_fpga_init(void)
 	int err;
 
 	// Creer la classe specifique pour notre peripherique.
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 4, 0)
+	example_fpga_class = class_create(THIS_MODULE->name);
+#else
 	example_fpga_class = class_create(THIS_MODULE, THIS_MODULE->name);
+#endif
 	if (IS_ERR(example_fpga_class)) {
 		example_fpga_class = NULL;
 		return -EINVAL;
