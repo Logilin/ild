@@ -3,7 +3,7 @@
 // Exemples de la formation
 //  "Ecriture de drivers et programmation noyau Linux"
 //
-// (c) 2001-2023 Christophe Blaess
+// (c) 2001-202 Christophe Blaess
 //
 //    https://www.logilin.fr/
 //
