@@ -1,5 +1,7 @@
 ifneq ($(KERNELRELEASE),)
 
+	obj-m += skeleton.o
+
 	# obj-m += tp-I-05-messages.o
 	# obj-m += tp-II-02-proc-current-pid.o
 	# obj-m += tp-II-03-proc-sum.o
