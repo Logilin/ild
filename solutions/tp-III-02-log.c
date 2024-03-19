@@ -121,7 +121,6 @@ static ssize_t log_write(struct file * filp, const char __user * u_buffer, size_
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
 	static const struct proc_ops log_fops = {
-		.owner	= THIS_MODULE,
 		.proc_read   = log_read,
 		.proc_write  = log_write,
 	};
