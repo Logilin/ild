@@ -120,6 +120,7 @@ static ssize_t example_read(struct file *filp, char *u_buffer, size_t length, lo
 	unsigned long irqs;
 	char k_buffer[80];
 	struct example_data *data = filp->private_data;
+	unsigned long value;
 
 	spin_lock_irqsave(&data->array_spl, irqs);
 
@@ -132,17 +133,17 @@ static ssize_t example_read(struct file *filp, char *u_buffer, size_t length, lo
 		spin_lock_irqsave(&data->array_spl, irqs);
 	}
 
-	snprintf(k_buffer, 80, "%ld\n", data->array[0]);
-	if (length < (strlen(k_buffer)+1)) {
-		spin_unlock_irqrestore(&data->array_spl, irqs);
-		return -ENOMEM;
-	}
+	value = data->array[0];
 
 	data->array_end--;
 	if (data->array_end > 0)
 		memmove(data->array, &(data->array[1]), data->array_end * sizeof(long));
 
 	spin_unlock_irqrestore(&data->array_spl, irqs);
+
+	snprintf(k_buffer, 80, "%ld\n", value);
+	if (length < (strlen(k_buffer)+1))
+		return -ENOMEM;
 
 	if (copy_to_user(u_buffer, k_buffer, strlen(k_buffer)+1) != 0)
 		return -EFAULT;
