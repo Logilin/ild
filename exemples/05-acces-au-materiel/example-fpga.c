@@ -367,7 +367,11 @@ static int example_fpga_mmap(struct file * filp, struct vm_area_struct * vma)
 		default:
 			return  -EINVAL;
 	}
-	vma->vm_flags |= VM_IO | VM_DONTCOPY;
+	#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 0)
+		vm_flags_set(vma, VM_IO | VM_DONTCOPY);
+	#else
+		vma->vm_flags |= VM_IO | VM_DONTCOPY;
+	#endif
 	vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
 
 	if (io_remap_pfn_range (vma, vma->vm_start,
