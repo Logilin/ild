@@ -13,7 +13,7 @@ else
 KERNEL_SRC ?= /lib/modules/$(shell uname -r)/build
 MODULE_DIR := $(shell pwd)
 MOD_INSTALL_DIR ?= $(DESTDIR)/lib/modules/$(KERNEL_VERSION)/ild
-
+ARCH ?= $(shell arch)
 
 .PHONY: all
 

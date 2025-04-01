@@ -10,18 +10,32 @@ ifneq ($(KERNELRELEASE),)
 
 else
 
-	KERNEL_DIR ?= /lib/modules/$(shell uname -r)/build
-	MODULE_DIR := $(shell pwd)
+KERNEL_SRC ?= /lib/modules/$(shell uname -r)/build
+MODULE_DIR := $(shell pwd)
+MOD_INSTALL_DIR ?= $(DESTDIR)/lib/modules/$(KERNEL_VERSION)/ild
+ARCH ?= $(shell arch)
+
 
 .PHONY: all
 
 all: modules
 
+
 .PHONY: modules
 
 modules:
-	$(MAKE) -C $(KERNEL_DIR) M=$(MODULE_DIR)  modules
-	rm -f *.o *.mod*
+	$(MAKE) -C $(KERNEL_SRC) M=$(MODULE_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE)  modules
+
+
+.PHONY: modules_install
+
+modules_install:
+	install -d $(MOD_INSTALL_DIR)
+	install -m 0644 example-III-01.ko  $(MOD_INSTALL_DIR)/
+	install -m 0644 example-III-02.ko  $(MOD_INSTALL_DIR)/
+	install -m 0644 example-III-03.ko  $(MOD_INSTALL_DIR)/
+	install -m 0644 example-III-04.ko  $(MOD_INSTALL_DIR)/
+
 
 .PHONY: clean
 

@@ -18,31 +18,51 @@ ifneq ($(KERNELRELEASE),)
 
 else
 
+KERNEL_SRC ?= /lib/modules/$(shell uname -r)/build
+MODULE_DIR := $(shell pwd)
+MOD_INSTALL_DIR ?= $(DESTDIR)/lib/modules/$(KERNEL_VERSION)/ild
+ARCH ?= $(shell arch)
 
-	# Uncomment and complete the following lines if you cross-compile the examples.
-	# export ARCH          := arm
-	# export CROSS_COMPILE := arm-linux-
-	# export KERNEL_DIR    := ~/cross/kernel/linux-rpi-3.6.11
-
-	KERNEL_DIR ?= /lib/modules/$(shell uname -r)/build
-	MODULE_DIR := $(shell pwd)
-
-	USER_PROGS :=    cat-non-block        \
-	                 test-mmap            \
-	                 test-select          \
+USER_PROGS :=    cat-non-block        \
+                 test-mmap            \
+                 test-select          \
 
 .PHONY: all
+
 all: user modules
 
+
 .PHONY: modules
+
 modules:
-	$(MAKE) -C $(KERNEL_DIR) M=$(MODULE_DIR)  modules
+	$(MAKE) -C $(KERNEL_SRC) M=$(MODULE_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE)  modules
+
+
+.PHONY: modules_install
+
+modules_install:
+	install -d $(MOD_INSTALL_DIR)
+	install -m 0644 example-V-01.ko  $(MOD_INSTALL_DIR)/
+	install -m 0644 example-V-02.ko  $(MOD_INSTALL_DIR)/
+	install -m 0644 example-V-03.ko  $(MOD_INSTALL_DIR)/
+	install -m 0644 example-V-04.ko  $(MOD_INSTALL_DIR)/
+	install -m 0644 example-V-05.ko  $(MOD_INSTALL_DIR)/
+	install -m 0644 example-V-06.ko  $(MOD_INSTALL_DIR)/
+	install -m 0644 example-V-07.ko  $(MOD_INSTALL_DIR)/
+	install -m 0644 example-V-08.ko  $(MOD_INSTALL_DIR)/
+	install -m 0644 example-V-09.ko  $(MOD_INSTALL_DIR)/
+	install -m 0644 example-V-10.ko  $(MOD_INSTALL_DIR)/
+	install -m 0644 example-V-11.ko  $(MOD_INSTALL_DIR)/
+
 
 .PHONY: user
+
 user: $(USER_PROGS)
 
+
 %:%.c
-	$(CROSS_COMPILE)$(CC) $(CFLAGS)  -o $@ $<
+	$(CC) $(CFLAGS) $(LDFLAGS)  -o $@ $<
+
 
 .PHONY: clean
 clean:

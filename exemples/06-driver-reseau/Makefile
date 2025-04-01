@@ -9,17 +9,33 @@ ifneq ($(KERNELRELEASE),)
 
 else
 
-	KERNEL_DIR ?= /lib/modules/$(shell uname -r)/build
-	MODULE_DIR := $(shell pwd)
+KERNEL_SRC ?= /lib/modules/$(shell uname -r)/build
+MODULE_DIR := $(shell pwd)
+MOD_INSTALL_DIR ?= $(DESTDIR)/lib/modules/$(KERNEL_VERSION)/ild
+ARCH ?= $(shell arch)
 
-	CFLAGS := -Wall -g
+
+.PHONY: all
 
 all: modules
 
-modules:
-	$(MAKE) -C $(KERNEL_DIR) M=$(MODULE_DIR)  modules
-	rm -f *.o *.mod*
 
+.PHONY: modules
+
+modules:
+	$(MAKE) -C $(KERNEL_SRC) M=$(MODULE_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE)  modules
+
+
+.PHONY: modules_install
+
+modules_install:
+	install -d $(MOD_INSTALL_DIR)
+	install -m 0644 example-VI-01.ko  $(MOD_INSTALL_DIR)/
+	install -m 0644 example-VI-02.ko  $(MOD_INSTALL_DIR)/
+	install -m 0644 example-VI-03.ko  $(MOD_INSTALL_DIR)/
+
+
+.PHONY: clean
 
 clean:
 	rm -f *.o *.ko *.mod.c .*.o .*.o.d .*.ko .*.mod.c .*.cmd *~ *.ko.unsigned *.mod
