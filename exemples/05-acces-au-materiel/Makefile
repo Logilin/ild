@@ -60,10 +60,6 @@ modules_install:
 user: $(USER_PROGS)
 
 
-%:%.c
-	$(CC) $(CFLAGS) $(LDFLAGS)  -o $@ $<
-
-
 .PHONY: clean
 clean:
 	rm -f *.o *.ko *.mod.c .*.o .*.o.d .*.ko .*.mod.c .*.cmd *~ *.ko.unsigned *.mod
