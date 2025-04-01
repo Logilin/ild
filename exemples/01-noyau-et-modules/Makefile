@@ -26,7 +26,7 @@ modules:
 	$(MAKE) -C $(KERNEL_SRC) M=$(MODULE_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE)  modules
 
 
-.PHONY modules_install
+.PHONY: modules_install
 
 modules_install:
 	install -d $(MOD_INSTALL_DIR)
