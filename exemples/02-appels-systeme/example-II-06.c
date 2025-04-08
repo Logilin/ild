@@ -32,16 +32,9 @@ static ssize_t example_read(struct file *filp, char __user *u_buffer, size_t max
 		 current->comm,
 		 example_value);
 
-	nb = strlen(k_buffer) - (*offset);
-	if (nb <= 0)
-		return 0;
-	if (nb > max)
-		nb = max;
-	if (copy_to_user(u_buffer, &(k_buffer[*offset]), nb) != 0)
-		return -EFAULT;
-	(*offset) += nb;
+	nb = strlen(k_buffer);
 
-	return nb;
+	return simple_read_from_buffer(u_buffer, max, offset, k_buffer, nb);
 }
 
 

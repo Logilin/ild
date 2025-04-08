@@ -8,6 +8,7 @@ ifneq ($(KERNELRELEASE),)
 	obj-m += example-II-03.o
 	obj-m += example-II-04.o
 	obj-m += example-II-05.o
+	obj-m += example-II-06.o
 else
 
 KERNEL_SRC ?= /lib/modules/$(shell uname -r)/build
@@ -36,6 +37,7 @@ modules_install:
 	install -m 0644 example-II-03.ko  $(MOD_INSTALL_DIR)/
 	install -m 0644 example-II-04.ko  $(MOD_INSTALL_DIR)/
 	install -m 0644 example-II-05.ko  $(MOD_INSTALL_DIR)/
+	install -m 0644 example-II-06.ko  $(MOD_INSTALL_DIR)/
 
 
 .PHONY: clean
