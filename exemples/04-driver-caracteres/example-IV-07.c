@@ -64,11 +64,7 @@ static struct miscdevice example_misc_driver = {
 };
 
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 9, 0)
-	module_misc_device(example_misc_driver);
-#else
-	module_driver(example_misc_driver, misc_register, misc_deregister)
-#endif
+module_misc_device(example_misc_driver);
 
 MODULE_DESCRIPTION("Unprotected access on a shared variable.");
 MODULE_AUTHOR("Christophe Blaess <Christophe.Blaess@Logilin.fr>");

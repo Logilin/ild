@@ -29,11 +29,7 @@ struct timer_list example_timer;
 static char *example_buffer;
 
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
 static void example_timer_function(struct timer_list *unused)
-#else
-static void example_timer_function(unsigned long unused)
-#endif
 {
 	sprintf(example_buffer, "\r%s: %lu", THIS_MODULE->name, jiffies);
 	mod_timer(&example_timer, jiffies + HZ);
@@ -97,12 +93,7 @@ static int __init example_init(void)
 		return err;
 	}
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
 	timer_setup(&example_timer, example_timer_function, 0);
-#else
-	init_timer(&example_timer);
-	example_timer.function = example_timer_function;
-#endif
 	example_timer.expires = jiffies + HZ;
 	add_timer(&example_timer);
 

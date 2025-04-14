@@ -18,7 +18,6 @@
 static struct timer_list example_timer;
 
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
 static void example_timer_function(struct timer_list *timer)
 {
 	pr_info("%s -%s: ktime_get_ns(): %lld\n",
@@ -27,32 +26,12 @@ static void example_timer_function(struct timer_list *timer)
 
 	mod_timer(timer, jiffies + HZ);
 }
-#else
-static void example_timer_function(unsigned long arg)
-{
-	struct timer_list *timer = (struct timer_list *) arg;
-	struct timeval time_of_day;
-
-	do_gettimeofday(&time_of_day);
-	pr_info("%s - %s: time_of_day=%ld.%06ld\n",
-		THIS_MODULE->name, __func__,
-		time_of_day.tv_sec, time_of_day.tv_usec);
-
-	mod_timer(timer, jiffies + HZ);
-}
-#endif
 
 
 
 static int __init example_init(void)
 {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
 	timer_setup(&example_timer, example_timer_function, 0);
-#else
-	init_timer(&example_timer);
-	example_timer.function = example_timer_function;
-	example_timer.data = (unsigned long) (&example_timer);
-#endif
 	example_timer.expires = jiffies + HZ;
 	add_timer(&example_timer);
 

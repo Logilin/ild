@@ -169,11 +169,7 @@ static struct miscdevice example_misc_driver = {
 
 
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 9, 0)
-	module_misc_device(example_misc_driver);
-#else
-	module_driver(example_misc_driver, misc_register, misc_deregister)
-#endif
+module_misc_device(example_misc_driver);
 
 
 MODULE_DESCRIPTION("Blocking and non-blocking read() system call.");
