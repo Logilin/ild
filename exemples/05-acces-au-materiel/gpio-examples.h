@@ -28,10 +28,17 @@
 #else
 
 	#if EXAMPLE_GPIO_MODE == EXAMPLE_RASPBERRY_PI
-		// Input on pin 16 (GPIO 23)
-		#define EXAMPLE_GPIO_IN  23
-		// Output on pin 18 (GPIO 24)
-		#define EXAMPLE_GPIO_OUT 24
+		#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 6, 0)
+			// Input on pin 16
+			#define EXAMPLE_GPIO_IN  594
+			// Output on pin 18
+			#define EXAMPLE_GPIO_OUT 595
+		#else
+			// Input on pin 16
+			#define EXAMPLE_GPIO_IN  59
+			// Output on pin 18
+			#define EXAMPLE_GPIO_OUT 24
+		#endif
 	#elif EXAMPLE_GPIO_MODE == EXAMPLE_BEAGLEBONE_BLACK
 		// Input on pin P8-07 (GPIO 66)
 		#define EXAMPLE_GPIO_IN  66
