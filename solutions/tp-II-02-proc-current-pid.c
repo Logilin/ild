@@ -36,16 +36,10 @@ static ssize_t pid_read(struct file *filp, char __user *u_buffer, size_t max, lo
 }
 
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
-	static const struct proc_ops pid_fops = {
-		.proc_read   = pid_read,
-	};
-#else
 	static const struct file_operations pid_fops = {
 		.owner	= THIS_MODULE,
 		.read   = pid_read,
 	};
-#endif
 
 
 	static struct proc_dir_entry *current_entry;

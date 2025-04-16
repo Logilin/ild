@@ -37,16 +37,9 @@ static ssize_t example_read(struct file *filp, char __user *u_buffer, size_t max
 }
 
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
-	static const struct proc_ops example_ops = {
-		.proc_read = example_read,
-		.proc_lseek = default_llseek,
-	};
-#else
 	static const struct file_operations example_ops = {
 		.read = example_read,
 	};
-#endif
 
 
 static struct proc_dir_entry *example_entry;

@@ -24,11 +24,7 @@ static int example_open(struct net_device *net_dev)
 
 	pr_info("%s - %s(%pK):\n", THIS_MODULE->name, __func__, net_dev);
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0)
-	eth_hw_addr_set(net_dev, hw_address);
-#else
 	memcpy(net_dev->dev_addr, hw_address, 6);
-#endif
 	netif_start_queue(net_dev);
 
 	return 0;

@@ -55,18 +55,10 @@ static ssize_t example_write(struct file * filp, const char __user * u_buffer, s
 }
 
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
-	static const struct proc_ops example_ops = {
-		.proc_read  = example_read,
-		.proc_write = example_write,
-		.proc_lseek = default_llseek,
-	};
-#else
 	static const struct file_operations example_ops = {
 		.read  = example_read,
 		.write = example_write,
 	};
-#endif
 
 
 static struct proc_dir_entry *example_entry;

@@ -27,11 +27,7 @@ static void example_bottom_half(struct tasklet_struct *unused)
 }
 
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
-	static DECLARE_TASKLET(example_tasklet, example_bottom_half);
-#else
-	static DECLARE_TASKLET(example_tasklet, (void (*)(unsigned long))example_bottom_half, 0);
-#endif
+static DECLARE_TASKLET(example_tasklet, (void (*)(unsigned long))example_bottom_half, 0);
 
 
 static irqreturn_t example_top_half(int irq, void *ident)

@@ -14,13 +14,8 @@
 #include <linux/version.h>
 
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
-	static const struct proc_ops example_ops = {
-	};
-#else
 	static const struct file_operations example_ops = {
 	};
-#endif
 
 
 static struct proc_dir_entry *example_entry;

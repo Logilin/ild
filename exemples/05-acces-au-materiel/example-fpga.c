@@ -367,11 +367,7 @@ static int example_fpga_mmap(struct file * filp, struct vm_area_struct * vma)
 		default:
 			return  -EINVAL;
 	}
-	#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 0)
-		vm_flags_set(vma, VM_IO | VM_DONTCOPY);
-	#else
-		vma->vm_flags |= VM_IO | VM_DONTCOPY;
-	#endif
+	vma->vm_flags |= VM_IO | VM_DONTCOPY;
 	vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
 
 	if (io_remap_pfn_range (vma, vma->vm_start,
@@ -397,21 +393,13 @@ static long example_fpga_ioctl (struct file * filp, unsigned int cmd, unsigned l
 	// Si la commande est une lecture depuis l'espace utilisateur
 	if (_IOC_DIR(cmd) & _IOC_READ)
 		// Verifier si nous pouvons acceder en ecriture sur le pointeur transmis
-		#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 0, 0)
-		if (access_ok((void __user *) arg, _IOC_SIZE(cmd)) == 0)
-		#else
 		if (access_ok(VERIFY_WRITE, (void __user *) arg, _IOC_SIZE(cmd)) == 0)
-		#endif
 			return -EFAULT;
 
 	// Si la commande est une ecriture depuis l'espace utilisateur
 	if (_IOC_DIR(cmd) & _IOC_WRITE)
 		// Verifier si nous pouvons acceder en lecture sur le pointeur transmis
-		#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 0, 0)
-		if (access_ok((void __user *) arg, _IOC_SIZE(cmd)) == 0)
-		#else
 		if (access_ok(VERIFY_READ, (void __user *) arg, _IOC_SIZE(cmd)) == 0)
-		#endif
 			return -EFAULT;
 
 	// Extraire le numero de commande
@@ -475,11 +463,7 @@ static int example_fpga_initialize_pci_device (struct pci_dev * dev, struct exam
 	}
 
 	// Projection en memoire du module RAM
-	#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
-	example_fpga->module_mem = ioremap(example_fpga->iobase + EXAMPLE_FPGA_MODULE_MEM_START, EXAMPLE_FPGA_MODULE_MEM_LENGTH);
-	#else
 	example_fpga->module_mem = ioremap_nocache(example_fpga->iobase + EXAMPLE_FPGA_MODULE_MEM_START, EXAMPLE_FPGA_MODULE_MEM_LENGTH);
-	#endif
 	if (example_fpga->module_mem == NULL) {
 		pr_debug("Error on ioremap for PIO MEM");
 		pci_release_region(dev, 0);
@@ -488,11 +472,7 @@ static int example_fpga_initialize_pci_device (struct pci_dev * dev, struct exam
 	}
 
 	// Projection en memoire du module LED
-	#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
-	example_fpga->module_leds = ioremap(example_fpga->iobase + EXAMPLE_FPGA_MODULE_LEDS_START, EXAMPLE_FPGA_MODULE_LEDS_LENGTH);
-	#else
 	example_fpga->module_leds = ioremap_nocache(example_fpga->iobase + EXAMPLE_FPGA_MODULE_LEDS_START, EXAMPLE_FPGA_MODULE_LEDS_LENGTH);
-	#endif
 	if (example_fpga->module_leds == NULL) {
 		pr_debug("Error on ioremap for PIO LED");
 		iounmap(example_fpga->module_mem);
@@ -502,11 +482,7 @@ static int example_fpga_initialize_pci_device (struct pci_dev * dev, struct exam
 	}
 
 	// Projection en memoire du module Switch
-	#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
-	example_fpga->module_switches = ioremap(example_fpga->iobase + EXAMPLE_FPGA_MODULE_SWITCHES_START, EXAMPLE_FPGA_MODULE_SWITCHES_LENGTH);
-	#else
 	example_fpga->module_switches = ioremap_nocache(example_fpga->iobase + EXAMPLE_FPGA_MODULE_SWITCHES_START, EXAMPLE_FPGA_MODULE_SWITCHES_LENGTH);
-	#endif
 	if (example_fpga->module_switches == NULL) {
 		pr_debug("Error on ioremap for PIO SWITCH");
 		iounmap(example_fpga->module_leds);
@@ -517,11 +493,7 @@ static int example_fpga_initialize_pci_device (struct pci_dev * dev, struct exam
 	}
 
 	// Projection en memoire du module Controls
-	#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
-	example_fpga->module_controls = ioremap(example_fpga->iobase + EXAMPLE_FPGA_MODULE_CONTROLS_START, EXAMPLE_FPGA_MODULE_CONTROLS_LENGTH);
-	#else
 	example_fpga->module_controls = ioremap_nocache(example_fpga->iobase + EXAMPLE_FPGA_MODULE_CONTROLS_START, EXAMPLE_FPGA_MODULE_CONTROLS_LENGTH);
-	#endif
 	if (example_fpga->module_controls == NULL) {
 		pr_debug("Error on ioremap for PIO CONTROL");
 		iounmap(example_fpga->module_switches);
@@ -753,11 +725,7 @@ static int __init example_fpga_init(void)
 	int err;
 
 	// Creer la classe specifique pour notre peripherique.
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 4, 0)
-	example_fpga_class = class_create(THIS_MODULE->name);
-#else
 	example_fpga_class = class_create(THIS_MODULE, THIS_MODULE->name);
-#endif
 	if (IS_ERR(example_fpga_class)) {
 		example_fpga_class = NULL;
 		return -EINVAL;

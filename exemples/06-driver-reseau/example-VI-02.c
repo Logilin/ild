@@ -39,11 +39,7 @@ static int example_open(struct net_device *net_dev)
 	if (net_dev == net_dev_ex_1)
 		hw_address[5] = 0x01;
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0)
-	eth_hw_addr_set(net_dev, hw_address);
-#else
 	memcpy(net_dev->dev_addr, hw_address, 6);
-#endif
 
 	netif_start_queue(net_dev);
 
