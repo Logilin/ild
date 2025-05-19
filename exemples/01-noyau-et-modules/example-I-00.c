@@ -13,7 +13,7 @@
 #include <linux/module.h>
 
 
-int __init example_00_init(void)
+static int __init example_00_init(void)
 {
 	/* Module initialization. */
 
@@ -21,7 +21,7 @@ int __init example_00_init(void)
 }
 
 
-void __exit example_00_exit(void)
+static void __exit example_00_exit(void)
 {
 	/* Module cleanup. */
 
