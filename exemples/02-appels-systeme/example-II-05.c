@@ -23,7 +23,7 @@ static ssize_t example_read(struct file *filp, char __user *u_buffer, size_t max
 	char k_buffer[128];
 	int  nb;
 
-	pr_info("%s - %s(%016lx, %016lx, %u, %lld)", THIS_MODULE->name, __func__, (unsigned long)filp, (unsigned long)u_buffer, (unsigned int) max, *offset);
+	pr_info("%s - %s(%016lx, %016lx, %u, %lld)\n", THIS_MODULE->name, __func__, (unsigned long)filp, (unsigned long)u_buffer, (unsigned int) max, *offset);
 
 	snprintf(k_buffer, 128, "PID=%u, PPID=%u, Command=%s\n",
 		current->pid,
