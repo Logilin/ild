@@ -12,8 +12,20 @@ else
 
 KERNEL_SRC ?= /lib/modules/$(shell uname -r)/build
 MODULE_DIR := $(shell pwd)
+
 MOD_INSTALL_DIR ?= $(DESTDIR)/lib/modules/$(KERNEL_VERSION)/ild
 ARCH ?= $(shell arch)
+ifeq ($(ARCH),i686)
+	ARCH := x86
+else ifeq ($(ARCH),aarch64)
+	ARCH := arm64
+else ifeq ($(ARCH),armv7l)
+	ARCH := arm
+else ifeq ($(ARCH),armv6l)
+	ARCH := arm
+else ifeq ($(ARCH),riscv64)
+	ARCH := riscv
+endif
 
 
 .PHONY: all
