@@ -37,7 +37,7 @@ static irqreturn_t example_irq_rx_handler(int irq, void *irq_id)
 	struct net_device *net_dev;
 	struct example_net_dev_priv *priv;
 
-	pr_info("%s -%s(%d, %pK)\n", THIS_MODULE->name, __func__, irq, irq_id);
+	pr_info("%s -%s(%d, %016lx)\n", THIS_MODULE->name, __func__, irq, (unsigned long)irq_id);
 
 	net_dev = (struct net_device *)irq_id;
 	priv = netdev_priv(net_dev);
@@ -66,7 +66,7 @@ static irqreturn_t example_irq_tx_handler(int irq, void *irq_id)
 	struct net_device *net_dev;
 	struct example_net_dev_priv *priv;
 
-	pr_info("%s -%s(%d, %pK)\n", THIS_MODULE->name, __func__, irq, irq_id);
+	pr_info("%s -%s(%d, %016lx)\n", THIS_MODULE->name, __func__, irq, (unsigned long)irq_id);
 
 	net_dev = (struct net_device *)irq_id;
 	priv = netdev_priv(net_dev);
@@ -82,7 +82,7 @@ static int example_open(struct net_device *net_dev)
 {
 	u8 hw_address[6] = { 0x00, 0x12, 0x34, 0x56, 0x78, 0x00 };
 
-	pr_info("%s - %s(%pK):\n", THIS_MODULE->name, __func__, net_dev);
+	pr_info("%s - %s(%016lx):\n", THIS_MODULE->name, __func__, (unsigned long)net_dev);
 
 	if (net_dev == net_dev_ex_1)
 		hw_address[5] = 0x01;
@@ -101,7 +101,7 @@ static int example_open(struct net_device *net_dev)
 
 static int example_stop(struct net_device *net_dev)
 {
-	pr_info("%s - %s(%pK):\n", THIS_MODULE->name, __func__, net_dev);
+	pr_info("%s - %s(%016lx):\n", THIS_MODULE->name, __func__, (unsigned long)net_dev);
 
 	netif_tx_disable(net_dev);
 
@@ -124,7 +124,7 @@ static int example_start_xmit(struct sk_buff *sk_b, struct net_device *src)
 	int    len;
 	char   short_packet[ETH_ZLEN];
 
-	pr_info("%s -%s(%pK, %pK)\n", THIS_MODULE->name, __func__, sk_b, src);
+	pr_info("%s -%s(%016lx, %016lx)\n", THIS_MODULE->name, __func__, (unsigned long)sk_b, (unsigned long)src);
 
 	if (src == net_dev_ex_0)
 		dst = net_dev_ex_1;
@@ -201,7 +201,7 @@ static int example_hard_header(struct sk_buff *sk_b, struct net_device *net_dev,
 
 static struct net_device_stats *example_get_stats(struct net_device *net_dev)
 {
-	pr_info("%s - %s(%pK)\n", THIS_MODULE->name, __func__, net_dev);
+	pr_info("%s - %s(%016lx)\n", THIS_MODULE->name, __func__, (unsigned long)net_dev);
 
 	return &(net_dev->stats);
 }
@@ -224,7 +224,7 @@ static void example_setup(struct net_device *net_dev)
 {
 	struct example_net_dev_priv *private_data = NULL;
 
-	pr_info("%s - %s(%pK)\n", THIS_MODULE->name, __func__, net_dev);
+	pr_info("%s - %s(%016lx)\n", THIS_MODULE->name, __func__, (unsigned long)net_dev);
 
 	ether_setup(net_dev);
 
