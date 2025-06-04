@@ -35,7 +35,7 @@
 			#define EXAMPLE_GPIO_OUT 595
 		#else
 			// Input on pin 16
-			#define EXAMPLE_GPIO_IN  59
+			#define EXAMPLE_GPIO_IN  23
 			// Output on pin 18
 			#define EXAMPLE_GPIO_OUT 24
 		#endif
