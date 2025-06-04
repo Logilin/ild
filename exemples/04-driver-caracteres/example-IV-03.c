@@ -52,7 +52,7 @@ static int __init example_init(void)
 	if (err < 0)
 		return err;
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 4, 0)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 4, 0)) || (defined(RHEL_MAJOR) && LINUX_VERSION_CODE >= KERNEL_VERSION(5,14,0))
 	example_class = class_create("example_class");
 #else
 	example_class = class_create(THIS_MODULE, "example_class");
