@@ -24,26 +24,12 @@
 static ssize_t example_read(struct file *filp, char *u_buffer, size_t length, loff_t *offset)
 {
 	char k_buffer[128];
-	int lg;
 
 	snprintf(k_buffer, 128, "PID=%u, PPID=%u\n",
 		current->pid,
 		current->real_parent->pid);
 
-	lg = strlen(k_buffer) - (*offset);
-
-	if (lg <= 0)
-		return 0;
-
-	if (length < lg)
-		lg = length;
-
-	if (copy_to_user(u_buffer, &k_buffer[*offset], lg) != 0)
-		return -EFAULT;
-
-	*offset += lg;
-
-	return lg;
+	return simple_read_from_buffer(u_buffer, length, offset, k_buffer, strlen(k_buffer));
 }
 
 
