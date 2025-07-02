@@ -29,7 +29,6 @@ static int example_ppid_flag = 1;
 static ssize_t example_read(struct file *filp, char *u_buffer, size_t length, loff_t *offset)
 {
 	char k_buffer[128];
-	int l;
 
 	if (example_ppid_flag)
 		snprintf(k_buffer, 128, "PID= %u, PPID= %u\n",
@@ -38,19 +37,7 @@ static ssize_t example_read(struct file *filp, char *u_buffer, size_t length, lo
 	else
 		snprintf(k_buffer, 128, "PID= %u\n", current->pid);
 
-	l = strlen(k_buffer) - (*offset);
-	if (l <= 0)
-		return 0;
-
-	if (length < l)
-		l = length;
-
-	if (copy_to_user(u_buffer, &k_buffer[*offset], l) != 0)
-		return -EFAULT;
-
-	*offset += l;
-
-	return l;
+	return simple_read_from_buffer(u_buffer, length, offset, k_buffer, strlen(k_buffer));
 }
 
 
