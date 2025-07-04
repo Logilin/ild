@@ -56,7 +56,7 @@ static ssize_t example_write(struct file *file, const char __user *data,
 		kfree(buffer);
 		return -EFAULT;
 	}
-	buffer[length] = '\0';
+	buffer[length - 1] = '\0';
 	err = (sscanf(buffer, "%d %d %d %d %d %d %d %d", &o0, &o1, &o2, &o3, &o4, &o5, &o6, &o7) != 8);
 	kfree(buffer);
 	if (err)
