@@ -11,6 +11,8 @@
 #ifndef _GPIO_EXAMPLES_H_
 #define _GPIO_EXAMPLES_H_
 
+#include <linux/version.h>
+
 #define EXAMPLE_RASPBERRY_PI       1
 #define EXAMPLE_BEAGLEBONE_BLACK   2
 #define EXAMPLE_TERASIC_DE1_SOC    3
@@ -18,8 +20,10 @@
 
 // Uncomment one of the following lines depending on you plateform:
 
-// #define EXAMPLE_GPIO_MODE   EXAMPLE_RASPBERRY_PI
-   #define EXAMPLE_GPIO_MODE   EXAMPLE_BEAGLEBONE_BLACK
+#define EXAMPLE_GPIO_MODE   EXAMPLE_RASPBERRY_PI
+
+
+//   #define EXAMPLE_GPIO_MODE   EXAMPLE_BEAGLEBONE_BLACK
 // #define EXAMPLE_GPIO_MODE   EXAMPLE_TERASIC_DE1_SOC
 
 
