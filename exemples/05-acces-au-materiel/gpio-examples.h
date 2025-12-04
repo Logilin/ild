@@ -20,10 +20,8 @@
 
 // Uncomment one of the following lines depending on you plateform:
 
-#define EXAMPLE_GPIO_MODE   EXAMPLE_RASPBERRY_PI
-
-
-//   #define EXAMPLE_GPIO_MODE   EXAMPLE_BEAGLEBONE_BLACK
+//#define EXAMPLE_GPIO_MODE   EXAMPLE_RASPBERRY_PI
+#define EXAMPLE_GPIO_MODE   EXAMPLE_BEAGLEBONE_BLACK
 // #define EXAMPLE_GPIO_MODE   EXAMPLE_TERASIC_DE1_SOC
 
 
