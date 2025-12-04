@@ -47,11 +47,11 @@ static long example_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
 		return -ENOTTY;
 
 	switch (_IOC_NR(cmd)) {
-	case EXAMPLE_GET_PPID_FLAG:
+	case EXAMPLE_INTERNAL_GET_PPID_FLAG:
 		if (copy_to_user((void *) arg, &example_ppid_flag, sizeof(example_ppid_flag)) != 0)
 			return -EFAULT;
 		break;
-	case EXAMPLE_SET_PPID_FLAG:
+	case EXAMPLE_INTERNAL_SET_PPID_FLAG:
 		if (copy_from_user(&example_ppid_flag, (void *) arg, sizeof(example_ppid_flag)) != 0)
 			return -EFAULT;
 		break;

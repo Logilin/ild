@@ -36,11 +36,11 @@ int main(int argc, char *argv[])
 
 	if (argc > 2)
 		if (sscanf(argv[2], "%d", &ppid_flag) == 1)
-			if (ioctl(fd, EXIOCSPPIDF, &ppid_flag) != 0)
-				perror("ioctl(EXIOCSPPIDF)");
+			if (ioctl(fd, EXAMPLE_SET_PPID_FLAG, &ppid_flag) != 0)
+				perror("ioctl(EXAMPLE_SET_PPID_FLAG)");
 
-	if (ioctl(fd, EXIOCGPPIDF, &ppid_flag) != 0) {
-		perror("ioctl(EXIOCGPPIDF)");
+	if (ioctl(fd, EXAMPLE_GET_PPID_FLAG, &ppid_flag) != 0) {
+		perror("ioctl(EXAMPLE_GET_PPID_FLAG)");
 		exit(EXIT_FAILURE);
 	}
 	fprintf(stdout, "%d\n", ppid_flag);
