@@ -1,0 +1,5 @@
+example {
+	compatible = "logilin,example";
+	out-gpios = <0x38 24 0>; // out-gpios = <&rp1_gpio 24 0> (`rp1_gpio` specific Raspberry Pi 5 B)
+	in-gpios  = <0x38 23 0>; // in-gpios = <&rp1_gpio 23 0>
+};

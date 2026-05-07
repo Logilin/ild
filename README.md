@@ -1,7 +1,7 @@
 ild 10.0
 ========
 
-(c) Christophe BLAESS 2005-2025
+(c) Christophe BLAESS 2005-2026
 
 Exemples de notre cours _"Écriture de drivers pour Linux"_
 

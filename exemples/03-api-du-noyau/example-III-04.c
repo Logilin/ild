@@ -58,7 +58,6 @@ static int __init example_init(void)
 {
 	example_period_kt = ktime_set(0, 1000 * period_us);
 
-
 	#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,13,0)
 		hrtimer_setup(&example_htimer, example_htimer_function, CLOCK_REALTIME, HRTIMER_MODE_REL);
 	#else
