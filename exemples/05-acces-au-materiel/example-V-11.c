@@ -105,7 +105,11 @@ static void __exit example_exit(void)
 {
 	struct page *pg;
 
-	del_timer(&example_timer);
+	#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,13,0)
+		timer_delete(&example_timer);
+	#else
+		del_timer(&example_timer);
+	#endif
 
 	pg = virt_to_page(example_buffer);
 	ClearPageReserved(pg);

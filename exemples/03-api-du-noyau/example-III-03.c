@@ -41,7 +41,11 @@ static int __init example_init(void)
 
 static void __exit example_exit(void)
 {
-	del_timer(&example_timer);
+	#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,13,0)
+		timer_delete(&example_timer);
+	#else
+		del_timer(&example_timer);
+	#endif
 }
 
 
