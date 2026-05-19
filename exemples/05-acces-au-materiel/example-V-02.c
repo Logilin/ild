@@ -18,7 +18,7 @@
 
 struct task_struct *example_thread_id;
 
-int example_thread_function(void *arg)
+static int example_thread_function(void *arg)
 {
 	(void) arg;
 

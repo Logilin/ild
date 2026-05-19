@@ -81,7 +81,7 @@ static int __init example_init(void)
 static void __exit example_exit(void)
 {
 	free_irq(gpio_to_irq(EXAMPLE_GPIO_IN), THIS_MODULE->name);
-	flush_scheduled_work();
+	flush_work(&example_workqueue);
 	gpio_free(EXAMPLE_GPIO_OUT);
 	gpio_free(EXAMPLE_GPIO_IN);
 }
